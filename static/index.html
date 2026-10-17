@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#232440">
+  <meta name="description" content="Nicolás: productos, clientes, ventas y stock, todo en un solo lugar.">
+  <title>Nicolás · Administración de ventas</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%236960df'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-family='Arial' font-size='43' font-weight='700' fill='white'%3EN%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a href="#main" class="skip-link">Ir al contenido</a>
+  <svg xmlns="http://www.w3.org/2000/svg" class="icon-definitions" aria-hidden="true"><defs>
+    <symbol id="icon-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+    <symbol id="icon-box" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Zm9 5v9l-9 5-9-5V8m9 5v9M7.5 5.5l9 5"/></symbol>
+    <symbol id="icon-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2m20 0v-2a4 4 0 0 0-3-3.87M15 3.13a4 4 0 0 1 0 7.75"/><circle cx="9" cy="7" r="4"/></symbol>
+    <symbol id="icon-receipt" viewBox="0 0 24 24"><path d="M5 3h14v18l-3-2-4 2-4-2-3 2V3Zm4 4h6m-6 4h6m-6 4h3"/></symbol>
+    <symbol id="icon-activity" viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></symbol>
+    <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="7"/><path d="m16 16 4.5 4.5"/></symbol>
+    <symbol id="icon-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4"/></symbol>
+    <symbol id="icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></symbol>
+    <symbol id="icon-trend" viewBox="0 0 24 24"><path d="m3 17 6-6 4 4 8-10m-6 0h6v6"/></symbol>
+    <symbol id="icon-wallet" viewBox="0 0 24 24"><path d="M20 8V5a2 2 0 0 0-2-2H5a3 3 0 0 0 0 6h15v12H5a3 3 0 0 1-3-3V6m18 7h-6v4h6"/></symbol>
+    <symbol id="icon-alert" viewBox="0 0 24 24"><path d="m10.3 4-8 14a2 2 0 0 0 1.7 3h16a2 2 0 0 0 1.7-3l-8-14a2 2 0 0 0-3.4 0ZM12 9v4m0 4h.01"/></symbol>
+    <symbol id="icon-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="icon-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></symbol>
+    <symbol id="icon-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+    <symbol id="icon-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="icon-edit" viewBox="0 0 24 24"><path d="m16 3 5 5L9 20l-6 1 1-6L16 3Zm-1 1 5 5"/></symbol>
+    <symbol id="icon-trash" viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></symbol>
+    <symbol id="icon-cart" viewBox="0 0 24 24"><path d="M2 3h3l3 12h11l3-9H6m2 9-1 4h13"/><circle cx="9" cy="21" r="1"/><circle cx="18" cy="21" r="1"/></symbol>
+  </defs></svg>
+
+  <button id="overlay" class="sidebar-overlay" type="button" aria-label="Cerrar menú" tabindex="-1" hidden></button>
+  <aside id="sidebar" class="sidebar" aria-label="Navegación principal">
+    <a href="#dashboard" class="brand" data-view="dashboard" aria-label="Nicolás, ir al resumen"><span class="brand-mark">N<span></span></span><span class="brand-wordmark">nicolás<span>GESTIÓN DE NEGOCIOS</span></span></a>
+    <div class="workspace-label">ESPACIO DE TRABAJO</div>
+    <nav class="main-nav">
+      <a href="#dashboard" class="nav-item active" data-view="dashboard" aria-current="page"><svg class="icon"><use href="#icon-grid"/></svg><span>Resumen</span><span class="nav-active-dot"></span></a>
+      <a href="#products" class="nav-item" data-view="products"><svg class="icon"><use href="#icon-box"/></svg><span>Productos</span></a>
+      <a href="#clients" class="nav-item" data-view="clients"><svg class="icon"><use href="#icon-users"/></svg><span>Clientes</span></a>
+      <a href="#invoices" class="nav-item" data-view="invoices"><svg class="icon"><use href="#icon-receipt"/></svg><span>Ventas</span></a>
+      <div class="nav-divider"></div>
+      <a href="#stock" class="nav-item" data-view="stock"><svg class="icon"><use href="#icon-activity"/></svg><span>Movimientos de stock</span></a>
+    </nav>
+    <div class="sidebar-bottom"><div class="sidebar-note"><span class="sidebar-note-icon"><svg class="icon"><use href="#icon-check"/></svg></span><div><strong>Tu negocio, en orden.</strong><p>Más simple. Más cerca.</p></div></div><div class="sidebar-footer"><span class="business-avatar">MN</span><div><strong>Mi negocio</strong><span>Panel de administración</span></div><span class="online-dot" title="Espacio de trabajo"></span></div></div>
+  </aside>
+
+  <div class="app-shell">
+    <header class="topbar"><div class="topbar-start"><button id="nav-toggle" class="btn-icon nav-toggle" type="button" aria-label="Abrir menú" aria-controls="sidebar" aria-expanded="false"><svg class="icon"><use href="#icon-menu"/></svg></button><div class="breadcrumb"><span>Administración</span><span class="breadcrumb-divider">/</span><span id="breadcrumb-current">Resumen</span></div></div><div class="topbar-end"><span class="topbar-status"><span class="online-dot"></span>Espacio de trabajo</span><span class="topbar-avatar" aria-hidden="true">N</span></div></header>
+    <main id="main" class="main-content">
+      <header class="page-heading"><div><div class="eyebrow">TU PANEL DE CONTROL</div><h1 id="page-title">Resumen</h1><p id="page-subtitle">Una mirada clara a tu negocio.</p></div><div class="page-actions"><span class="date-chip"><svg class="icon"><use href="#icon-calendar"/></svg><time id="current-date">Hoy</time></span><button class="btn btn-primary" type="button" data-action="new-sale"><svg class="icon"><use href="#icon-plus"/></svg>Nueva venta</button></div></header>
+
+      <section id="view-dashboard" class="view" aria-label="Resumen del negocio">
+        <div class="welcome-banner"><div><span class="welcome-kicker">TODO LO QUE NECESITÁS, A MANO</span><h2>Todo tu negocio,<br>en un solo lugar<span>.</span></h2><p>Seguí tus ventas, cuidá tu stock y hacé crecer tu negocio.</p><a href="#invoices" class="welcome-link" data-view="invoices">Ver mis ventas <svg class="icon"><use href="#icon-arrow"/></svg></a></div><div class="welcome-art" aria-hidden="true"><div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div><div class="art-card"><div class="art-card-header"><span class="art-square"><svg class="icon"><use href="#icon-trend"/></svg></span><span class="art-line art-line-short"></span><span class="art-dot"></span></div><div class="art-line art-line-long"></div><div class="art-chart"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div><span class="art-badge"><svg class="icon"><use href="#icon-check"/></svg></span><span class="art-spark spark-one">✦</span><span class="art-spark spark-two">✦</span></div></div>
+        <div id="dashboard-stats" class="stats-grid" aria-live="polite">
+          <article class="metric-card"><div class="metric-top"><span class="metric-label">Ventas del mes</span><span class="metric-icon purple"><svg class="icon"><use href="#icon-wallet"/></svg></span></div><div class="metric-value skeleton-value">—</div><div class="metric-note">Cargando información…</div></article>
+          <article class="metric-card"><div class="metric-top"><span class="metric-label">Operaciones del mes</span><span class="metric-icon blue"><svg class="icon"><use href="#icon-trend"/></svg></span></div><div class="metric-value skeleton-value">—</div><div class="metric-note">Cargando información…</div></article>
+          <article class="metric-card"><div class="metric-top"><span class="metric-label">Productos</span><span class="metric-icon amber"><svg class="icon"><use href="#icon-box"/></svg></span></div><div class="metric-value skeleton-value">—</div><div class="metric-note">Cargando información…</div></article>
+          <article class="metric-card"><div class="metric-top"><span class="metric-label">Clientes</span><span class="metric-icon green"><svg class="icon"><use href="#icon-users"/></svg></span></div><div class="metric-value skeleton-value">—</div><div class="metric-note">Cargando información…</div></article>
+        </div>
+        <div class="dashboard-grid"><article class="panel sales-panel"><div class="panel-header"><div><h2>Así van tus ventas</h2><p>La actividad de los últimos 7 días.</p></div><span class="badge badge-neutral">Últimos 7 días</span></div><div class="chart-caption"><span class="chart-legend"><i></i>Ventas diarias</span><span id="chart-total">Importes en pesos</span></div><div id="revenue-chart" class="revenue-chart" aria-label="Gráfico de ventas de los últimos siete días"><div class="chart-loading">Cargando tus ventas…</div></div></article><article class="panel stock-panel"><div class="panel-header"><div><h2>Atención al stock</h2><p>Productos que necesitan reposición.</p></div><span class="panel-header-icon amber"><svg class="icon"><use href="#icon-box"/></svg></span></div><div id="low-stock-list" class="low-stock-list"><div class="compact-loading">Consultando productos…</div></div><a href="#products" class="panel-footer-link" data-view="products">Ir a productos <svg class="icon"><use href="#icon-arrow"/></svg></a></article></div>
+        <article class="panel recent-panel"><div class="panel-header"><div><h2>Últimas ventas</h2><p>Un vistazo a la actividad más reciente.</p></div><a href="#invoices" class="text-link" data-view="invoices">Ver todas <svg class="icon"><use href="#icon-arrow"/></svg></a></div><div class="table-wrap"><table><thead><tr><th>Comprobante</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead><tbody id="recent-sales"><tr><td colspan="4" class="table-loading">Cargando últimas ventas…</td></tr></tbody></table></div></article>
+        <div class="dashboard-footnote"><svg class="icon"><use href="#icon-check"/></svg>Todo listo para dar el próximo paso en tu negocio.</div>
+      </section>
+
+      <section id="view-products" class="view" aria-label="Productos" hidden>
+        <div class="section-intro"><div><h2>Tu catálogo, siempre al día</h2><p>Administrá tus productos, precios y existencias.</p></div><button id="add-product" class="btn btn-primary" type="button"><svg class="icon"><use href="#icon-plus"/></svg>Agregar producto</button></div>
+        <article class="panel"><div class="toolbar"><label class="search-box" for="product-search"><svg class="icon"><use href="#icon-search"/></svg><input id="product-search" type="search" placeholder="Buscar por nombre o código…" autocomplete="off" aria-label="Buscar productos"></label><div class="toolbar-actions"><span id="product-count" class="result-count">Cargando…</span><a class="btn btn-secondary btn-sm" href="/api/export/products.csv" download><svg class="icon"><use href="#icon-download"/></svg>Exportar CSV</a></div></div><div class="table-wrap"><table><thead><tr><th>Producto / SKU</th><th>Precio</th><th>Stock</th><th>Stock mínimo</th><th class="text-right">Acciones</th></tr></thead><tbody id="products-body"><tr><td colspan="5" class="table-loading">Cargando productos…</td></tr></tbody></table></div></article>
+        <p class="section-note"><svg class="icon"><use href="#icon-box"/></svg>El stock se actualiza automáticamente al registrar una venta.</p>
+      </section>
+
+      <section id="view-clients" class="view" aria-label="Clientes" hidden>
+        <div class="section-intro"><div><h2>Personas que eligen tu negocio</h2><p>Tené sus datos a mano para cada nueva venta.</p></div><button id="add-client" class="btn btn-primary" type="button"><svg class="icon"><use href="#icon-plus"/></svg>Agregar cliente</button></div>
+        <article class="panel"><div class="toolbar"><label class="search-box" for="client-search"><svg class="icon"><use href="#icon-search"/></svg><input id="client-search" type="search" placeholder="Buscar por nombre, documento o contacto…" autocomplete="off" aria-label="Buscar clientes"></label><span id="client-count" class="result-count">Cargando…</span></div><div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Contacto</th><th>Documento</th><th class="text-right">Acciones</th></tr></thead><tbody id="clients-body"><tr><td colspan="4" class="table-loading">Cargando clientes…</td></tr></tbody></table></div></article>
+      </section>
+
+      <section id="view-invoices" class="view" aria-label="Ventas" hidden>
+        <div class="section-intro"><div><h2>Cada venta cuenta</h2><p>Consultá tus comprobantes y registrá nuevas ventas.</p></div><button class="btn btn-primary" type="button" data-action="new-sale"><svg class="icon"><use href="#icon-plus"/></svg>Nueva venta</button></div>
+        <article class="panel"><div class="toolbar"><label class="search-box" for="invoice-search"><svg class="icon"><use href="#icon-search"/></svg><input id="invoice-search" type="search" placeholder="Buscar comprobante o cliente…" autocomplete="off" aria-label="Buscar ventas"></label><div class="toolbar-actions"><span id="invoice-count" class="result-count">Cargando…</span><a class="btn btn-secondary btn-sm" href="/api/export/invoices.csv" download><svg class="icon"><use href="#icon-download"/></svg>Exportar CSV</a></div></div><div class="table-wrap"><table><thead><tr><th>Comprobante / Fecha</th><th>Cliente</th><th>Pago</th><th>Total</th><th>Estado</th><th class="text-right">Detalle</th></tr></thead><tbody id="invoices-body"><tr><td colspan="6" class="table-loading">Cargando ventas…</td></tr></tbody></table></div></article>
+        <p class="section-note"><svg class="icon"><use href="#icon-receipt"/></svg>Los comprobantes son de uso interno y no tienen validez fiscal.</p>
+      </section>
+
+      <section id="view-stock" class="view" aria-label="Movimientos de stock" hidden>
+        <div class="section-intro"><div><h2>El recorrido de tu inventario</h2><p>Revisá las entradas, salidas y ajustes de tus productos.</p></div><a href="#products" class="btn btn-secondary" data-view="products"><svg class="icon"><use href="#icon-box"/></svg>Ver productos</a></div>
+        <article class="panel"><div class="panel-header"><div><h2>Historial de movimientos</h2><p>Cada cambio de stock, en un mismo lugar.</p></div><span class="panel-header-icon purple"><svg class="icon"><use href="#icon-activity"/></svg></span></div><div class="table-wrap"><table><thead><tr><th>Producto</th><th>Movimiento</th><th>Motivo</th><th>Fecha</th></tr></thead><tbody id="movements-body"><tr><td colspan="4" class="table-loading">Cargando movimientos…</td></tr></tbody></table></div></article>
+      </section>
+      <footer class="main-footer"><span>nicolás<span class="footer-dot">.</span></span><p>Una forma más simple de llevar tu negocio.</p></footer>
+    </main>
+  </div>
+  <dialog id="modal" aria-label="Formulario"><div id="modal-content"></div></dialog>
+  <div id="toast-region" role="status" aria-live="polite" aria-atomic="true"></div>
+  <noscript><div class="noscript-message">Para usar Nicolás, activá JavaScript en tu navegador.</div></noscript>
+</body>
+</html>

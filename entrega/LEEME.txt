@@ -1,0 +1,23 @@
+NICOLAS - WEB PRIVADA DE VENTAS
+
+1. Descarga el ZIP y extrae todos sus archivos.
+2. Abre ABRIR-NICOLAS.html con Chrome o Edge de computadora.
+3. Crea una contrasena de 8 caracteres o mas y confirmala.
+
+NO requiere Python, instalaciones, servidor ni Internet para funcionar.
+
+La informacion se guarda cifrada en este navegador y equipo. Abre siempre
+el mismo HTML desde la misma ubicacion y con el mismo navegador/perfil.
+No uses incognito para guardar informacion habitual. No hay sincronizacion
+automática entre dispositivos.
+
+Usa Copia de seguridad para guardar un respaldo cifrado (.json). Conserva
+la contrasena: no tiene recuperacion. Borrar los datos del navegador puede
+borrar los registros locales; el respaldo permite recuperarlos.
+
+Para llevar datos a otro equipo, copia el HTML y el respaldo e importalo
+con la contrasena que usabas al guardarlo. Restaurar reemplaza datos: la
+aplicacion te pide revisar la copia y respaldar primero tus datos actuales.
+
+Incluye clientes, productos, stock, ventas, IVA, anulaciones, CSV e impresion.
+Los comprobantes son internos; no incluye facturacion fiscal ARCA.
