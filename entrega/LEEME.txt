@@ -1,23 +1,42 @@
-NICOLAS - WEB PRIVADA DE VENTAS
+NICOLAS - PRESTAMOS Y COBROS
 
-1. Descarga el ZIP y extrae todos sus archivos.
+1. Extrae todos los archivos del ZIP.
 2. Abre ABRIR-NICOLAS.html con Chrome o Edge de computadora.
-3. Crea una contrasena de 8 caracteres o mas y confirmala.
+3. Crea tu contrasena o importa tu copia anterior con su contrasena.
+4. Completa Mis datos y agrega tus clientes.
+5. Registra capital entregado, tasa mensual, plazo en meses, emision y plan.
+6. Revisa el cronograma, imprime el pagare y registra los cobros.
 
-NO requiere Python, instalaciones, servidor ni Internet para funcionar.
+No requiere Python, instalaciones, servidor ni Internet para funcionar.
 
-La informacion se guarda cifrada en este navegador y equipo. Abre siempre
-el mismo HTML desde la misma ubicacion y con el mismo navegador/perfil.
-No uses incognito para guardar informacion habitual. No hay sincronizacion
-automática entre dispositivos.
+PAGARE
+Se crea pendiente de firma. Imprimelo, completa los datos faltantes y firmalo.
+Luego registra la fecha y, si deseas, adjunta la foto o PDF firmado (max5MB).
+Marcar firmado en la pagina no firma el documento ni sustituye la firma.
 
-Usa Copia de seguridad para guardar un respaldo cifrado (.json). Conserva
-la contrasena: no tiene recuperacion. Borrar los datos del navegador puede
-borrar los registros locales; el respaldo permite recuperarlos.
+INTERESES
+Elige interes simple sobre capital inicial o sobre saldo programado con
+capital fijo. Los planes son cuotas mensuales, interes mensual con capital
+al final, o pago unico final. El cronograma se muestra antes de confirmar.
+No hay capitalizacion, mora, prorrateo diario ni descuento por anticipos
+automaticos. La tasa ingresada es mensual.
 
-Para llevar datos a otro equipo, copia el HTML y el respaldo e importalo
-con la contrasena que usabas al guardarlo. Restaurar reemplaza datos: la
-aplicacion te pide revisar la copia y respaldar primero tus datos actuales.
+COBROS Y AVISOS
+Registra cada pago parcial o completo: el saldo se actualiza. Se imputa
+primero a interes y luego capital de la cuota mas antigua.
+Los avisos aparecen al abrir y mientras la pagina esta abierta. Exporta el
+calendario .ics e importalo para alertas del calendario; los cambios futuros
+se actualizan alli manualmente. La pagina cerrada no envia avisos sola.
 
-Incluye clientes, productos, stock, ventas, IVA, anulaciones, CSV e impresion.
-Los comprobantes son internos; no incluye facturacion fiscal ARCA.
+COPIAS Y ACTUALIZACION
+Los datos quedan cifrados en este navegador/equipo/perfil, no dentro delHTML.
+Usa siempre la misma ubicacion de archivo y el mismo navegador. No uses
+incognito para tus registros habituales. Guarda una Copia de seguridad
+cifrada frecuentemente y conserva su contrasena: no tiene recuperacion.
+Borrar datos del navegador puede borrar los registros; el respaldo permite
+recuperarlos. Para cambiar de equipo copia el HTML y el respaldo.
+
+Antes de actualizar la version anterior, descarga una copia de seguridad.
+Puedes reemplazar el HTML conservando ubicacion y nombre. Si la pagina no
+encuentra tus clientes, importa tu copia anterior; se conservaran sus datos.
+Restaurar exige revisar, respaldar datos actuales y confirmar el reemplazo.

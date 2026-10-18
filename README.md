@@ -1,52 +1,89 @@
-# Nicolás · Web privada de ventas
+# Nicolás · Sistema de préstamos y cobros
 
-## Descargar y abrir
+[**Descargar la página privada actualizada (.zip)**](https://github.com/ignaciomenes-afk/nicolas/raw/refs/heads/codex/web-privada-descargable/entrega/Nicolas-prestamos.zip)
 
-[**Descargar el sistema listo para usar (.zip)**](https://github.com/ignaciomenes-afk/nicolas/raw/refs/heads/codex/web-privada-descargable/entrega/Nicolas-web-privada.zip)
+## Abrir y empezar
 
-1. Descargá el ZIP y **extraé todos los archivos**.
-2. Dentro de la carpeta extraída, abrí **ABRIR-NICOLAS.html** con Chrome o Edge de computadora.
-3. Creá tu contraseña de al menos ocho caracteres y confirmala.
-4. Cargá productos, clientes y ventas.
+1. Descargá y extraé todos los archivos del ZIP.
+2. Abrí **ABRIR-NICOLAS.html** en Chrome o Edge de computadora y creá tu contraseña.
+3. En **Mis datos**, completá tus datos de prestamista y los días de anticipación de los avisos.
+4. Agregá los datos del cliente: nombre, DNI/CUIT, teléfono, correo y domicilio.
+5. En **Nuevo préstamo**, ingresá el capital entregado, tasa mensual, plazo en meses, fecha de emisión y plan de devolución. Revisá el cronograma antes de guardar.
+6. Abrí el detalle para imprimir el pagaré, registrar la firma, adjuntar el documento firmado y registrar los cobros.
 
-No requiere Python, instalaciones, servidor ni Internet después de descargarlo. Si abriste el ZIP en el navegador, primero guardalo y extraelo; la aplicación es el archivo HTML que contiene.
+No necesita Python, instalaciones, servidor ni conexión a Internet para funcionar después de descargarlo.
 
-## Datos privados
+## Qué registra
 
-Los registros se guardan automáticamente **cifrados en ese navegador y equipo**, protegidos con tu contraseña. No se envían a GitHub ni a otros servicios. El repositorio público contiene solo el programa, sin información de uso.
+- **Clientes:** datos de contacto y documento; cada préstamo conserva una copia de los datos de la fecha de emisión.
+- **Préstamos:** capital entregado, interés mensual, plazo, fecha de emisión, primer vencimiento y cuotas programadas.
+- **Pagarés:** plantilla para completar, imprimir y firmar; fecha de firma y foto o PDF firmado de hasta 5 MB, guardado cifrado.
+- **Cobros:** abonos completos o parciales, fecha, medio de pago, notas y recibo imprimible. El saldo se actualiza automáticamente.
+- **Vencimientos:** cuotas vencidas, las que vencen hoy y próximas a vencer, con importe pendiente y contacto del cliente.
+- **Movimientos:** entregas de capital, entradas de dinero y flujo neto de caja; separación de capital e interés en los cobros.
+- **Resumen:** capital pendiente, saldo contractual, cobros e intereses cobrados del mes.
+- **Exportaciones:** clientes, préstamos, cobros y movimientos en CSV, y vencimientos en calendario .ics.
 
-Abrí siempre el mismo HTML desde la misma ubicación y con el mismo navegador y perfil. No uses una ventana de incógnito para guardar información habitual. El programa no sincroniza datos entre equipos.
+Es un registro interno de préstamos y cobros. El saldo de caja refleja únicamente los movimientos de préstamos cargados en esta aplicación.
 
-Usá **Copia de seguridad** para descargar un respaldo cifrado (.json). Conservá esa copia y tu contraseña: borrar los datos del navegador puede eliminar los registros locales, y no existe recuperación de contraseña. Para pasar a otro equipo, copiá el HTML y el respaldo e importalo con su contraseña.
+## Intereses y planes
 
-**Restaurar** permite revisar cuántos registros contiene una copia antes de reemplazar el contenido. Si ya hay datos, debés desbloquear primero el espacio y descargar un respaldo actual antes de confirmar el reemplazo.
+La tasa se ingresa como **porcentaje mensual**, con hasta dos decimales. Antes de guardar se muestra el capital, interés total, importe total a cobrar y cada fecha de cobro.
 
-## Funciones
+Podés elegir:
 
-- Clientes y productos con búsqueda, edición y archivo.
-- Stock inicial, ajustes con motivo, alertas e historial de movimientos.
-- Ventas en pesos argentinos, efectivo/tarjeta/transferencia e IVA de 0%, 10,5% o 21%.
-- Comprobantes internos numerados, impresión/PDF y exportación CSV.
-- Anulación de ventas con devolución de stock una sola vez.
-- Resumen mensual y de los últimos siete días.
-- Contraseña, bloqueo, almacenamiento cifrado y copias de seguridad.
+- **Interés simple sobre capital inicial:** cada período mensual calcula interés sobre el capital entregado originalmente.
+- **Interés sobre saldo programado, con capital fijo:** cada cuota amortiza una parte del capital; el interés mensual se calcula sobre el capital programado pendiente al comenzar ese período. Las cuotas disminuyen. No es el sistema francés.
 
-Los comprobantes son internos; no se integra facturación fiscal ARCA. La página es una aplicación local; no es un servicio alojado con sincronización entre usuarios.
+Planes de devolución:
+
+- Cuotas mensuales de capital e interés.
+- Interés cada mes y todo el capital en el último vencimiento.
+- Un único pago al vencimiento final, con el capital y el interés mensual acumulado sin capitalización.
+
+Ejemplo: $100.000 al 10% mensual durante 3 meses, con interés simple sobre capital inicial, genera $30.000 de interés y $130.000 de total programado.
+
+Los importes se calculan en centavos, con redondeo al centavo. El cronograma es fijo: no hay capitalización, cargos de mora, prorrateo diario ni descuentos por anticipos automáticos. Un adelanto se aplica al cronograma pactado; no reduce sus intereses de forma automática.
+
+## Fechas y avisos
+
+Si dejás **Primer cobro** vacío, el vencimiento se calcula cada mes en el día de la emisión o el último día de ese mes. Ejemplo: emisión 31 de enero → 28 de febrero → 31 de marzo. Una fecha de primer cobro personalizada fija ese nuevo día para los períodos siguientes. En el plan de un solo pago, se usa el último vencimiento del plazo.
+
+Los avisos visibles se actualizan al abrir la página y mientras permanece abierta. Los préstamos saldados o anulados dejan de generar avisos de cobro.
+
+**Calendario:** el archivo .ics exportado incluye los pendientes a las 09:00 de Argentina y un aviso con la anticipación configurada en Mis datos. Importalo en un calendario que admita alertas. Los cambios posteriores y los pagos registrados no se sincronizan con ese calendario: actualizá o eliminá sus eventos manualmente. La página cerrada no envía notificaciones por sí sola.
+
+## Pagaré y firma
+
+La plantilla incluye cliente, prestamista, capital, tasa mensual, plazo, emisión, vencimiento final, total pactado, cronograma y espacios de firma. Completá los campos que falten antes de firmar.
+
+El préstamo se crea con el pagaré **pendiente de firma**. Después de firmarlo físicamente, marcá **Tengo el pagaré firmado**, indicá la fecha y, si querés, adjuntá una foto JPEG/PNG o un PDF. Registrar la marca en el sistema no firma el documento ni reemplaza la firma. Los adjuntos se incluyen en las copias de seguridad cifradas.
+
+## Cobros y correcciones
+
+Los cobros se imputan por orden de registro a la cuota pendiente más antigua, primero a su interés y luego a su capital. Se aceptan pagos parciales; se rechazan importes superiores al saldo y cobros con fecha futura.
+
+**Anular error de cobro** conserva el registro como anulado y vuelve a calcular la imputación de los cobros posteriores. **Anular error de carga** de un préstamo solo está disponible cuando no tiene cobros activos. Son correcciones de registros: estas acciones no documentan una devolución real de efectivo.
+
+## Datos privados y copias
+
+Los datos se guardan automáticamente cifrados en ese navegador, equipo y perfil. No se envían a GitHub ni se escriben dentro del HTML del programa. No hay sincronización automática entre equipos ni recuperación de contraseña.
+
+Guardá una **Copia de seguridad** al finalizar la jornada o tras cambios importantes. Conservá el archivo y su contraseña. Borrar los datos del navegador o usar otro perfil puede dejarte sin acceso a los registros locales; el respaldo permite restaurarlos.
+
+Para actualizar desde la versión anterior, descargá primero una copia desde ella. Podés reemplazar el HTML manteniendo la misma ubicación, nombre y navegador. Si la página nueva no encuentra tus registros locales, usá **Importar mi copia de seguridad** y su contraseña. La actualización mantiene los clientes y conserva los registros históricos anteriores en el respaldo, aunque la nueva interfaz se centra en préstamos.
+
+Restaurar en una sesión existente reemplaza sus datos: la página exige revisar la copia, respaldar el contenido actual y confirmar. Los CSV son consultas sin cifrar y no reemplazan el respaldo completo.
 
 ## Desarrollo
 
-La descarga funciona directamente; estas herramientas solo son para desarrollo.
+Solo quienes desarrollan necesitan Node y, para pruebas, Playwright y un Chrome autorizado. El usuario final únicamente necesita el navegador.
 
 ```bash
 node scripts/build-standalone.cjs
+CHROMIUM_PATH=/ruta/a/chrome node tests/loans_smoke.cjs entrega/ABRIR-NICOLAS.html
 ```
 
-Genera `entrega/ABRIR-NICOLAS.html`, incorporando todos los recursos. La compilación comprueba la sintaxis de los scripts generados y no usa paquetes externos.
+El generador incorpora todos los recursos y valida la sintaxis de los scripts del HTML resultante. La suite abre archivos reales, en perfiles temporales, comprueba cálculos, cobros, avisos, pagarés, cifrado y migración de copias anteriores. También acepta un ZIP y prueba el HTML extraído.
 
-Las pruebas abren el archivo real, también desde un ZIP extraído, en perfiles temporales. Requieren Playwright y un Chrome de pruebas en la máquina de desarrollo:
-
-```bash
-CHROMIUM_PATH=/ruta/a/chrome node tests/offline_smoke.cjs entrega/Nicolas-web-privada.zip
-```
-
-Los archivos de `entrega/` forman parte del repositorio para evitar depender de rutas temporales del entorno de trabajo. Cada tarea en la nube ya está aislada; usá el checkout existente y no crees un worktree salvo petición explícita.
+Los archivos descargables están en `entrega/`. La rama publicada es `codex/web-privada-descargable`; el enlace anterior `Nicolas-web-privada.zip` se conserva con la misma versión actualizada. Cada tarea de Codex ya está aislada: usá el checkout existente, sin crear un worktree salvo petición explícita.

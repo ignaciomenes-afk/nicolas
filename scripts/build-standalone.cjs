@@ -13,7 +13,7 @@ let html = read("index.html")
   .replace(/<link\s+rel="stylesheet"\s+href="\/?styles\.css"\s*\/?\s*>/, () => `${style("styles.css", "data-nicolas-main")}\n${style("private.css", "data-nicolas-private")}`)
   .replace(/\s*<script\s+src="\/?app\.js"\s+defer><\/script>/, "")
   .replace(/<body(?:\s[^>]*)?>/, '<body class="vault-locked">')
-  .replace(/<title>[^<]*<\/title>/, '<title>Nicolás · Mi negocio privado</title>')
+  .replace(/<title>[^<]*<\/title>/, '<title>Nicolás · Préstamos privados</title>')
   .replace('</head>', `  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; frame-src 'self' blob: data:; base-uri 'none'; form-action 'none'">\n</head>`)
   .replace('</body>', () => `${script("local-store.js")}\n${script("app.js")}\n${script("private-ui.js")}\n</body>`);
 if (/<(?:script|link)[^>]+(?:src|href)="\//.test(html)) throw new Error("El archivo aún requiere recursos externos.");

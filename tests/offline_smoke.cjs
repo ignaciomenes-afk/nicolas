@@ -1,4 +1,6 @@
-/* Developer checks only: users opening Nicolas.html need just their browser.
+/* Legacy sales interface checks, retained for the previous sales delivery.
+ * The current loans application is validated by tests/loans_smoke.cjs instead.
+ * Developer checks only: users opening Nicolas.html need just their browser.
  * node tests/offline_smoke.cjs /path/Nicolas.html (or the delivered ZIP)
  * Uses only an extracted/copied temporary file and disposable browser profiles.
  */
