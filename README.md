@@ -87,3 +87,37 @@ CHROMIUM_PATH=/ruta/a/chrome node tests/loans_smoke.cjs entrega/ABRIR-NICOLAS.ht
 El generador incorpora todos los recursos y valida la sintaxis de los scripts del HTML resultante. La suite abre archivos reales, en perfiles temporales, comprueba cálculos, cobros, avisos, pagarés, cifrado y migración de copias anteriores. También acepta un ZIP y prueba el HTML extraído.
 
 Los archivos descargables están en `entrega/`. La rama publicada es `codex/web-privada-descargable`; el enlace anterior `Nicolas-web-privada.zip` se conserva con la misma versión actualizada. Cada tarea de Codex ya está aislada: usá el checkout existente, sin crear un worktree salvo petición explícita.
+
+## Página para clientes: solicitar préstamo
+
+La página de solicitud se entrega por separado de la aplicación de administración:
+
+- [SOLICITAR-PRESTAMO.html](entrega/SOLICITAR-PRESTAMO.html): un único archivo HTML para abrir en el navegador, sin instalaciones.
+- [Nicolas-solicitud-prestamo.zip](entrega/Nicolas-solicitud-prestamo.zip): paquete con la página de solicitud.
+
+El cliente ingresa sus datos, el capital solicitado, la cantidad de cuotas y una fecha propuesta para el primer pago. La simulación aplica **40% de interés total, una sola vez sobre el capital**, sin multiplicarlo por la cantidad de meses. Por ejemplo, $200.000 generan $80.000 de interés y $280.000 de total: en 2 cuotas, son $140.000 por cuota. Esta condición corresponde a la página de solicitud; la aplicación de administración conserva sus planes y tasas mensuales.
+
+El botón de WhatsApp prepara el mensaje dirigido al prestamista **5493544617342**. El cliente debe revisar el texto y **enviarlo manualmente en WhatsApp**. La simulación, la solicitud y las fechas propuestas quedan pendientes de aprobación; completar el formulario no otorga el préstamo ni confirma sus vencimientos.
+
+La página permite descargar un calendario de las fechas propuestas. Hay que importarlo en una aplicación de calendario; los avisos dependen de esa aplicación, su configuración y sus permisos. Descargar el archivo no activa alarmas por sí solo.
+
+Los datos personales del formulario no se guardan por la página ni se envían a un backend propio. Se utilizan para preparar la solicitud que el cliente decide enviar por WhatsApp.
+
+### Desarrollo y validación de la solicitud
+
+Los fuentes están en `client-request/`. Para generar el HTML, el ZIP y la copia idéntica `docs/index.html`:
+
+```bash
+node scripts/build-client-request.cjs
+CHROMIUM_PATH=/ruta/a/chrome node tests/client_request_smoke.cjs entrega/Nicolas-solicitud-prestamo.zip
+```
+
+### Publicar la página de solicitud con GitHub Pages
+
+`docs/index.html` queda preparado para publicar únicamente la página cliente desde `/docs`. Su presencia en el repositorio no confirma que el sitio ya esté publicado. Después de subir los archivos a la rama `codex/web-privada-descargable`:
+
+1. Abrí el repositorio en GitHub y entrá en **Settings → Pages**.
+2. En **Build and deployment**, elegí **Source: Deploy from a branch**.
+3. Seleccioná la rama **codex/web-privada-descargable** y la carpeta **/docs**.
+4. Pulsá **Save** y esperá a que GitHub indique que el despliegue terminó.
+5. Usá la dirección que muestre GitHub Pages para compartir la solicitud con los clientes.
