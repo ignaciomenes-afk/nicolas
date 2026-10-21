@@ -99,20 +99,20 @@ async function main() {
   console.log(`\n${checks} comprobaciones de solicitud correctas; ningún WhatsApp real enviado.`);
 }
 async function mathChecks(page) {
-  await check("$200.000 en dos meses: interés total $80.000, total $280.000 y cuotas $140.000", async () => {
+  await check("$200.000 en dos meses: interés total $70.000, total $270.000 y cuotas $135.000", async () => {
     const value = await core(page, "calculate", { principal_cents: 20000000, term_months: 2, first_due_date: "2026-11-21" });
-    assert.equal(value.interest_percent, 40); assert.equal(value.interest_cents, 8000000); assert.equal(value.total_cents, 28000000);
-    assert.deepEqual(value.installments.map(item => item.amount_cents), [14000000, 14000000]);
+    assert.equal(value.interest_percent, 35); assert.equal(value.interest_cents, 7000000); assert.equal(value.total_cents, 27000000);
+    assert.deepEqual(value.installments.map(item => item.amount_cents), [13500000, 13500000]);
   });
-  await check("Cambiar de uno a 24 meses distribuye el mismo 40%, sin interés mensual adicional", async () => {
+  await check("Cambiar de uno a 24 meses distribuye el mismo 35%, sin interés mensual adicional", async () => {
     for (const months of [1, 2, 3, 6, 12, 24]) {
       const value = await core(page, "calculate", { principal_cents: 20000000, term_months: months, first_due_date: "2026-11-21" });
-      assert.equal(value.interest_cents, 8000000); assert.equal(value.total_cents, 28000000); assert.equal(value.installments.length, months);
-      assert.equal(value.installments.reduce((sum, item) => sum + item.amount_cents, 0), 28000000);
+      assert.equal(value.interest_cents, 7000000); assert.equal(value.total_cents, 27000000); assert.equal(value.installments.length, months);
+      assert.equal(value.installments.reduce((sum, item) => sum + item.amount_cents, 0), 27000000);
     }
   });
   await check("Centavos y última cuota conservan exactamente la suma total", async () => {
-    for (const [principal, interest] of [[1, 0], [2, 1], [3, 1], [50, 20], [101, 40]]) {
+    for (const [principal, interest] of [[1, 0], [2, 1], [3, 1], [10, 4], [50, 18], [101, 35]]) {
       for (const months of [1, 2, 3]) {
         const value = await core(page, "calculate", { principal_cents: principal, term_months: months, first_due_date: "2026-11-21" });
         assert.equal(value.interest_cents, interest); assert.equal(value.total_cents, principal + interest);
@@ -159,11 +159,11 @@ async function formChecks(page) {
   });
   await fillValid(page);
   await check("La calculadora visible muestra dos cuotas, capital, interés total y total a devolver", async () => {
-    await page.waitForFunction(() => document.getElementById("calculator-result").textContent.includes("280.000"));
+    await page.waitForFunction(() => document.getElementById("calculator-result").textContent.includes("270.000"));
     const text = await page.locator("#calculator-result").textContent();
-    assert.ok(text.includes("200.000")); assert.ok(text.includes("80.000")); assert.ok(text.includes("280.000"));
+    assert.ok(text.includes("200.000")); assert.ok(text.includes("70.000")); assert.ok(text.includes("270.000"));
     assert.equal(await page.locator("#installments-body tr").count(), 2);
-    for (const row of await page.locator("#installments-body tr").all()) assert.ok((await row.textContent()).includes("140.000"));
+    for (const row of await page.locator("#installments-body tr").all()) assert.ok((await row.textContent()).includes("135.000"));
   });
   await check("CUIL, domicilio, teléfono, capital, plazo, fecha y consentimiento inválidos impiden abrir WhatsApp", async () => {
     const firstDate = await page.locator('[name="first_due_date"]').inputValue(), before = await targetCount(page);
@@ -188,7 +188,7 @@ async function formChecks(page) {
     assert.ok((await page.evaluate(() => window.__copiedRequest))?.includes(payload));
     await page.locator('[name="full_name"]').fill(fake.full_name);
   });
-  await check("WhatsApp se prepara para el número autorizado con datos completos y el interés total del 40%", async () => {
+  await check("WhatsApp se prepara para el número autorizado con datos completos y el interés total del 35%", async () => {
     const current = page.url(), before = await targetCount(page);
     await page.locator("#copy-request").click(); await page.waitForFunction(() => window.__copiedRequest);
     const copied = await page.evaluate(() => window.__copiedRequest);
@@ -197,8 +197,8 @@ async function formChecks(page) {
     assert.equal(text, copied, "Copied request and WhatsApp request must agree exactly");
     for (const value of [fake.full_name, fake.address_street, fake.address_number, fake.locality]) assert.ok(text.includes(value), value);
     assert.ok(text.replace(/\D/g, "").includes("20000000001")); assert.ok(text.replace(/\D/g, "").includes("5491100000001"));
-    for (const amount of ["200.000", "80.000", "280.000", "140.000"]) assert.ok(text.includes(amount), amount);
-    assert.match(text, /40\s?%/); assert.match(text, /total/i); assert.doesNotMatch(text, /40\s?%\s*(mensual|por mes)/i);
+    for (const amount of ["200.000", "70.000", "270.000", "135.000"]) assert.ok(text.includes(amount), amount);
+    assert.match(text, /35\s?%/); assert.match(text, /total/i); assert.doesNotMatch(text, /35\s?%\s*(mensual|por mes)/i);
     assert.ok(text.includes("2026")); assert.equal(page.url(), current);
     const status = await page.locator("#send-status").textContent(); assert.match(status, /WhatsApp/i); assert.match(status, /revis|toc[aá]|enviar/i);
     assert.doesNotMatch(status, /solicitud enviada|mensaje enviado|enviad[oa] con [eé]xito/i);

@@ -7,7 +7,7 @@
 })(typeof window !== "undefined" ? window : typeof globalThis !== "undefined" ? globalThis : null, function () {
   "use strict";
 
-  const INTEREST_PERCENT = 40;
+  const INTEREST_PERCENT = 35;
   const MAX_PRINCIPAL_CENTS = 100000000000;
   const MAX_TERM_MONTHS = 24;
   const CUIL_PREFIXES = new Set(["20", "23", "24", "27"]);
@@ -43,7 +43,7 @@
     return `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(resultDay).padStart(2, "0")}`;
   }
 
-  /** One total charge of 40%; the term only distributes that fixed total. */
+  /** One total charge of 35%; the term only distributes that fixed total. */
   function calculate(input) {
     if (!input || typeof input !== "object" || Array.isArray(input)) fail("Completá los datos del préstamo.");
     const principal = integer(input.principal_cents, 1, MAX_PRINCIPAL_CENTS, "El capital en centavos");

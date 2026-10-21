@@ -95,7 +95,7 @@ La página de solicitud se entrega por separado de la aplicación de administrac
 - [SOLICITAR-PRESTAMO.html](entrega/SOLICITAR-PRESTAMO.html): un único archivo HTML para abrir en el navegador, sin instalaciones.
 - [Nicolas-solicitud-prestamo.zip](entrega/Nicolas-solicitud-prestamo.zip): paquete con la página de solicitud.
 
-El cliente ingresa sus datos, el capital solicitado, la cantidad de cuotas y una fecha propuesta para el primer pago. La simulación aplica **40% de interés total, una sola vez sobre el capital**, sin multiplicarlo por la cantidad de meses. Por ejemplo, $200.000 generan $80.000 de interés y $280.000 de total: en 2 cuotas, son $140.000 por cuota. Esta condición corresponde a la página de solicitud; la aplicación de administración conserva sus planes y tasas mensuales.
+El cliente ingresa sus datos, el capital solicitado, la cantidad de cuotas y una fecha propuesta para el primer pago. La simulación aplica **35% de interés total, una sola vez sobre el capital**, sin multiplicarlo por la cantidad de meses. Por ejemplo, $200.000 generan $70.000 de interés y $270.000 de total: en 2 cuotas, son $135.000 por cuota. Esta condición corresponde a la página de solicitud; la aplicación de administración conserva sus planes y tasas mensuales.
 
 El botón de WhatsApp prepara el mensaje dirigido al prestamista **5493544617342**. El cliente debe revisar el texto y **enviarlo manualmente en WhatsApp**. La simulación, la solicitud y las fechas propuestas quedan pendientes de aprobación; completar el formulario no otorga el préstamo ni confirma sus vencimientos.
 

@@ -11,10 +11,10 @@ PARA ABRIR LA PÁGINA
    Abrir el mensaje no completa la solicitud; debe enviarse desde WhatsApp.
 
 CÓMO SE CALCULA
-El interés es del 40% TOTAL del capital, calculado una sola vez.
+El interés es del 35% TOTAL del capital, calculado una sola vez.
 Ejemplo: pedís $200.000 en 2 meses.
-Interés total: $80.000. Total a devolver: $280.000.
-Dos cuotas de $140.000 cada una.
+Interés total: $70.000. Total a devolver: $270.000.
+Dos cuotas de $135.000 cada una.
 Cambiar el plazo reparte el mismo total entre más o menos cuotas.
 Cuando el total no se divide exactamente, la última cuota suma los centavos
 restantes para que todas las cuotas juntas coincidan con el total informado.

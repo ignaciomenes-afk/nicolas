@@ -107,7 +107,7 @@
       cell.colSpan = 3; row.append(cell); schedule.append(row); return;
     }
     const summary = element("div", undefined, "summary-grid");
-    for (const [label, value] of [["Importe que pedís", quote.principal_cents], ["Interés total · 40%", quote.interest_cents]]) {
+    for (const [label, value] of [["Importe que pedís", quote.principal_cents], [`Interés total · ${quote.interest_percent}%`, quote.interest_cents]]) {
       const item = element("div", undefined, "summary-item");
       item.append(element("span", label), element("strong", money(value))); summary.append(item);
     }
@@ -147,7 +147,7 @@
       `Nombre y apellido: ${data.full_name}`, `CUIL: ${data.cuil}`,
       `Domicilio: ${data.address_street} ${data.address_number}`, `Localidad / Ciudad: ${data.locality}`,
       `Mi WhatsApp: +${data.client_whatsapp}`, "", "SIMULACIÓN EN PESOS ARGENTINOS",
-      `Capital solicitado: ${money(q.principal_cents)}`, `Interés: 40% TOTAL sobre el capital, aplicado una sola vez (${money(q.interest_cents)}).`,
+      `Capital solicitado: ${money(q.principal_cents)}`, `Interés: ${q.interest_percent}% TOTAL sobre el capital, aplicado una sola vez (${money(q.interest_cents)}).`,
       `Total a devolver: ${money(q.total_cents)}`, `Plazo: ${q.term_months} ${q.term_months === 1 ? "mes" : "meses"}`, "", "CUOTAS Y FECHAS ESTIMADAS",
       ...q.installments.map(item => `${item.number}/${q.term_months} · ${displayDate(item.due_date)} · ${money(item.amount_cents)}`), "",
       `Acepto contacto por WhatsApp para esta solicitud y la coordinación de pagos: SÍ.`,
