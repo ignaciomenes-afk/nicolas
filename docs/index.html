@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#282344">
+  <meta name="description" content="Simulá tu préstamo. Conocé el importe de tus cuotas y prepará tu solicitud por WhatsApp.">
+  <title>Préstamos | Solicitá tu préstamo</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%236960df'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-family='Arial' font-size='43' font-weight='700' fill='white'%3EP%3C/text%3E%3C/svg%3E">
+  <style data-loan-styles>
+@charset "UTF-8";
+:root{--ink:#302e44;--muted:#747184;--primary:#7266c7;--primary-dark:#6053b5;--purple-soft:#f0edf9;--border:#ebe8f1;--surface:#fff;--bg:#f8f7fb;--green:#278262;--green-dark:#1f7053;--green-soft:#eef7f2;--error:#b74c61;--radius:17px;--shadow:0 7px 24px #3f305207}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);background:var(--bg);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}button,input,select{font:inherit}a{color:inherit;text-decoration:none}button{cursor:pointer;color:inherit}button:disabled{cursor:not-allowed;opacity:.5}button,a,input,select{-webkit-tap-highlight-color:transparent}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #a99ade;outline-offset:4px}input,select,button{outline:none}h1,h2,h3,p{margin:0}h1,h2,h3{line-height:1.3}svg.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;vertical-align:middle}.icon-definitions{position:absolute;width:0;height:0;overflow:hidden}[hidden]{display:none!important}.skip-link{position:fixed;z-index:100;left:16px;top:-80px;background:#fff;border:1px solid var(--border);border-radius:9px;padding:11px 18px;box-shadow:var(--shadow)}.skip-link:focus{top:16px}
+.site-header{border-bottom:1px solid #eeebf4;background:#fff}.header-inner{max-width:1160px;margin:auto;padding:23px 36px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{display:flex;align-items:center;gap:11px}.brand-mark{display:grid;place-items:center;position:relative;width:42px;height:44px;background:#7568cc;border-radius:13px;font-size:30px;font-weight:750;line-height:1;color:#fff;letter-spacing:-2px;padding-right:2px;box-shadow:0 5px 12px #7568cc1f}.brand-mark>span{position:absolute;right:7px;bottom:10px;width:4px;height:4px;background:#c7c0f3;border-radius:50%}.brand-name{font-size:28px;font-weight:730;letter-spacing:-1.5px;line-height:1.1;color:#3e3656}.brand-name>span{display:block;font-size:8px;letter-spacing:2px;font-weight:500;color:#a096ae;margin-top:7px}.header-badge{display:flex;align-items:center;gap:8px;color:#8b7ca7;font-size:12px;padding:8px 12px;border-radius:7px;background:#f6f3fb;border:1px solid #eee8f6}.badge-dot{display:block;width:5px;height:5px;background:#a18bc6;border-radius:50%}.page-shell{max-width:1160px;padding:0 36px;margin:auto}.hero{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);align-items:center;gap:70px;padding:64px 0 48px}.eyebrow{display:block;font-size:10px;letter-spacing:1.7px;font-weight:650;color:#9685ad}.hero h1{font-size:43px;font-weight:650;line-height:1.15;letter-spacing:-1.5px;margin:14px 0 18px;color:#3f3553}.hero h1>span{color:#a48ac7}.hero-copy>p{font-size:15px;line-height:1.8;color:#8b7d98;max-width:430px}.hero-note{display:flex;flex-wrap:wrap;gap:15px;margin-top:23px}.hero-note>span{display:flex;align-items:center;gap:6px;font-size:11px;color:#9b8bab}.hero-note .icon{width:13px;height:13px;color:#a68cbb;stroke-width:2}.example-card{position:relative;overflow:hidden;isolation:isolate;background:#3d3458;border:1px solid #50436e;border-radius:19px;padding:24px 27px;color:#fff;box-shadow:0 14px 26px #4f386b14;transform:rotate(1deg)}.example-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}.example-label{font-size:9px;letter-spacing:1.5px;color:#b6a6cc;font-weight:550}.example-icon{display:grid;place-items:center;width:29px;height:29px;background:#6f5d8a5c;border:1px solid #a68db126;border-radius:8px;color:#b9a2d1}.example-icon .icon{width:16px;height:16px}.example-amount>span{display:block;font-size:12px;color:#c5b9d6}.example-amount>strong{display:block;font-size:29px;letter-spacing:-.5px;font-weight:600;line-height:1.3;margin:4px 0}.example-amount b{font-weight:550;color:#e2d7ed}.example-divider{height:1px;background:#b197ce2b;margin:17px 0}.example-result>span{font-size:12px;color:#d1c3df;display:block}.example-result>strong{display:block;font-size:30px;letter-spacing:-.6px;font-weight:650;line-height:1.4;margin:3px 0 13px}.example-result>strong>span{font-size:11px;font-weight:400;letter-spacing:0;color:#bca9d0}.example-bottom{display:flex;flex-direction:column;gap:3px;font-size:10px;color:#a995c0}.example-bottom b{font-weight:500;color:#baa7d0}.example-orbit{position:absolute;border:1px solid #9173af20;border-radius:50%;z-index:-1;width:230px;height:230px;right:-90px;top:-60px}.example-orbit.orbit-two{width:310px;height:310px;right:-130px;top:-100px}
+.steps{padding:20px 23px;margin:0 0 28px;list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;border:1px solid var(--border);background:#ffffff9c;border-radius:12px}.steps>li{display:flex;align-items:center;gap:12px;position:relative}.step-number{display:grid;place-items:center;width:31px;height:31px;border-radius:9px;background:#eeebf6;color:#a18bb8;font-size:13px;font-weight:600;flex-shrink:0}.steps strong{display:block;font-size:13px;font-weight:550;color:#756581}.steps li>div>span{display:block;font-size:11px;color:#a799af;margin-top:2px}.steps>li:not(:last-child)::after{position:absolute;content:"";height:22px;width:1px;background:#e9e3ef;right:15px;top:6px}.request-layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:27px;align-items:start}.form-column,.quote-column{min-width:0}.form-card,.quote-card,.send-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:27px;box-shadow:var(--shadow)}.form-card{margin-bottom:22px}.card-header{display:flex;align-items:center;gap:12px;margin-bottom:25px}.section-icon{display:grid;place-items:center;width:38px;height:38px;background:#f2eef9;color:#a38bbb;border:1px solid #eee6f7;border-radius:11px;flex-shrink:0}.section-icon .icon{width:18px;height:18px}.card-header h2,.quote-heading h2,.send-heading h2{font-size:18px;font-weight:600;letter-spacing:-.4px;color:#635270}.card-header p{font-size:12px;color:#a08eac;margin-top:5px;line-height:1.6}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px 17px}.field{display:flex;flex-direction:column;gap:7px;min-width:0}.field-full{grid-column:1/-1}.field label{font-size:14px;font-weight:500;color:#776183}.field input:not([type=checkbox]),.field select{display:block;min-width:0;width:100%;min-height:47px;padding:11px 12px;border:1px solid #e8dfed;border-radius:8px;background:#fff;color:#65546f;font-size:14px;transition:box-shadow .15s,border-color .15s}.field input::placeholder{color:#b29bbf;font-weight:400}.field input:focus,.field select:focus{border-color:#b09bc9;box-shadow:0 0 0 3px #f5effb}.field small{font-size:11px;color:#ab94b9;line-height:1.5}.field input[type=date]{min-width:0;appearance:none;-webkit-appearance:none}.field input[type=date]::-webkit-date-and-time-value{text-align:left}.field select{padding-right:29px}.field-error{font-size:12px;line-height:1.5;color:var(--error)}.field-error:empty{display:none}.field.invalid input:not([type=checkbox]),.field.invalid select,.field.invalid .amount-input,input[aria-invalid=true]:not([type=checkbox]),select[aria-invalid=true]{border-color:#d48c9e;background:#fffcfd}.field.invalid .amount-input input{border-color:transparent}.rate-note{display:flex;gap:10px;padding:13px 14px;background:#f8f4fc;border:1px solid #eee4f7;border-radius:9px;margin-bottom:22px;color:#ac8cbe}.rate-note>.icon{width:17px;height:17px;margin-top:2px}.rate-note strong{display:block;font-size:12px;font-weight:600;color:#9a73b0}.rate-note p{font-size:11px;line-height:1.7;color:#ac8cbe;margin-top:3px}.amount-input{display:flex;align-items:center;border:1px solid #e8dfed;border-radius:8px;transition:border-color .15s,box-shadow .15s}.amount-input>span{font-size:22px;font-weight:550;color:#b095c1;padding-left:15px}.amount-input input:not([type=checkbox]){font-size:24px;font-weight:600;letter-spacing:-.5px;color:#916ba5;border:none;min-height:59px;padding-left:10px;background:transparent}.amount-input:focus-within{border-color:#b09bc9;box-shadow:0 0 0 3px #f5effb}.amount-input input:focus{box-shadow:none}.privacy-note{display:flex;justify-content:center;align-items:center;gap:9px;padding:0 14px;margin:7px 0 22px;color:#ae9ab9}.privacy-note>.icon{width:17px;height:17px}.privacy-note p{font-size:11px;line-height:1.7}.privacy-note strong{font-weight:500;color:#a28baf}
+.quote-card{padding:25px;margin-bottom:19px}.quote-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:19px;border-bottom:1px solid #f0e9f5}.quote-heading .eyebrow{font-size:8px;letter-spacing:1.2px;margin-bottom:7px}.quote-heading h2{font-size:18px}.quote-icon{display:grid;place-items:center;width:34px;height:34px;background:#f5f0fa;color:#ad8dc2;border-radius:9px;flex-shrink:0}.quote-icon .icon{width:17px;height:17px}.calculator-result{margin:20px 0 24px}.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px 13px}.summary-item{min-width:0}.summary-item>span,.summary-item>small,.summary-item>dt{font-size:11px;color:#ad8fbe;display:block}.summary-item>strong,.summary-item>dd{font-size:19px;color:#8e68a5;font-weight:550;display:block;margin:4px 0 0;font-variant-numeric:tabular-nums;letter-spacing:-.3px;overflow-wrap:anywhere}.summary-total{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:15px;margin-top:15px;border-top:1px solid #eee4f4;font-size:12px;color:#ac8dbd}.summary-total strong{font-size:20px;font-weight:600;color:#9069a7;white-space:nowrap}.installment-highlight{background:#efe8f8;border:1px solid #e7dcf2;padding:20px 18px;border-radius:11px;margin-top:18px;color:#a17ab7;text-align:center}.installment-highlight>span,.installment-highlight>small{display:block;font-size:12px;color:#a17ab7}.installment-highlight>strong{display:block;font-size:33px;line-height:1.3;letter-spacing:-1px;color:#8b60a5;margin:5px 0;font-weight:650;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.installment-highlight p{font-size:11px;color:#ad8bc1;line-height:1.7;margin-top:5px}.schedule-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 12px}.schedule-heading h3{font-size:12px;font-weight:550;color:#9d7ab0}.schedule-heading>span{font-size:10px;color:#b497c6;white-space:nowrap}.table-wrap{overflow-x:auto;width:100%;max-width:100%}table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}th{font-size:10px;color:#b194c4;background:#faf7fd;font-weight:550;padding:11px 10px;border-top:1px solid #f0e8f7;border-bottom:1px solid #f0e8f7}td{font-size:12px;color:#a183b5;padding:12px 10px;border-bottom:1px solid #f1eaf8;font-variant-numeric:tabular-nums}td:last-child{font-weight:550}tbody tr:last-child td{border-bottom:0}.text-right{text-align:right}.empty-schedule{text-align:center;color:#b79dca;font-size:11px;white-space:normal;font-weight:400!important;line-height:1.7;padding:18px 10px}.note{font-size:11px;color:#b296c5;line-height:1.7}.schedule-note{margin-top:13px}.empty-result{text-align:center;padding:14px 10px;color:#b093c4}.empty-symbol{display:grid;place-items:center;width:42px;height:42px;background:#f8f2fc;color:#b294c5;margin:0 auto 11px;border-radius:12px}.empty-symbol .icon{width:19px;height:19px}.empty-result p{font-size:12px;max-width:220px;line-height:1.8;margin:auto}
+.send-card{padding:24px 25px;margin-bottom:19px}.send-heading{display:flex;align-items:center;gap:8px;margin-bottom:20px}.send-heading h2{font-size:16px}.mini-step{display:grid;place-items:center;width:23px;height:23px;flex-shrink:0;border-radius:7px;background:#f1e9f8;color:#b28cc7;font-size:11px;font-weight:600}.checkbox-label{display:flex;align-items:flex-start;gap:9px;font-size:12px!important;font-weight:400!important;color:#a082b3!important;line-height:1.8;cursor:pointer}.checkbox-label input{width:16px;height:16px;min-width:16px;flex-shrink:0;accent-color:#a27dbb;margin:3px 0 0}.consent-field{margin-bottom:18px}.form-error{background:#fff1f4;border:1px solid #f0ceda;color:#b95d7b;border-radius:8px;padding:12px;font-size:12px;margin-bottom:15px;line-height:1.7}.btn{display:inline-flex;justify-content:center;align-items:center;gap:9px;min-height:46px;padding:11px 14px;border:1px solid transparent;border-radius:8px;font-size:13px;font-weight:600;line-height:1.5;transition:background .15s,border-color .15s,box-shadow .15s}.btn .icon{width:18px;height:18px;stroke-width:1.8}.btn-full{width:100%}.btn-whatsapp{background:var(--green);color:#fff;box-shadow:0 4px 10px #27826212}.btn-whatsapp:hover{background:var(--green-dark);box-shadow:0 5px 12px #27826225}.action-arrow{margin-left:auto;width:16px!important;height:16px!important}.btn-secondary{border-color:#e9dff1;background:#fff;color:#ad8ec1}.btn-secondary:hover{background:#faf5fd;border-color:#dac5e9}.copy-button{font-size:12px;min-height:39px;box-shadow:none}.copy-button .icon{width:14px;height:14px}.send-explanation{font-size:11px;color:#b196c3;line-height:1.8;text-align:center;margin:12px 5px 15px}.send-explanation strong{font-weight:550}.status-card{padding:13px 14px;background:#f1f7f3;color:#83a792;border:1px solid #e0ece4;border-radius:8px;font-size:12px;line-height:1.8;margin-top:16px}.status-card strong{font-weight:550;color:#648b74}.status-card p+p{margin-top:7px}.reminder-card{display:flex;align-items:flex-start;gap:12px;padding:18px 3px}.reminder-icon{display:grid;place-items:center;width:31px;height:31px;background:#f0e9f7;color:#af91c4;border:1px solid #e9def2;border-radius:9px;flex-shrink:0}.reminder-icon .icon{width:16px;height:16px}.reminder-content{min-width:0}.reminder-content h2{font-size:13px;font-weight:550;color:#a17cb4;margin-bottom:9px}.reminder-checkbox{font-size:11px!important;gap:8px}.reminder-checkbox input{width:14px;height:14px;min-width:14px;margin-top:3px}.calendar-button{display:flex;align-items:center;gap:7px;padding:0;border:0;background:transparent;color:#af86c4;font-size:11px;font-weight:550;margin:13px 0 9px;text-align:left}.calendar-button .icon{width:13px;height:13px}.calendar-button:hover{color:#9b70b6;text-decoration:underline;text-underline-offset:3px}.reminder-content .note{font-size:10px}
+.faq{margin:49px 0 60px;padding-top:39px;border-top:1px solid #ede5f3;display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:70px}.faq-intro .eyebrow{font-size:9px;letter-spacing:1.3px}.faq-intro h2{font-size:25px;letter-spacing:-.7px;font-weight:600;color:#81638f;margin-top:10px}.faq-intro p{font-size:12px;color:#ae92bf;margin-top:11px}.faq-list details{border-bottom:1px solid #e9def1}.faq-list summary{list-style:none;display:flex;justify-content:space-between;gap:15px;align-items:center;padding:16px 0;font-size:13px;color:#a280b6;font-weight:500;cursor:pointer}.faq-list summary::-webkit-details-marker{display:none}.faq-list summary .icon{width:16px;height:16px;color:#bca0ce;transition:transform .2s}.faq-list details[open] summary .icon{transform:rotate(180deg)}.faq-list details>p{font-size:12px;color:#ae91c1;line-height:1.9;padding:0 22px 18px 0}.faq-list strong{font-weight:550;color:#a17bb7}.site-footer{background:#fff;border-top:1px solid #ede5f3}.footer-inner{max-width:1160px;padding:27px 36px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:20px}.footer-brand{font-size:23px;letter-spacing:-.9px;font-weight:650;color:#b091c4;line-height:1.2}.footer-brand>span{color:#c5add6}.footer-inner p{font-size:10px;color:#bfa7ce;margin-top:5px}.footer-contact{text-align:right}.footer-contact>span{display:block;font-size:10px;color:#c2aad1;margin-bottom:4px}.footer-contact>a{display:flex;justify-content:flex-end;align-items:center;gap:8px;font-size:12px;color:#b18fc5}.footer-contact .icon{width:13px;height:13px}.noscript-message{position:fixed;inset:auto 15px 15px;z-index:100;background:#fff;border:1px solid #e6d4ef;color:#9d72b4;border-radius:10px;padding:15px;text-align:center;font-size:14px}
+/* Functional text uses a neutral palette and readable sizes. */
+.hero-copy>p,.hero-note>span,.steps li>div>span,.card-header p,.field small,.rate-note p,.privacy-note,.privacy-note strong,.summary-item>span,.summary-item>small,.summary-item>dt,.summary-total,.installment-highlight>span,.installment-highlight>small,.installment-highlight p,.schedule-heading>span,.empty-schedule,.note,.empty-result,.send-explanation,.reminder-content .note,.faq-intro p,.faq-list details>p,.footer-inner p,.footer-contact>span{color:var(--muted)}.field label,.steps strong,.card-header h2,.quote-heading h2,.send-heading h2,.schedule-heading h3,.reminder-content h2,.faq-intro h2,.faq-list summary{color:#555063}.field input:not([type=checkbox]),.field select{color:#4e495c}.field input::placeholder{color:#9d98aa}.rate-note strong{color:#89729c}.checkbox-label{font-size:13px!important;color:#756c81!important}.reminder-checkbox{font-size:12px!important}.amount-input>span{color:#a294b5}.amount-input input:not([type=checkbox]){color:#7f6798}.summary-item>strong,.summary-item>dd,.summary-total strong{color:#71617e}.installment-highlight>strong{color:#75608c}.btn-secondary{color:#8d789e}.calendar-button{font-size:12px;color:#9277a6}.empty-result p,.note,.send-explanation,.field small,.privacy-note p,.reminder-content .note{font-size:12px}.schedule-heading h3{font-size:13px}.schedule-heading>span{font-size:11px}th{font-size:11px;color:#9990a8}td{font-size:13px;color:#81748f}.faq-list summary{font-size:14px}.faq-list details>p{font-size:13px}.faq-intro p{font-size:13px}.hero-note>span{font-size:12px}.steps strong{font-size:14px}.steps li>div>span{font-size:12px}.header-badge{font-size:12px}.footer-inner p,.footer-contact>span{font-size:11px}.footer-contact>a{font-size:13px;color:#927ba5}.status-card{color:#547763}.status-card strong{color:#41694f}
+@media(min-width:1250px){.hero{padding-top:73px;padding-bottom:53px}.hero h1{font-size:46px}.example-card{max-width:360px;justify-self:end;width:100%}.quote-column{position:sticky;top:24px}}
+@media(max-width:1000px){.header-inner,.page-shell,.footer-inner{padding-left:28px;padding-right:28px}.hero{gap:36px;padding-top:49px}.hero h1{font-size:37px}.hero-copy>p{font-size:14px}.hero-note{gap:9px 13px}.hero-note>span{font-size:11px}.example-card{padding:23px}.example-result>strong{font-size:28px}.steps{padding:18px 20px;gap:17px}.steps>li{gap:10px}.steps>li:not(:last-child)::after{right:4px}.steps li>div>span{font-size:10px}.steps strong{font-size:13px}.request-layout{gap:21px;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr)}.form-card,.quote-card,.send-card{padding:23px}.card-header{gap:10px}.card-header h2{font-size:17px}.card-header p{font-size:11px}.section-icon{width:34px;height:34px;border-radius:10px}.form-grid{gap:18px 14px}.field label{font-size:13px}.field input:not([type=checkbox]),.field select{font-size:13px}.card-header{margin-bottom:22px}.quote-heading h2{font-size:17px}.quote-heading .eyebrow{font-size:7px}.quote-icon{width:29px;height:29px}.summary-item>strong,.summary-item>dd{font-size:17px}.installment-highlight>strong{font-size:30px}.send-heading h2{font-size:15px}.btn-whatsapp{font-size:12px;gap:7px}.btn-whatsapp>.icon{width:17px;height:17px}.schedule-heading{flex-wrap:wrap;gap:3px}.faq{gap:40px}.faq-intro h2{font-size:24px}}
+@media(max-width:760px){.header-inner,.page-shell,.footer-inner{padding-left:23px;padding-right:23px}.header-inner{padding-top:19px;padding-bottom:19px}.header-badge{font-size:10px;padding:7px 9px;max-width:210px;line-height:1.6}.brand-mark{width:37px;height:39px;font-size:26px;border-radius:11px}.brand-name{font-size:26px}.brand-name>span{font-size:7px}.hero{gap:27px;padding:38px 0 33px;grid-template-columns:minmax(0,1fr) minmax(0,.85fr)}.eyebrow{font-size:9px;letter-spacing:1.1px}.hero h1{font-size:32px;letter-spacing:-1px}.hero-copy>p{font-size:13px}.hero-note{margin-top:17px}.hero-note>span{font-size:10px}.example-card{padding:20px}.example-label{font-size:8px}.example-amount>strong{font-size:25px}.example-result>strong{font-size:25px}.example-bottom{font-size:9px}.steps{gap:16px;padding:16px}.steps>li{gap:8px}.steps strong{font-size:12px}.steps li>div>span{font-size:9px}.steps>li:not(:last-child)::after{right:0}.step-number{width:26px;height:27px;border-radius:8px;font-size:12px}.request-layout{grid-template-columns:1fr;gap:7px}.form-card,.quote-card,.send-card{padding:26px}.form-grid{gap:20px}.card-header h2{font-size:19px}.card-header p{font-size:12px}.field label{font-size:14px}.field input:not([type=checkbox]),.field select{font-size:15px;min-height:48px}.section-icon{width:38px;height:38px}.quote-heading h2{font-size:20px}.quote-heading .eyebrow{font-size:9px}.quote-icon{width:35px;height:35px}.summary-item>span,.summary-item>small,.summary-item>dt{font-size:12px}.summary-item>strong,.summary-item>dd{font-size:23px}.summary-total{font-size:13px}.summary-total strong{font-size:23px}.installment-highlight>strong{font-size:38px}.installment-highlight>span,.installment-highlight>small{font-size:13px}.calculator-result{margin-top:23px}.schedule-heading{justify-content:space-between;flex-wrap:nowrap}.schedule-heading h3{font-size:14px}.schedule-heading>span{font-size:12px}th{font-size:12px;padding:12px}td{font-size:14px;padding:13px 12px}.send-heading h2{font-size:18px}.mini-step{width:27px;height:27px;font-size:12px}.checkbox-label{font-size:14px!important}.checkbox-label input{width:18px;height:18px;min-width:18px;margin-top:4px}.btn-whatsapp{font-size:15px;min-height:50px;padding:12px 16px}.btn-whatsapp>.icon{width:20px;height:20px}.send-explanation{font-size:13px;max-width:420px;margin-left:auto;margin-right:auto}.copy-button{font-size:13px;min-height:43px}.reminder-card{padding:18px 4px}.reminder-icon{width:36px;height:36px}.reminder-icon .icon{width:19px;height:19px}.reminder-content h2{font-size:15px}.reminder-checkbox{font-size:13px!important}.reminder-checkbox input{width:16px;height:16px;min-width:16px}.calendar-button{font-size:13px}.reminder-content .note{font-size:12px;max-width:440px}.faq{gap:30px;margin-top:35px;padding-top:30px}.faq-intro h2{font-size:23px}.faq-intro p{font-size:12px}.faq-list summary{font-size:13px}.faq-list details>p{font-size:12px}.footer-brand{font-size:23px}.footer-contact>a{font-size:12px}}
+@media(max-width:560px){.header-inner,.page-shell,.footer-inner{padding-left:20px;padding-right:20px}.header-badge{max-width:158px;font-size:10px;padding:6px 8px;gap:6px}.brand{gap:9px}.brand-name{font-size:25px}.brand-mark{width:36px;height:38px}.hero{display:block;padding:32px 0 28px}.hero h1{font-size:35px;line-height:1.14;letter-spacing:-1.1px;margin-top:12px;margin-bottom:15px}.hero-copy>p{font-size:14px;line-height:1.8;max-width:360px}.hero-note{gap:10px 14px;margin-top:17px}.hero-note>span{font-size:11px}.example-card{transform:none;margin-top:24px;padding:20px 22px;display:grid;grid-template-columns:1fr 1fr;gap:0 17px;border-radius:15px}.example-top{grid-column:1/-1;margin-bottom:12px}.example-icon{width:25px;height:25px}.example-icon .icon{width:14px;height:14px}.example-label{font-size:9px;letter-spacing:1.1px}.example-amount{grid-column:1;grid-row:2;padding-right:10px;border-right:1px solid #b197ce2b}.example-amount>strong{font-size:25px;letter-spacing:-.6px}.example-amount>span{font-size:11px}.example-divider{display:none}.example-result{grid-column:2;grid-row:2;align-self:center}.example-result>span{font-size:11px}.example-result>strong{font-size:26px;line-height:1.4;margin:5px 0}.example-result>strong>span{display:block;font-size:10px;line-height:1.2;margin-top:2px}.example-bottom{grid-column:1/-1;display:flex;flex-direction:row;flex-wrap:wrap;justify-content:space-between;gap:4px 10px;margin-top:16px;border-top:1px solid #b197ce2b;padding-top:11px;font-size:9px}.steps{gap:10px;padding:16px 12px;margin-bottom:22px;border-radius:10px}.steps>li{gap:7px}.steps li>div>span{display:none}.steps strong{font-size:12px}.step-number{width:24px;height:24px;font-size:11px;border-radius:7px}.steps>li:not(:last-child)::after{height:17px;right:0;top:4px}.form-card,.quote-card,.send-card{padding:23px 21px;border-radius:15px}.card-header{gap:10px;margin-bottom:22px}.card-header h2{font-size:18px;letter-spacing:-.5px}.card-header p{font-size:12px;line-height:1.6}.section-icon{width:33px;height:33px;border-radius:9px}.section-icon .icon{width:17px;height:17px}.form-grid{grid-template-columns:1fr;gap:18px}.field-full{grid-column:auto}.field input:not([type=checkbox]),.field select{min-height:48px;font-size:16px}.field small{font-size:12px}.rate-note{padding:13px 12px;margin-bottom:21px;gap:8px}.rate-note strong{font-size:13px}.rate-note p{font-size:12px;line-height:1.7}.rate-note>.icon{width:16px;height:16px}.amount-input input:not([type=checkbox]){font-size:29px;min-height:62px}.amount-input>span{font-size:24px}.privacy-note{padding:0 4px;margin-bottom:19px}.privacy-note p{font-size:11px}.privacy-note>.icon{width:16px;height:16px}.quote-heading{padding-bottom:18px}.quote-heading h2{font-size:19px;letter-spacing:-.5px}.quote-heading .eyebrow{font-size:8px;letter-spacing:1px}.quote-icon{width:30px;height:30px}.quote-icon .icon{width:16px;height:16px}.summary-item>strong,.summary-item>dd{font-size:22px}.summary-grid{gap:17px 12px}.summary-total strong{font-size:22px}.installment-highlight{padding:18px 15px}.installment-highlight>strong{font-size:36px}.installment-highlight p{font-size:12px}.schedule-heading h3{font-size:13px}.schedule-heading>span{font-size:11px}th{font-size:11px;padding:11px 8px}td{font-size:13px;padding:12px 8px}.schedule-note{font-size:12px;line-height:1.8}.send-card{padding:23px 21px}.send-heading h2{font-size:17px;letter-spacing:-.4px}.mini-step{width:25px;height:25px;font-size:11px}.checkbox-label{font-size:13px!important;line-height:1.8}.checkbox-label input{width:17px;height:17px;min-width:17px;margin-top:4px}.btn-whatsapp{font-size:13px;min-height:51px;gap:7px;padding:12px}.btn-whatsapp>.icon{width:19px;height:19px}.action-arrow{width:14px!important;height:14px!important}.send-explanation{font-size:12px;line-height:1.9;margin-top:12px;margin-bottom:16px}.copy-button{font-size:12px;min-height:42px}.reminder-content h2{font-size:14px}.reminder-checkbox{font-size:12px!important}.reminder-checkbox input{width:15px;height:15px;min-width:15px}.calendar-button{font-size:12px;line-height:1.6}.reminder-icon{width:32px;height:32px;border-radius:9px}.reminder-icon .icon{width:17px;height:17px}.reminder-card{gap:10px;padding:16px 2px}.reminder-content .note{font-size:11px}.faq{grid-template-columns:1fr;gap:14px;margin:27px 0 38px;padding-top:27px}.faq-intro .eyebrow{font-size:9px}.faq-intro h2{font-size:24px;margin-top:8px}.faq-intro p{font-size:12px;margin-top:7px}.faq-list summary{font-size:14px;padding:17px 0}.faq-list details>p{font-size:13px;line-height:1.9;padding-right:5px}.footer-inner{padding-top:22px;padding-bottom:23px;align-items:flex-start;gap:15px}.footer-brand{font-size:22px}.footer-inner p{font-size:10px;max-width:150px}.footer-contact>span{font-size:10px}.footer-contact>a{font-size:11px;gap:4px}.footer-contact .icon{width:12px;height:12px}.status-card{font-size:12px}}
+@media(max-width:370px){.header-inner,.page-shell,.footer-inner{padding-left:16px;padding-right:16px}.header-badge{max-width:135px;font-size:9px}.brand-name{font-size:23px}.brand-mark{width:33px;height:35px;font-size:25px}.hero h1{font-size:32px}.hero-copy>p{font-size:13px}.hero-note{gap:9px}.hero-note>span{font-size:10px}.example-card{padding:18px 20px;gap:0 15px}.example-amount>strong{font-size:23px}.example-result>strong{font-size:24px}.steps{gap:8px;padding-left:10px;padding-right:10px}.steps strong{font-size:11px}.step-number{width:22px;height:22px;font-size:10px}.form-card,.quote-card,.send-card{padding:22px 18px}.card-header h2{font-size:17px}.card-header p{font-size:11px}.quote-heading h2{font-size:18px}.quote-heading .eyebrow{font-size:7px}.summary-item>strong,.summary-item>dd{font-size:21px}.summary-total strong{font-size:21px}.installment-highlight>strong{font-size:33px}.btn-whatsapp{font-size:12px;padding:12px 10px;gap:6px}.btn-whatsapp>.icon{width:17px;height:17px}.footer-contact>a{font-size:10px}.schedule-heading h3{font-size:12px}.schedule-heading>span{font-size:10px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media print{body{background:#fff}.site-header,.hero,.steps,.form-column,.send-card,.reminder-card,.faq,.site-footer{display:none}.request-layout{display:block}.page-shell{padding:0}.quote-card{border:0;box-shadow:none}.quote-column{position:static}.quote-heading .eyebrow{display:none}}
+
+/* Keep form labels readable at every screen size. */
+.field label{font-size:14px}.checkbox-label,.reminder-checkbox{font-size:14px!important}.btn-whatsapp{font-size:14px}
+
+#copy-fallback{display:grid;gap:9px;width:100%;min-width:0;margin-top:16px;padding:15px;border:1px solid #e8deef;border-radius:9px;background:#faf7fc}#copy-fallback label,#copy-fallback .label{display:block;font-size:13px;line-height:1.7;font-weight:550;color:#71637f}#copy-fallback-text{display:block;width:100%;max-width:100%;min-width:0;min-height:180px;padding:12px;border:1px solid #dfd3e9;border-radius:7px;background:#fff;color:#665d73;font:inherit;font-size:12px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;resize:vertical}#copy-fallback-text:focus-visible{outline:3px solid #a99ade;outline-offset:3px}#copy-fallback p{font-size:12px;line-height:1.7;color:var(--muted)}
+
+/* Direct questions and sharing stay separate from the loan application. */
+.header-actions{display:flex;align-items:center;justify-content:flex-end;gap:17px}.header-consult{display:inline-flex;align-items:center;gap:7px;color:#7f6b95;font-size:12px;font-weight:550;white-space:nowrap;padding:8px 0}.header-consult .icon{width:17px;height:17px;color:#8e7b9e}.header-consult:hover{color:var(--primary-dark);text-decoration:underline;text-underline-offset:3px}.brand-name{font-size:27px}.brand-name>span{font-size:7px;letter-spacing:1.2px}.brand-mark{padding-right:0;letter-spacing:-1px}.send-steps{display:grid;gap:10px;list-style:none;margin:15px 0 17px;padding:0;text-align:left}.send-steps>li{display:flex;gap:8px;align-items:flex-start}.send-steps>li>span{display:grid;place-items:center;flex-shrink:0;min-width:19px;height:19px;background:#f3eef8;color:#a48ab8;border-radius:50%;font-size:10px;line-height:1.2;margin-top:2px}.send-steps p{margin:0;font-size:12px;line-height:1.8;color:var(--muted)}.send-steps strong{font-weight:550;color:#81718f}.whatsapp-actions{display:grid;gap:10px;padding-top:15px;margin-top:16px;border-top:1px solid #eee5f4}.whatsapp-actions .btn{font-size:13px;min-height:43px}.whatsapp-actions .btn-whatsapp{font-size:13px}.footer-inner{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:15px 24px}.footer-actions{display:flex;align-items:center;gap:24px}.footer-contact>span{font-size:11px;line-height:1.7}.footer-contact>a.consult-button{display:inline-flex;justify-content:center;align-items:center;gap:7px;border:1px solid #e5ddec;border-radius:7px;background:#faf7fc;color:#8d759f;padding:8px 11px;font-size:12px;font-weight:550;margin-top:3px}.footer-contact>a.consult-button:hover{background:#f2eaf8;border-color:#d9c8e5}.consult-button .icon{width:15px;height:15px}.consult-button .icon:last-child{width:13px;height:13px}.share-button{font-size:12px;min-height:37px;padding:8px 11px;color:#927ea4;white-space:normal}.share-button .icon{width:15px;height:15px}.share-status{grid-column:1/-1;width:100%;font-size:12px!important;line-height:1.8;margin:0!important;max-width:none!important;color:#8b789c!important;text-align:right}.share-status a{color:var(--primary-dark);text-decoration:underline;overflow-wrap:anywhere}.share-status input,.share-status textarea{width:100%;max-width:100%;min-width:0;font:inherit;font-size:12px;color:#71617f;border:1px solid #e1d4eb;background:#fff;border-radius:7px;padding:9px;margin-top:8px}.share-status button{font:inherit}
+@media(max-width:1000px){.header-badge{display:none}.brand-name{font-size:27px}.footer-actions{gap:16px}.share-button{font-size:11px;padding:8px 10px}}
+@media(max-width:760px){.header-actions{gap:0}.header-consult{font-size:12px;gap:6px}.brand-name{font-size:27px}.brand-name>span{font-size:7px;letter-spacing:1px}.footer-inner{gap:17px}.footer-actions{flex-direction:column;align-items:flex-end;gap:11px}.footer-contact>span{font-size:10px}.footer-contact>a.consult-button{font-size:12px;padding:8px 10px}.share-button{font-size:11px;min-height:34px;padding:7px 10px}.share-status{text-align:left}.send-steps p{font-size:13px}.send-steps>li>span{width:20px;height:20px;margin-top:3px}}
+@media(max-width:560px){.brand{gap:9px}.brand-name{font-size:25px}.brand-name>span{font-size:6px;letter-spacing:1px;margin-top:6px}.header-consult{font-size:11px}.header-consult .icon{width:16px;height:16px}.footer-inner{grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:start}.footer-brand{font-size:22px}.footer-inner p{max-width:145px}.footer-contact>span{max-width:160px;font-size:10px}.footer-contact>a.consult-button{font-size:11px;padding:8px}.share-button{font-size:11px;padding:7px 9px;min-height:33px}.share-button .icon{width:14px;height:14px}.send-steps{gap:10px}.send-steps p{font-size:12px}.send-steps>li>span{width:19px;height:19px;margin-top:2px}.whatsapp-actions .btn{font-size:12px;padding:11px 10px}.whatsapp-actions .btn-whatsapp{font-size:12px}.share-status{font-size:12px!important}}
+@media(max-width:370px){.brand-name{font-size:23px}.brand-name>span{font-size:6px;letter-spacing:.7px}.brand{gap:8px}.header-consult{font-size:10px;gap:5px}.header-consult .icon{width:15px;height:15px}.footer-brand{font-size:20px}.footer-contact>a.consult-button{font-size:10px;padding:7px}.share-button{font-size:10px;padding:7px}.share-button .icon{width:13px;height:13px}.footer-inner p{font-size:9px;max-width:120px}.footer-contact>span{max-width:145px;font-size:9px}}
+
+#share-fallback{display:grid;gap:8px;width:100%;max-width:100%;min-width:0;margin-top:12px;padding:14px;border:1px solid #e6dced;border-radius:9px;background:#faf7fc;text-align:left}#share-fallback label{display:block;font-size:13px;font-weight:550;line-height:1.7;color:#71637f}#share-url-fallback{display:block;width:100%;max-width:100%;min-width:0;min-height:42px;padding:10px 11px;border:1px solid #ddd0e8;border-radius:7px;background:#fff;color:#685b75;font:inherit;font-size:12px;line-height:1.6;white-space:nowrap;overflow-x:auto;text-overflow:clip}#share-url-fallback:focus-visible{outline:3px solid #a99ade;outline-offset:3px}@media(max-width:560px){#share-fallback{padding:12px}#share-fallback label{font-size:13px}#share-url-fallback{font-size:12px}}
+
+#share-fallback{grid-column:1/-1}@media(max-width:370px){.summary-item>strong,.summary-item>dd{font-size:18px}}
+
+</style>
+
+
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+</head>
+<body>
+  <a class="skip-link" href="#request-form">Ir al formulario</a>
+  <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></symbol>
+    <symbol id="icon-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="icon-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></symbol>
+    <symbol id="icon-wallet" viewBox="0 0 24 24"><path d="M20 8V5a2 2 0 0 0-2-2H5a3 3 0 0 0 0 6h15v12H5a3 3 0 0 1-3-3V6m18 7h-6v4h6"/></symbol>
+    <symbol id="icon-chat" viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 9.4 9.4 0 0 1-4-.9L3 21l1.8-5.5a8.5 8.5 0 1 1 16.2-4Z"/><path d="M8.5 8.5c1.2 3.2 3 5 6.5 6.5l1.5-1.5-2.2-1.2-1 1c-1.2-.8-2.2-1.8-3-3l1-1L10 7Z"/></symbol>
+    <symbol id="icon-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18m-11 5 2 2 4-4"/></symbol>
+    <symbol id="icon-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V3H3v13h5"/></symbol>
+    <symbol id="icon-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></symbol>
+    <symbol id="icon-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="icon-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10h.01"/></symbol>
+    <symbol id="icon-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 10.5 6.8-4m-6.8 7 6.8 4"/></symbol>
+    <symbol id="icon-document" viewBox="0 0 24 24"><path d="M14 3H5v18h14V8l-5-5Zm0 0v5h5M8 12h8m-8 4h6"/></symbol>
+  </defs></svg>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#" aria-label="Préstamos, inicio"><span class="brand-mark">P<span></span></span><span class="brand-name">préstamos<span>35% DE INTERÉS TOTAL</span></span></a>
+      <div class="header-actions"><span class="header-badge"><span class="badge-dot"></span>Calculá tu cuota antes de solicitar</span><a class="header-consult" href="https://wa.me/5493544617342?text=Hola%2C%20quisiera%20hacer%20una%20consulta%20sobre%20los%20pr%C3%A9stamos." target="_blank" rel="noopener noreferrer" aria-label="Hacer una consulta por WhatsApp"><svg class="icon"><use href="#icon-chat"/></svg>Consultar</a></div>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy"><span class="eyebrow">VOS ELEGÍS. LOS NÚMEROS, CLAROS.</span><h1 id="hero-title">Tu préstamo, claro<br>desde el principio<span>.</span></h1><p>Simulá el importe, elegí los meses y enviá tu solicitud por WhatsApp.</p><div class="hero-note"><span><svg class="icon"><use href="#icon-check"/></svg>Interés total a la vista</span><span><svg class="icon"><use href="#icon-check"/></svg>Cuotas calculadas al instante</span></div></div>
+      <aside class="example-card" aria-label="Ejemplo de un préstamo de 200.000 pesos en dos meses"><div class="example-top"><span class="example-label">UN EJEMPLO SIMPLE</span><span class="example-icon"><svg class="icon"><use href="#icon-wallet"/></svg></span></div><div class="example-amount"><span>Si pedís</span><strong>$ 200.000</strong><span>y elegís <b>2 meses</b></span></div><div class="example-divider"></div><div class="example-result"><span>Tu cuota mensual sería</span><strong>$ 135.000<span> / mes</span></strong></div><div class="example-bottom"><span>Interés total: <b>$ 70.000 (35%)</b></span><span>Total a devolver: <b>$ 270.000</b></span></div><span class="example-orbit orbit-one" aria-hidden="true"></span><span class="example-orbit orbit-two" aria-hidden="true"></span></aside>
+    </section>
+
+    <ol class="steps" aria-label="Cómo solicitar tu préstamo"><li><span class="step-number">1</span><div><strong>Tus datos</strong><span>Para conocerte y contactarte</span></div></li><li><span class="step-number">2</span><div><strong>Tu préstamo</strong><span>Elegí importe y plazo</span></div></li><li><span class="step-number">3</span><div><strong>WhatsApp</strong><span>Revisá y enviá tu solicitud</span></div></li></ol>
+
+    <form id="request-form" novalidate>
+      <div class="request-layout">
+        <div class="form-column">
+          <section class="form-card" aria-labelledby="personal-title">
+            <div class="card-header"><span class="section-icon"><svg class="icon"><use href="#icon-user"/></svg></span><div><h2 id="personal-title">Primero, contanos quién sos</h2><p>Completá tus datos como figuran en tu documento.</p></div></div>
+            <div class="form-grid">
+              <div class="field field-full"><label for="full_name">Nombre y apellido</label><input id="full_name" name="full_name" type="text" required autocomplete="name" maxlength="160" placeholder="Ej.: María López" aria-describedby="error-full_name"><span class="field-error" id="error-full_name"></span></div>
+              <div class="field"><label for="cuil">CUIL</label><input id="cuil" name="cuil" type="text" inputmode="numeric" required autocomplete="off" maxlength="13" placeholder="20-12345678-6" aria-describedby="cuil-help error-cuil"><small id="cuil-help">Los 11 dígitos de tu CUIL.</small><span class="field-error" id="error-cuil"></span></div>
+              <div class="field"><label for="client_whatsapp">Tu número de WhatsApp</label><input id="client_whatsapp" name="client_whatsapp" type="tel" inputmode="tel" required autocomplete="tel" maxlength="30" placeholder="Ej.: 351 1234567" aria-describedby="whatsapp-help error-client_whatsapp"><small id="whatsapp-help">Código de área y número, sin 0 ni 15. También podés usar el número internacional con +.</small><span class="field-error" id="error-client_whatsapp"></span></div>
+              <div class="field street-field"><label for="address_street">Calle</label><input id="address_street" name="address_street" type="text" required autocomplete="address-line1" maxlength="160" placeholder="Ej.: San Martín" aria-describedby="error-address_street"><span class="field-error" id="error-address_street"></span></div>
+              <div class="field number-field"><label for="address_number">Número</label><input id="address_number" name="address_number" type="text" required autocomplete="address-line2" maxlength="40" placeholder="Ej.: 123" aria-describedby="error-address_number"><span class="field-error" id="error-address_number"></span></div>
+              <div class="field field-full"><label for="locality">Localidad / Ciudad</label><input id="locality" name="locality" type="text" required autocomplete="address-level2" maxlength="120" placeholder="Ej.: Villa Dolores, Córdoba" aria-describedby="error-locality"><span class="field-error" id="error-locality"></span></div>
+            </div>
+          </section>
+
+          <section class="form-card" aria-labelledby="loan-title">
+            <div class="card-header"><span class="section-icon"><svg class="icon"><use href="#icon-wallet"/></svg></span><div><h2 id="loan-title">Ahora, armá tu préstamo</h2><p>Probá distintas opciones y mirá cómo cambia tu cuota.</p></div></div>
+            <div class="rate-note"><svg class="icon"><use href="#icon-info"/></svg><div><strong>Interés total fijo del 35%</strong><p>Se calcula una sola vez sobre el importe que pedís. El total se reparte en los meses que elijas.</p></div></div>
+            <div class="form-grid">
+              <div class="field field-full"><label for="principal">¿Cuánto querés pedir?</label><div class="amount-input"><span aria-hidden="true">$</span><input id="principal" name="principal" type="number" inputmode="decimal" min="0.01" max="1000000000" step="0.01" required placeholder="200000" aria-describedby="principal-help error-principal"></div><small id="principal-help">Importe expresado en pesos argentinos.</small><span class="field-error" id="error-principal"></span></div>
+              <div class="field"><label for="term_months">¿En cuántos meses?</label><select id="term_months" name="term_months" required aria-describedby="error-term_months"><option value="1">1 mes</option><option value="2" selected>2 meses</option><option value="3">3 meses</option><option value="4">4 meses</option><option value="5">5 meses</option><option value="6">6 meses</option><option value="7">7 meses</option><option value="8">8 meses</option><option value="9">9 meses</option><option value="10">10 meses</option><option value="11">11 meses</option><option value="12">12 meses</option><option value="13">13 meses</option><option value="14">14 meses</option><option value="15">15 meses</option><option value="16">16 meses</option><option value="17">17 meses</option><option value="18">18 meses</option><option value="19">19 meses</option><option value="20">20 meses</option><option value="21">21 meses</option><option value="22">22 meses</option><option value="23">23 meses</option><option value="24">24 meses</option></select><span class="field-error" id="error-term_months"></span></div>
+              <div class="field"><label for="first_due_date">Primera cuota estimada</label><input id="first_due_date" name="first_due_date" type="date" required aria-describedby="date-help error-first_due_date"><small id="date-help">La fecha se confirma al acordar el préstamo.</small><span class="field-error" id="error-first_due_date"></span></div>
+            </div>
+          </section>
+
+          <div class="privacy-note"><svg class="icon"><use href="#icon-lock"/></svg><p>Los datos se comparten al enviar por WhatsApp.<br><strong>No se guardan en esta página.</strong></p></div>
+        </div>
+
+        <aside class="quote-column" aria-label="Tu simulación y envío de la solicitud">
+          <section class="quote-card" aria-labelledby="quote-title">
+            <div class="quote-heading"><div><span class="eyebrow">SIN SORPRESAS EN LOS NÚMEROS</span><h2 id="quote-title">Así quedaría tu préstamo</h2></div><span class="quote-icon"><svg class="icon"><use href="#icon-document"/></svg></span></div>
+            <div id="calculator-result" class="calculator-result" aria-live="polite" aria-atomic="true"><div class="empty-result"><span class="empty-symbol"><svg class="icon"><use href="#icon-wallet"/></svg></span><p>Elegí el importe y los meses para ver tu cuota.</p></div></div>
+            <div class="schedule-heading"><h3>Fechas estimadas de pago</h3><span>Una cuota por mes</span></div>
+            <div class="table-wrap"><table><thead><tr><th>Cuota</th><th>Fecha</th><th class="text-right">Importe</th></tr></thead><tbody id="installments-body"><tr><td colspan="3" class="empty-schedule">Las cuotas aparecerán al completar la simulación.</td></tr></tbody></table></div>
+            <p class="note schedule-note">Estos importes y fechas forman parte de una simulación. La solicitud y el préstamo se confirman por WhatsApp.</p>
+          </section>
+
+          <section class="send-card" aria-labelledby="send-title">
+            <div class="send-heading"><span class="mini-step">3</span><h2 id="send-title">Revisá y enviá tu solicitud</h2></div>
+            <div class="field consent-field"><label class="checkbox-label" for="contact_consent"><input id="contact_consent" name="contact_consent" type="checkbox" required aria-describedby="error-contact_consent"><span>Acepto que me contacten por WhatsApp para responder esta solicitud y coordinar los pagos.</span></label><span class="field-error" id="error-contact_consent"></span></div>
+            <p id="form-error" class="form-error" role="alert" hidden></p>
+            <button id="send-request" class="btn btn-whatsapp btn-full" type="submit"><svg class="icon"><use href="#icon-chat"/></svg>Enviar solicitud por WhatsApp<svg class="icon action-arrow"><use href="#icon-arrow"/></svg></button>
+            <ol class="send-explanation send-steps" aria-label="Cómo completar el envío"><li><span>1</span><p>Abrí WhatsApp y <strong>revisá el mensaje</strong> con tus datos y la simulación.</p></li><li><span>2</span><p>Tocá <strong>Enviar en WhatsApp</strong> para completar tu solicitud.</p></li></ol>
+            <button id="copy-request" class="btn btn-secondary btn-full copy-button" type="button"><svg class="icon"><use href="#icon-copy"/></svg>Copiar solicitud</button>
+            <div id="send-status" class="status-card" role="status" aria-live="polite" hidden></div>
+            <div id="whatsapp-actions" class="whatsapp-actions" hidden><a id="reopen-whatsapp" class="btn btn-whatsapp btn-full" href="https://wa.me/5493544617342" target="_blank" rel="noopener noreferrer"><svg class="icon"><use href="#icon-chat"/></svg>Abrir mi solicitud en WhatsApp</a><a id="direct-whatsapp" class="btn btn-secondary btn-full" href="https://wa.me/5493544617342?text=Hola%2C%20quisiera%20hacer%20una%20consulta%20sobre%20los%20pr%C3%A9stamos." target="_blank" rel="noopener noreferrer">Hablar por WhatsApp<svg class="icon"><use href="#icon-arrow"/></svg></a></div>
+          </section>
+
+          <section class="reminder-card" aria-labelledby="reminder-title"><span class="reminder-icon"><svg class="icon"><use href="#icon-calendar"/></svg></span><div class="reminder-content"><h2 id="reminder-title">Que la fecha no se te pase</h2><label class="checkbox-label reminder-checkbox" for="remind_me"><input id="remind_me" name="remind_me" type="checkbox" checked><span>Quiero guardar las fechas de pago en mi calendario.</span></label><button id="download-reminders" class="calendar-button" type="button">Agregar fechas al calendario <svg class="icon"><use href="#icon-arrow"/></svg></button><p class="note">Al importar el calendario, tu celular podrá avisarte antes del vencimiento. Son fechas estimadas hasta confirmar el préstamo.</p></div></section>
+        </aside>
+      </div>
+    </form>
+
+    <section class="faq" aria-labelledby="faq-title"><div class="faq-intro"><span class="eyebrow">TODO UN POCO MÁS CLARO</span><h2 id="faq-title">Antes de solicitar</h2><p>Las respuestas que te ayudan a elegir.</p></div><div class="faq-list"><details><summary>¿Cómo se calcula el interés?<svg class="icon"><use href="#icon-chevron"/></svg></summary><p>El interés es del <strong>35% total sobre el importe solicitado</strong>. Por ejemplo, si pedís $ 200.000, el interés total es $ 70.000 y el total a devolver es $ 270.000. Si elegís 2 meses, son 2 cuotas de $ 135.000. Cambiar los meses distribuye el mismo total entre más o menos cuotas.</p></details><details><summary>¿La solicitud se envía desde esta página?<svg class="icon"><use href="#icon-chevron"/></svg></summary><p>Al tocar “Enviar solicitud por WhatsApp”, se abre un mensaje con tus datos y la simulación. Revisalo y tocá <strong>Enviar en WhatsApp</strong>. Preparar el mensaje no envía la solicitud ni confirma el préstamo.</p></details><details><summary>¿Cómo recibo los recordatorios de pago?<svg class="icon"><use href="#icon-chevron"/></svg></summary><p>Podés descargar las fechas e importarlas en el calendario de tu celular. Tu calendario podrá mostrarte avisos según su configuración. Esta página no envía recordatorios automáticos por WhatsApp. Las fechas son estimadas hasta confirmar el préstamo.</p></details></div></section>
+  </main>
+
+  <footer class="site-footer"><div class="footer-inner"><div><span class="footer-brand">Préstamos<span>.</span></span><p>Los números claros, desde el principio.</p></div><div class="footer-actions"><div class="footer-contact"><span>¿Querés preguntar antes de solicitar?</span><a class="consult-button" href="https://wa.me/5493544617342?text=Hola%2C%20quisiera%20hacer%20una%20consulta%20sobre%20los%20pr%C3%A9stamos." target="_blank" rel="noopener noreferrer"><svg class="icon"><use href="#icon-chat"/></svg>Hacer una consulta<svg class="icon"><use href="#icon-arrow"/></svg></a></div><button id="share-page" class="btn btn-secondary share-button" type="button"><svg class="icon"><use href="#icon-share"/></svg>Compartir esta página</button></div><p id="share-status" class="share-status" role="status" aria-live="polite" hidden></p></div></footer>
+  <noscript><div class="noscript-message">Activá JavaScript para calcular tus cuotas y preparar la solicitud por WhatsApp.</div></noscript>
+<script data-loan-source="loan-core.js">
+/* Cálculo y validación de solicitudes. Funciones puras: sin almacenamiento ni red. */
+(function (root, factory) {
+  "use strict";
+  const core = factory();
+  if (typeof module === "object" && module.exports) module.exports = core;
+  if (root) root.LoanRequestCore = core;
+})(typeof window !== "undefined" ? window : typeof globalThis !== "undefined" ? globalThis : null, function () {
+  "use strict";
+
+  const INTEREST_PERCENT = 35;
+  const MAX_PRINCIPAL_CENTS = 100000000000;
+  const MAX_TERM_MONTHS = 24;
+  const CUIL_PREFIXES = new Set(["20", "23", "24", "27"]);
+  const CUIL_WEIGHTS = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
+
+  function fail(message) { throw new Error(message); }
+  function integer(value, minimum, maximum, label) {
+    if (!Number.isSafeInteger(value) || value < minimum || value > maximum) fail(`${label} debe ser un número entero entre ${minimum} y ${maximum}.`);
+    return value;
+  }
+  function daysInMonth(year, month) {
+    const date = new Date(0);
+    date.setUTCFullYear(year, month, 0);
+    date.setUTCHours(12, 0, 0, 0);
+    return date.getUTCDate();
+  }
+  function dateParts(value) {
+    if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) fail("La fecha debe tener formato AAAA-MM-DD.");
+    const year = Number(value.slice(0, 4)), month = Number(value.slice(5, 7)), day = Number(value.slice(8, 10));
+    if (year < 1 || year > 9999 || month < 1 || month > 12 || day < 1 || day > daysInMonth(year, month)) fail("Ingresá una fecha que exista en el calendario.");
+    return { year, month, day };
+  }
+
+  /** Calendar addition, retaining the original day or an explicitly supplied anchor. */
+  function addMonths(value, months, anchor) {
+    const source = dateParts(value);
+    integer(months, -120000, 120000, "La cantidad de meses");
+    const day = anchor === undefined ? source.day : integer(anchor, 1, 31, "El día de vencimiento");
+    const monthIndex = source.year * 12 + source.month - 1 + months;
+    const year = Math.floor(monthIndex / 12), month = monthIndex - year * 12 + 1;
+    if (year < 1 || year > 9999) fail("Los vencimientos superan el rango de fechas permitido.");
+    const resultDay = Math.min(day, daysInMonth(year, month));
+    return `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(resultDay).padStart(2, "0")}`;
+  }
+
+  /** One total charge of 35%; the term only distributes that fixed total. */
+  function calculate(input) {
+    if (!input || typeof input !== "object" || Array.isArray(input)) fail("Completá los datos del préstamo.");
+    const principal = integer(input.principal_cents, 1, MAX_PRINCIPAL_CENTS, "El capital en centavos");
+    const months = integer(input.term_months, 1, MAX_TERM_MONTHS, "El plazo en meses");
+    const firstDate = dateParts(input.first_due_date);
+    const anchor = input.due_anchor_day === undefined ? firstDate.day : integer(input.due_anchor_day, 1, 31, "El día de vencimiento");
+    if (addMonths(input.first_due_date, 0, anchor) !== input.first_due_date) fail("El día de vencimiento no coincide con la primera fecha elegida.");
+    // Round half up to one cent before distributing the total; no monthly compounding.
+    const interest = Number((BigInt(principal) * BigInt(INTEREST_PERCENT) + 50n) / 100n);
+    const total = principal + interest;
+    const regular = Math.floor(total / months), last = total - regular * (months - 1);
+    const installments = Array.from({ length: months }, (_, index) => ({
+      number: index + 1,
+      due_date: addMonths(input.first_due_date, index, anchor),
+      amount_cents: index === months - 1 ? last : regular,
+    }));
+    return {
+      principal_cents: principal,
+      interest_cents: interest,
+      total_cents: total,
+      term_months: months,
+      installments,
+      regular_installment_cents: regular,
+      last_installment_cents: last,
+      interest_percent: INTEREST_PERCENT,
+    };
+  }
+
+  /** Decimal text without thousands separators. Dot or comma may separate cents. */
+  function parseMoney(value) {
+    if (typeof value !== "string") fail("Ingresá el importe con números, sin separadores de miles.");
+    const cleaned = value.trim();
+    if (!/^\d+(?:[.,]\d{1,2})?$/.test(cleaned)) fail("Ingresá un importe válido, sin separadores de miles y con hasta dos decimales.");
+    const parts = cleaned.replace(",", ".").split(".");
+    // Cap input length before BigInt parsing; leading zeros are otherwise harmless.
+    const whole = parts[0].replace(/^0+(?=\d)/, "");
+    if (whole.length > 14) fail("El importe supera el máximo permitido.");
+    const cents = BigInt(whole) * 100n + BigInt((parts[1] || "").padEnd(2, "0"));
+    if (cents > BigInt(Number.MAX_SAFE_INTEGER)) fail("El importe supera el máximo permitido.");
+    return Number(cents);
+  }
+
+  /** Format check only: this cannot prove that ANSES issued the number or verify identity. */
+  function validateCuil(value) {
+    const invalid = (message, normalized = "") => ({ valid: false, normalized, message });
+    if (typeof value !== "string" || !/^[\d\s-]+$/.test(value)) return invalid("Ingresá tu CUIL con números, espacios o guiones.");
+    const normalized = value.replace(/[\s-]/g, "");
+    if (!/^\d{11}$/.test(normalized)) return invalid("El CUIL debe contener 11 dígitos.", normalized);
+    if (!CUIL_PREFIXES.has(normalized.slice(0, 2))) return invalid("Ingresá un CUIL de persona con prefijo 20, 23, 24 o 27.", normalized);
+    let sum = 0;
+    for (let index = 0; index < CUIL_WEIGHTS.length; index++) sum += Number(normalized[index]) * CUIL_WEIGHTS[index];
+    // A remainder of 1 has no valid decimal check digit. In particular, do not map 10 to 9.
+    const digit = Number(normalized[10]);
+    if ((sum + digit) % 11 !== 0) return invalid("Revisá tu CUIL: el dígito verificador no coincide.", normalized);
+    return { valid: true, normalized, message: "" };
+  }
+
+  /**
+   * Return digits suitable for a wa.me URL, preserving the entered country code.
+   * International '+' is required, except an unambiguous full Argentine 54/549 number.
+   * Local ten-digit numbers and the domestic '0'/'15' prefixes are never guessed.
+   */
+  function normalizePhone(value) {
+    const invalid = message => ({ valid: false, international: "", message });
+    if (typeof value !== "string" || !/^\+?[\d\s().-]+$/.test(value.trim())) return invalid("Ingresá un teléfono con código de país, por ejemplo +54 9 11 1234 5678.");
+    const source = value.trim(), international = source.replace(/[\s().-]/g, "").replace(/^\+/, "");
+    if (!/^[1-9]\d{7,14}$/.test(international)) return invalid("El teléfono debe tener entre 8 y 15 dígitos e incluir el código de país, sin el 0 inicial.");
+    const explicitCountry = source.startsWith("+");
+    const completeArgentina = /^54\d{10}$/.test(international) || /^549\d{10}$/.test(international);
+    if (!explicitCountry && !completeArgentina) return invalid("Incluí el código de país precedido por +. Para un celular argentino: +54 9, código de área y número, sin 0 ni 15.");
+    if (international.startsWith("54") && !completeArgentina) return invalid("Revisá el teléfono argentino: +54, código de área y número; para celulares, +54 9 seguido de 10 dígitos, sin 0 ni 15.");
+    return { valid: true, international, message: "" };
+  }
+
+  return Object.freeze({ calculate, addMonths, parseMoney, validateCuil, normalizePhone, parseArgentinaPhone: normalizePhone, INTEREST_PERCENT, MAX_PRINCIPAL_CENTS, MAX_TERM_MONTHS });
+});
+
+</script>
+<script data-loan-source="app.js">
+/* Página del cliente. Los datos del formulario solo viven en esta pestaña. */
+(function () {
+  "use strict";
+  const OWNER_WHATSAPP = "5493544617342";
+  const core = window.LoanRequestCore;
+  const form = document.getElementById("request-form");
+  const field = name => form.elements.namedItem(name);
+  const result = document.getElementById("calculator-result");
+  const schedule = document.getElementById("installments-body");
+  const status = document.getElementById("send-status");
+  const errorSummary = document.getElementById("form-error");
+  const whatsappActions = document.getElementById("whatsapp-actions");
+  const reopenWhatsApp = document.getElementById("reopen-whatsapp");
+  const currency = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const dateFormatter = new Intl.DateTimeFormat("es-AR", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" });
+  const loanFields = new Set(["principal", "term_months", "first_due_date"]);
+  let automaticFirstDate = true;
+  let calendarKey = "", calendarId = "";
+
+  function element(tag, text, className) {
+    const node = document.createElement(tag);
+    if (text !== undefined) node.textContent = text;
+    if (className) node.className = className;
+    return node;
+  }
+  function money(cents) { return currency.format(cents / 100); }
+  function displayDate(iso) { return dateFormatter.format(new Date(iso + "T12:00:00Z")); }
+  function todayArgentina() {
+    const parts = new Intl.DateTimeFormat("en", { timeZone: "America/Argentina/Buenos_Aires", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date());
+    const part = name => parts.find(item => item.type === name).value;
+    return `${part("year")}-${part("month")}-${part("day")}`;
+  }
+  function nextDay(iso) {
+    const date = new Date(iso + "T12:00:00Z");
+    date.setUTCDate(date.getUTCDate() + 1);
+    return date.toISOString().slice(0, 10);
+  }
+  const initialToday = todayArgentina();
+  const originalDay = Number(initialToday.slice(8));
+  field("first_due_date").value = core.addMonths(initialToday, 1);
+  field("first_due_date").min = nextDay(initialToday);
+
+  function cleanText(value) { return value.trim().replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " "); }
+  function phoneFromForm(value) {
+    const trimmed = value.trim();
+    if (/^[\d\s().-]+$/.test(trimmed)) {
+      const digits = trimmed.replace(/\D/g, "");
+      if (/^[1-9]\d{9}$/.test(digits)) return core.normalizePhone("+549" + digits);
+    }
+    return core.normalizePhone(trimmed);
+  }
+  function clearFieldError(name) {
+    const input = field(name);
+    if (!input) return;
+    input.removeAttribute("aria-invalid");
+    input.closest(".field")?.classList.remove("invalid");
+    const note = document.getElementById("error-" + name);
+    if (note) note.textContent = "";
+  }
+  function showErrors(errors) {
+    form.querySelectorAll("[name]").forEach(input => clearFieldError(input.name));
+    for (const [name, message] of Object.entries(errors)) {
+      const input = field(name);
+      input.setAttribute("aria-invalid", "true");
+      input.closest(".field")?.classList.add("invalid");
+      const note = document.getElementById("error-" + name);
+      if (note) note.textContent = message;
+    }
+    const names = Object.keys(errors);
+    errorSummary.hidden = names.length === 0;
+    errorSummary.textContent = names.length ? "Revisá los campos marcados para continuar." : "";
+    if (names.length) field(names[0]).focus();
+  }
+  function clearFeedback() {
+    status.replaceChildren(); status.hidden = true;
+    document.getElementById("copy-fallback")?.remove();
+    whatsappActions.hidden = true;
+    reopenWhatsApp.removeAttribute("href");
+    errorSummary.hidden = true;
+  }
+  function feedback(text) { status.textContent = text; status.hidden = false; }
+
+  function readLoan() {
+    const errors = {};
+    let principal = 0;
+    try {
+      principal = core.parseMoney(field("principal").value);
+      if (principal < 1) errors.principal = "Ingresá un importe mayor que cero.";
+      else if (principal > core.MAX_PRINCIPAL_CENTS) errors.principal = "El importe supera el máximo que admite la calculadora ($1.000.000.000).";
+    } catch (_) { errors.principal = "Ingresá el importe en pesos, sin separadores de miles y con hasta 2 decimales."; }
+    const months = Number(field("term_months").value);
+    if (!Number.isInteger(months) || months < 1 || months > core.MAX_TERM_MONTHS) errors.term_months = "Elegí un plazo entre 1 y 24 meses.";
+    const date = field("first_due_date").value;
+    field("first_due_date").min = nextDay(todayArgentina());
+    try {
+      core.addMonths(date, 0);
+      if (date <= todayArgentina()) errors.first_due_date = "Elegí una fecha de primera cuota posterior a hoy.";
+    } catch (_) { errors.first_due_date = "Elegí una fecha válida para la primera cuota."; }
+    if (Object.keys(errors).length) return { errors, quote: null };
+    try {
+      return { errors, quote: core.calculate({ principal_cents: principal, term_months: months, first_due_date: date,
+        ...(automaticFirstDate ? { due_anchor_day: originalDay } : {}) }) };
+    } catch (error) { return { errors: { first_due_date: error.message }, quote: null }; }
+  }
+  function renderCalculator() {
+    const { quote, errors } = readLoan();
+    result.replaceChildren(); schedule.replaceChildren();
+    if (!quote) {
+      result.append(element("p", field("principal").value ? Object.values(errors)[0] : "Elegí el importe y los meses para ver tu cuota.", "empty-result"));
+      const row = element("tr"), cell = element("td", "Las cuotas aparecerán al completar la simulación.", "empty-schedule");
+      cell.colSpan = 3; row.append(cell); schedule.append(row); return;
+    }
+    const summary = element("div", undefined, "summary-grid");
+    for (const [label, value] of [["Importe que pedís", quote.principal_cents], [`Interés total · ${quote.interest_percent}%`, quote.interest_cents]]) {
+      const item = element("div", undefined, "summary-item");
+      item.append(element("span", label), element("strong", money(value))); summary.append(item);
+    }
+    const total = element("div", undefined, "summary-total");
+    total.append(element("span", "Total a devolver"), element("strong", money(quote.total_cents)));
+    const highlight = element("div", undefined, "installment-highlight");
+    const equal = quote.regular_installment_cents === quote.last_installment_cents;
+    highlight.append(element("span", quote.term_months === 1 ? "Tu única cuota" : equal ? `Cada cuota · ${quote.term_months} meses` : "Cuota mensual"),
+      element("strong", money(quote.term_months === 1 ? quote.total_cents : quote.regular_installment_cents)));
+    highlight.append(element("p", equal || quote.term_months === 1 ? `${quote.term_months} ${quote.term_months === 1 ? "pago" : "pagos"} en total. El interés se aplica una sola vez.` : `La última cuota es de ${money(quote.last_installment_cents)} por el ajuste de centavos.`));
+    result.append(summary, total, highlight);
+    for (const item of quote.installments) {
+      const row = element("tr");
+      row.append(element("td", `${item.number} de ${quote.term_months}`), element("td", displayDate(item.due_date)), element("td", money(item.amount_cents), "text-right")); schedule.append(row);
+    }
+  }
+  function application() {
+    const { quote, errors } = readLoan();
+    const values = {};
+    for (const name of ["full_name", "address_street", "address_number", "locality"]) values[name] = cleanText(field(name).value);
+    if (values.full_name.length < 3 || values.full_name.split(" ").length < 2) errors.full_name = "Ingresá tu nombre y apellido completos.";
+    for (const [name, label] of [["address_street", "la calle de tu domicilio"], ["address_number", "el número de tu domicilio (o S/N)"], ["locality", "tu localidad o ciudad"]]) {
+      if (!values[name]) errors[name] = `Ingresá ${label}.`;
+    }
+    const cuil = core.validateCuil(field("cuil").value);
+    if (!cuil.valid) errors.cuil = cuil.message;
+    const phone = phoneFromForm(field("client_whatsapp").value);
+    if (!phone.valid) errors.client_whatsapp = "Revisá tu WhatsApp: código de área y número sin 0 ni 15, o el número internacional con +.";
+    if (!field("contact_consent").checked) errors.contact_consent = "Marcá la casilla si aceptás que te contacten por esta solicitud y sus pagos.";
+    showErrors(errors);
+    if (Object.keys(errors).length) return null;
+    return { ...values, cuil: cuil.normalized, client_whatsapp: phone.international, quote, remind_me: field("remind_me").checked };
+  }
+  function messageFor(data) {
+    const q = data.quote;
+    return ["SOLICITUD · PRÉSTAMOS", "", "DATOS DEL CLIENTE",
+      `Nombre y apellido: ${data.full_name}`, `CUIL: ${data.cuil}`,
+      `Domicilio: ${data.address_street} ${data.address_number}`, `Localidad / Ciudad: ${data.locality}`,
+      `Mi WhatsApp: +${data.client_whatsapp}`, "", "SIMULACIÓN EN PESOS ARGENTINOS",
+      `Capital solicitado: ${money(q.principal_cents)}`, `Interés: ${q.interest_percent}% TOTAL sobre el capital, aplicado una sola vez (${money(q.interest_cents)}).`,
+      `Total a devolver: ${money(q.total_cents)}`, `Plazo: ${q.term_months} ${q.term_months === 1 ? "mes" : "meses"}`, "", "CUOTAS Y FECHAS ESTIMADAS",
+      ...q.installments.map(item => `${item.number}/${q.term_months} · ${displayDate(item.due_date)} · ${money(item.amount_cents)}`), "",
+      `Acepto contacto por WhatsApp para esta solicitud y la coordinación de pagos: SÍ.`,
+      `Contacto para coordinar pagos y recordatorios: +${data.client_whatsapp}`,
+      `Deseo guardar recordatorios en mi calendario: ${data.remind_me ? "SÍ" : "NO"}.`,
+      "Los avisos del calendario requieren importar el archivo y activar sus notificaciones; no son avisos automáticos por WhatsApp.",
+      "", `Fecha de solicitud: ${displayDate(todayArgentina())}`,
+      "Solicitud sujeta a evaluación y aprobación. Importes y fechas estimados hasta confirmar el préstamo."].join("\n");
+  }
+  function prepareWhatsApp(data) {
+    const url = `https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(messageFor(data))}`;
+    reopenWhatsApp.href = url;
+    whatsappActions.hidden = false;
+    return url;
+  }
+
+  form.addEventListener("submit", event => {
+    event.preventDefault(); clearFeedback();
+    const data = application(); if (!data) return;
+    const url = prepareWhatsApp(data);
+    try {
+      window.open(url, "_blank", "noopener,noreferrer");
+      feedback("Tu solicitud está preparada. En WhatsApp, revisá el mensaje y tocá Enviar. Si el chat no se abrió, tocá “Abrir mi solicitud en WhatsApp” o copiá la solicitud y pegala en el chat con +54 9 3544 617342.");
+    } catch (_) {
+      feedback("El navegador no pudo abrir el chat. Tocá “Abrir mi solicitud en WhatsApp” para continuar. También podés copiar la solicitud y pegarla en WhatsApp.");
+    }
+  });
+  document.getElementById("copy-request").addEventListener("click", async () => {
+    clearFeedback();
+    const data = application(); if (!data) return;
+    const text = messageFor(data);
+    prepareWhatsApp(data);
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error("No clipboard");
+      await navigator.clipboard.writeText(text);
+      feedback("Solicitud copiada. Pegala en el chat de WhatsApp con +54 9 3544 617342, revisala y tocá Enviar.");
+    } catch (_) {
+      const panel = element("div"); panel.id = "copy-fallback";
+      const label = element("label", "Copiá este texto y pegalo en WhatsApp:"); label.htmlFor = "copy-fallback-text";
+      const area = element("textarea"); area.id = "copy-fallback-text"; area.readOnly = true; area.value = text;
+      panel.append(label, area); status.after(panel); area.focus(); area.select();
+      feedback("El navegador no permitió copiar automáticamente. Seleccioná y copiá el texto que aparece debajo.");
+    }
+  });
+
+  // RFC 5545: fold lines at 75 UTF-8 octets without splitting a Unicode character.
+  function calendarLine(value) {
+    const encoder = new TextEncoder(); let line = "", bytes = 0; const lines = [];
+    for (const character of value) {
+      const size = encoder.encode(character).length;
+      if (bytes + size > 75) { lines.push(line); line = " "; bytes = 1; }
+      line += character; bytes += size;
+    }
+    lines.push(line); return lines.join("\r\n");
+  }
+  function calendarText(value) { return value.replace(/\\/g, "\\\\").replace(/\r?\n/g, "\\n").replace(/;/g, "\\;").replace(/,/g, "\\,"); }
+  function calendarFor(quote) {
+    const key = JSON.stringify(quote);
+    if (key !== calendarKey) {
+      calendarKey = key;
+      calendarId = typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    }
+    const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+    const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Prestamos//Solicitud de prestamo//ES", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
+      "X-WR-CALNAME:Cuotas estimadas - Préstamos"];
+    for (const item of quote.installments) {
+      const title = `Cuota ${item.number}/${quote.term_months} estimada · ${money(item.amount_cents)} · Préstamos`;
+      const description = `Vencimiento propuesto, sujeto a aprobación. Importe: ${money(item.amount_cents)}. Confirmá las fechas por WhatsApp con +${OWNER_WHATSAPP} antes de pagar. Si cambian, eliminá estos eventos e importá el calendario actualizado. Los avisos dependen de la configuración y los permisos de tu calendario.`;
+      lines.push("BEGIN:VEVENT", `UID:${calendarId}-${item.number}@prestamos-solicitud`, `DTSTAMP:${stamp}`,
+        `DTSTART:${item.due_date.replace(/-/g, "")}T120000Z`, "DURATION:PT15M", "STATUS:TENTATIVE", "TRANSP:TRANSPARENT",
+        "SUMMARY:" + calendarText(title), "DESCRIPTION:" + calendarText(description));
+      for (const trigger of ["-P1D", "PT0M"]) lines.push("BEGIN:VALARM", `TRIGGER:${trigger}`, "ACTION:DISPLAY", "DESCRIPTION:" + calendarText(title), "END:VALARM");
+      lines.push("END:VEVENT");
+    }
+    lines.push("END:VCALENDAR"); return lines.map(calendarLine).join("\r\n") + "\r\n";
+  }
+  document.getElementById("download-reminders").addEventListener("click", () => {
+    clearFeedback();
+    const { quote, errors } = readLoan(); showErrors(errors); if (!quote) return;
+    if (!field("remind_me").checked) { feedback("Marcá “Quiero guardar las fechas de pago en mi calendario” para descargar los recordatorios."); field("remind_me").focus(); return; }
+    const blob = new Blob([calendarFor(quote)], { type: "text/calendar;charset=utf-8" });
+    const url = URL.createObjectURL(blob), link = element("a"); link.href = url; link.download = "fechas-de-pago.ics";
+    document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 30000);
+    feedback("Calendario descargado. Abrí el archivo fechas-de-pago.ics e importalo en tu calendario. Incluye avisos un día antes y el día de cada cuota, a las 09:00 de Argentina. Activá las notificaciones en tu calendario. Las fechas son estimadas hasta confirmar el préstamo; si cambian, eliminá estos eventos y descargalos de nuevo.");
+  });
+  function onEdit(event) {
+    const name = event.target.name;
+    if (!name) return;
+    clearFeedback(); clearFieldError(name);
+    if (name === "first_due_date") automaticFirstDate = false;
+    if (loanFields.has(name)) renderCalculator();
+  }
+  form.addEventListener("input", onEdit);
+  form.addEventListener("change", onEdit);
+
+  const shareStatus = document.getElementById("share-status");
+  function shareFeedback(text) { shareStatus.textContent = text; shareStatus.hidden = false; }
+  document.getElementById("share-page").addEventListener("click", async () => {
+    shareStatus.hidden = true;
+    document.getElementById("share-fallback")?.remove();
+    const url = new URL(window.location.href);
+    if (!/^https?:$/.test(url.protocol)) {
+      shareFeedback("Podés compartir el archivo PRESTAMOS.html. Para compartir un enlace, abrí la página publicada y usá este botón desde allí.");
+      return;
+    }
+    // Share only the public page, never form data, query parameters, or fragments.
+    url.search = ""; url.hash = "";
+    const publicUrl = url.href;
+    if (typeof navigator.share === "function") {
+      try {
+        await navigator.share({ title: "Préstamos", text: "Calculá tu cuota y enviá tu solicitud por WhatsApp.", url: publicUrl });
+        shareFeedback("Terminaste de compartir la página."); return;
+      } catch (error) {
+        if (error.name === "AbortError") { shareFeedback("Se canceló la acción de compartir."); return; }
+      }
+    }
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error("No clipboard");
+      await navigator.clipboard.writeText(publicUrl);
+      shareFeedback("Enlace copiado. Pegalo en WhatsApp para compartir la página.");
+    } catch (_) {
+      const panel = element("div"); panel.id = "share-fallback";
+      const label = element("label", "Copiá este enlace para compartir la página:"); label.htmlFor = "share-url-fallback";
+      const input = element("input"); input.id = "share-url-fallback"; input.type = "url"; input.readOnly = true; input.value = publicUrl;
+      panel.append(label, input); shareStatus.after(panel); input.focus(); input.select();
+      shareFeedback("Seleccioná y copiá el enlace que aparece debajo.");
+    }
+  });
+  renderCalculator();
+})();
+
+</script>
+</body>
+</html>
