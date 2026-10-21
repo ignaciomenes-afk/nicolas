@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#282344">
-  <meta name="description" content="Simulá tu préstamo con Nicolás. Conocé el importe de tus cuotas y prepará tu solicitud por WhatsApp.">
-  <title>Solicitá tu préstamo · Nicolás</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%236960df'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-family='Arial' font-size='43' font-weight='700' fill='white'%3EN%3C/text%3E%3C/svg%3E">
+  <meta name="description" content="Simulá tu préstamo. Conocé el importe de tus cuotas y prepará tu solicitud por WhatsApp.">
+  <title>Préstamos | Solicitá tu préstamo</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%236960df'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-family='Arial' font-size='43' font-weight='700' fill='white'%3EP%3C/text%3E%3C/svg%3E">
   <style data-loan-styles>
 @charset "UTF-8";
 :root{--ink:#302e44;--muted:#747184;--primary:#7266c7;--primary-dark:#6053b5;--purple-soft:#f0edf9;--border:#ebe8f1;--surface:#fff;--bg:#f8f7fb;--green:#278262;--green-dark:#1f7053;--green-soft:#eef7f2;--error:#b74c61;--radius:17px;--shadow:0 7px 24px #3f305207}
@@ -31,6 +31,17 @@
 
 #copy-fallback{display:grid;gap:9px;width:100%;min-width:0;margin-top:16px;padding:15px;border:1px solid #e8deef;border-radius:9px;background:#faf7fc}#copy-fallback label,#copy-fallback .label{display:block;font-size:13px;line-height:1.7;font-weight:550;color:#71637f}#copy-fallback-text{display:block;width:100%;max-width:100%;min-width:0;min-height:180px;padding:12px;border:1px solid #dfd3e9;border-radius:7px;background:#fff;color:#665d73;font:inherit;font-size:12px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;resize:vertical}#copy-fallback-text:focus-visible{outline:3px solid #a99ade;outline-offset:3px}#copy-fallback p{font-size:12px;line-height:1.7;color:var(--muted)}
 
+/* Direct questions and sharing stay separate from the loan application. */
+.header-actions{display:flex;align-items:center;justify-content:flex-end;gap:17px}.header-consult{display:inline-flex;align-items:center;gap:7px;color:#7f6b95;font-size:12px;font-weight:550;white-space:nowrap;padding:8px 0}.header-consult .icon{width:17px;height:17px;color:#8e7b9e}.header-consult:hover{color:var(--primary-dark);text-decoration:underline;text-underline-offset:3px}.brand-name{font-size:27px}.brand-name>span{font-size:7px;letter-spacing:1.2px}.brand-mark{padding-right:0;letter-spacing:-1px}.send-steps{display:grid;gap:10px;list-style:none;margin:15px 0 17px;padding:0;text-align:left}.send-steps>li{display:flex;gap:8px;align-items:flex-start}.send-steps>li>span{display:grid;place-items:center;flex-shrink:0;min-width:19px;height:19px;background:#f3eef8;color:#a48ab8;border-radius:50%;font-size:10px;line-height:1.2;margin-top:2px}.send-steps p{margin:0;font-size:12px;line-height:1.8;color:var(--muted)}.send-steps strong{font-weight:550;color:#81718f}.whatsapp-actions{display:grid;gap:10px;padding-top:15px;margin-top:16px;border-top:1px solid #eee5f4}.whatsapp-actions .btn{font-size:13px;min-height:43px}.whatsapp-actions .btn-whatsapp{font-size:13px}.footer-inner{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:15px 24px}.footer-actions{display:flex;align-items:center;gap:24px}.footer-contact>span{font-size:11px;line-height:1.7}.footer-contact>a.consult-button{display:inline-flex;justify-content:center;align-items:center;gap:7px;border:1px solid #e5ddec;border-radius:7px;background:#faf7fc;color:#8d759f;padding:8px 11px;font-size:12px;font-weight:550;margin-top:3px}.footer-contact>a.consult-button:hover{background:#f2eaf8;border-color:#d9c8e5}.consult-button .icon{width:15px;height:15px}.consult-button .icon:last-child{width:13px;height:13px}.share-button{font-size:12px;min-height:37px;padding:8px 11px;color:#927ea4;white-space:normal}.share-button .icon{width:15px;height:15px}.share-status{grid-column:1/-1;width:100%;font-size:12px!important;line-height:1.8;margin:0!important;max-width:none!important;color:#8b789c!important;text-align:right}.share-status a{color:var(--primary-dark);text-decoration:underline;overflow-wrap:anywhere}.share-status input,.share-status textarea{width:100%;max-width:100%;min-width:0;font:inherit;font-size:12px;color:#71617f;border:1px solid #e1d4eb;background:#fff;border-radius:7px;padding:9px;margin-top:8px}.share-status button{font:inherit}
+@media(max-width:1000px){.header-badge{display:none}.brand-name{font-size:27px}.footer-actions{gap:16px}.share-button{font-size:11px;padding:8px 10px}}
+@media(max-width:760px){.header-actions{gap:0}.header-consult{font-size:12px;gap:6px}.brand-name{font-size:27px}.brand-name>span{font-size:7px;letter-spacing:1px}.footer-inner{gap:17px}.footer-actions{flex-direction:column;align-items:flex-end;gap:11px}.footer-contact>span{font-size:10px}.footer-contact>a.consult-button{font-size:12px;padding:8px 10px}.share-button{font-size:11px;min-height:34px;padding:7px 10px}.share-status{text-align:left}.send-steps p{font-size:13px}.send-steps>li>span{width:20px;height:20px;margin-top:3px}}
+@media(max-width:560px){.brand{gap:9px}.brand-name{font-size:25px}.brand-name>span{font-size:6px;letter-spacing:1px;margin-top:6px}.header-consult{font-size:11px}.header-consult .icon{width:16px;height:16px}.footer-inner{grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:start}.footer-brand{font-size:22px}.footer-inner p{max-width:145px}.footer-contact>span{max-width:160px;font-size:10px}.footer-contact>a.consult-button{font-size:11px;padding:8px}.share-button{font-size:11px;padding:7px 9px;min-height:33px}.share-button .icon{width:14px;height:14px}.send-steps{gap:10px}.send-steps p{font-size:12px}.send-steps>li>span{width:19px;height:19px;margin-top:2px}.whatsapp-actions .btn{font-size:12px;padding:11px 10px}.whatsapp-actions .btn-whatsapp{font-size:12px}.share-status{font-size:12px!important}}
+@media(max-width:370px){.brand-name{font-size:23px}.brand-name>span{font-size:6px;letter-spacing:.7px}.brand{gap:8px}.header-consult{font-size:10px;gap:5px}.header-consult .icon{width:15px;height:15px}.footer-brand{font-size:20px}.footer-contact>a.consult-button{font-size:10px;padding:7px}.share-button{font-size:10px;padding:7px}.share-button .icon{width:13px;height:13px}.footer-inner p{font-size:9px;max-width:120px}.footer-contact>span{max-width:145px;font-size:9px}}
+
+#share-fallback{display:grid;gap:8px;width:100%;max-width:100%;min-width:0;margin-top:12px;padding:14px;border:1px solid #e6dced;border-radius:9px;background:#faf7fc;text-align:left}#share-fallback label{display:block;font-size:13px;font-weight:550;line-height:1.7;color:#71637f}#share-url-fallback{display:block;width:100%;max-width:100%;min-width:0;min-height:42px;padding:10px 11px;border:1px solid #ddd0e8;border-radius:7px;background:#fff;color:#685b75;font:inherit;font-size:12px;line-height:1.6;white-space:nowrap;overflow-x:auto;text-overflow:clip}#share-url-fallback:focus-visible{outline:3px solid #a99ade;outline-offset:3px}@media(max-width:560px){#share-fallback{padding:12px}#share-fallback label{font-size:13px}#share-url-fallback{font-size:12px}}
+
+#share-fallback{grid-column:1/-1}@media(max-width:370px){.summary-item>strong,.summary-item>dd{font-size:18px}}
+
 </style>
 
 
@@ -49,13 +60,14 @@
     <symbol id="icon-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></symbol>
     <symbol id="icon-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
     <symbol id="icon-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10h.01"/></symbol>
+    <symbol id="icon-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 10.5 6.8-4m-6.8 7 6.8 4"/></symbol>
     <symbol id="icon-document" viewBox="0 0 24 24"><path d="M14 3H5v18h14V8l-5-5Zm0 0v5h5M8 12h8m-8 4h6"/></symbol>
   </defs></svg>
 
   <header class="site-header">
     <div class="header-inner">
-      <a class="brand" href="#" aria-label="Nicolás, inicio"><span class="brand-mark">N<span></span></span><span class="brand-name">nicolás<span>PRÉSTAMOS</span></span></a>
-      <span class="header-badge"><span class="badge-dot"></span>Calculá tu cuota antes de solicitar</span>
+      <a class="brand" href="#" aria-label="Préstamos, inicio"><span class="brand-mark">P<span></span></span><span class="brand-name">préstamos<span>35% DE INTERÉS TOTAL</span></span></a>
+      <div class="header-actions"><span class="header-badge"><span class="badge-dot"></span>Calculá tu cuota antes de solicitar</span><a class="header-consult" href="https://wa.me/5493544617342?text=Hola%2C%20quisiera%20hacer%20una%20consulta%20sobre%20los%20pr%C3%A9stamos." target="_blank" rel="noopener noreferrer" aria-label="Hacer una consulta por WhatsApp"><svg class="icon"><use href="#icon-chat"/></svg>Consultar</a></div>
     </div>
   </header>
 
@@ -109,9 +121,10 @@
             <div class="field consent-field"><label class="checkbox-label" for="contact_consent"><input id="contact_consent" name="contact_consent" type="checkbox" required aria-describedby="error-contact_consent"><span>Acepto que me contacten por WhatsApp para responder esta solicitud y coordinar los pagos.</span></label><span class="field-error" id="error-contact_consent"></span></div>
             <p id="form-error" class="form-error" role="alert" hidden></p>
             <button id="send-request" class="btn btn-whatsapp btn-full" type="submit"><svg class="icon"><use href="#icon-chat"/></svg>Enviar solicitud por WhatsApp<svg class="icon action-arrow"><use href="#icon-arrow"/></svg></button>
-            <p class="send-explanation">Se abrirá WhatsApp con el mensaje preparado. Revisalo y tocá <strong>Enviar</strong> para completar la solicitud.</p>
+            <ol class="send-explanation send-steps" aria-label="Cómo completar el envío"><li><span>1</span><p>Abrí WhatsApp y <strong>revisá el mensaje</strong> con tus datos y la simulación.</p></li><li><span>2</span><p>Tocá <strong>Enviar en WhatsApp</strong> para completar tu solicitud.</p></li></ol>
             <button id="copy-request" class="btn btn-secondary btn-full copy-button" type="button"><svg class="icon"><use href="#icon-copy"/></svg>Copiar solicitud</button>
             <div id="send-status" class="status-card" role="status" aria-live="polite" hidden></div>
+            <div id="whatsapp-actions" class="whatsapp-actions" hidden><a id="reopen-whatsapp" class="btn btn-whatsapp btn-full" href="https://wa.me/5493544617342" target="_blank" rel="noopener noreferrer"><svg class="icon"><use href="#icon-chat"/></svg>Abrir mi solicitud en WhatsApp</a><a id="direct-whatsapp" class="btn btn-secondary btn-full" href="https://wa.me/5493544617342?text=Hola%2C%20quisiera%20hacer%20una%20consulta%20sobre%20los%20pr%C3%A9stamos." target="_blank" rel="noopener noreferrer">Hablar por WhatsApp<svg class="icon"><use href="#icon-arrow"/></svg></a></div>
           </section>
 
           <section class="reminder-card" aria-labelledby="reminder-title"><span class="reminder-icon"><svg class="icon"><use href="#icon-calendar"/></svg></span><div class="reminder-content"><h2 id="reminder-title">Que la fecha no se te pase</h2><label class="checkbox-label reminder-checkbox" for="remind_me"><input id="remind_me" name="remind_me" type="checkbox" checked><span>Quiero guardar las fechas de pago en mi calendario.</span></label><button id="download-reminders" class="calendar-button" type="button">Agregar fechas al calendario <svg class="icon"><use href="#icon-arrow"/></svg></button><p class="note">Al importar el calendario, tu celular podrá avisarte antes del vencimiento. Son fechas estimadas hasta confirmar el préstamo.</p></div></section>
@@ -122,7 +135,7 @@
     <section class="faq" aria-labelledby="faq-title"><div class="faq-intro"><span class="eyebrow">TODO UN POCO MÁS CLARO</span><h2 id="faq-title">Antes de solicitar</h2><p>Las respuestas que te ayudan a elegir.</p></div><div class="faq-list"><details><summary>¿Cómo se calcula el interés?<svg class="icon"><use href="#icon-chevron"/></svg></summary><p>El interés es del <strong>35% total sobre el importe solicitado</strong>. Por ejemplo, si pedís $ 200.000, el interés total es $ 70.000 y el total a devolver es $ 270.000. Si elegís 2 meses, son 2 cuotas de $ 135.000. Cambiar los meses distribuye el mismo total entre más o menos cuotas.</p></details><details><summary>¿La solicitud se envía desde esta página?<svg class="icon"><use href="#icon-chevron"/></svg></summary><p>Al tocar “Enviar solicitud por WhatsApp”, se abre un mensaje con tus datos y la simulación. Revisalo y tocá <strong>Enviar en WhatsApp</strong>. Preparar el mensaje no envía la solicitud ni confirma el préstamo.</p></details><details><summary>¿Cómo recibo los recordatorios de pago?<svg class="icon"><use href="#icon-chevron"/></svg></summary><p>Podés descargar las fechas e importarlas en el calendario de tu celular. Tu calendario podrá mostrarte avisos según su configuración. Esta página no envía recordatorios automáticos por WhatsApp. Las fechas son estimadas hasta confirmar el préstamo.</p></details></div></section>
   </main>
 
-  <footer class="site-footer"><div class="footer-inner"><div><span class="footer-brand">nicolás<span>.</span></span><p>Los números claros, desde el principio.</p></div><div class="footer-contact"><span>Atención por WhatsApp</span><a href="https://wa.me/5493544617342" target="_blank" rel="noopener noreferrer">+54 9 3544 617342<svg class="icon"><use href="#icon-arrow"/></svg></a></div></div></footer>
+  <footer class="site-footer"><div class="footer-inner"><div><span class="footer-brand">Préstamos<span>.</span></span><p>Los números claros, desde el principio.</p></div><div class="footer-actions"><div class="footer-contact"><span>¿Querés preguntar antes de solicitar?</span><a class="consult-button" href="https://wa.me/5493544617342?text=Hola%2C%20quisiera%20hacer%20una%20consulta%20sobre%20los%20pr%C3%A9stamos." target="_blank" rel="noopener noreferrer"><svg class="icon"><use href="#icon-chat"/></svg>Hacer una consulta<svg class="icon"><use href="#icon-arrow"/></svg></a></div><button id="share-page" class="btn btn-secondary share-button" type="button"><svg class="icon"><use href="#icon-share"/></svg>Compartir esta página</button></div><p id="share-status" class="share-status" role="status" aria-live="polite" hidden></p></div></footer>
   <noscript><div class="noscript-message">Activá JavaScript para calcular tus cuotas y preparar la solicitud por WhatsApp.</div></noscript>
 <script data-loan-source="loan-core.js">
 /* Cálculo y validación de solicitudes. Funciones puras: sin almacenamiento ni red. */
@@ -261,6 +274,8 @@
   const schedule = document.getElementById("installments-body");
   const status = document.getElementById("send-status");
   const errorSummary = document.getElementById("form-error");
+  const whatsappActions = document.getElementById("whatsapp-actions");
+  const reopenWhatsApp = document.getElementById("reopen-whatsapp");
   const currency = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const dateFormatter = new Intl.DateTimeFormat("es-AR", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" });
   const loanFields = new Set(["principal", "term_months", "first_due_date"]);
@@ -324,6 +339,8 @@
   function clearFeedback() {
     status.replaceChildren(); status.hidden = true;
     document.getElementById("copy-fallback")?.remove();
+    whatsappActions.hidden = true;
+    reopenWhatsApp.removeAttribute("href");
     errorSummary.hidden = true;
   }
   function feedback(text) { status.textContent = text; status.hidden = false; }
@@ -395,7 +412,7 @@
   }
   function messageFor(data) {
     const q = data.quote;
-    return ["SOLICITUD DE PRÉSTAMO · NICOLÁS", "", "DATOS DEL CLIENTE",
+    return ["SOLICITUD · PRÉSTAMOS", "", "DATOS DEL CLIENTE",
       `Nombre y apellido: ${data.full_name}`, `CUIL: ${data.cuil}`,
       `Domicilio: ${data.address_street} ${data.address_number}`, `Localidad / Ciudad: ${data.locality}`,
       `Mi WhatsApp: +${data.client_whatsapp}`, "", "SIMULACIÓN EN PESOS ARGENTINOS",
@@ -409,18 +426,29 @@
       "", `Fecha de solicitud: ${displayDate(todayArgentina())}`,
       "Solicitud sujeta a evaluación y aprobación. Importes y fechas estimados hasta confirmar el préstamo."].join("\n");
   }
+  function prepareWhatsApp(data) {
+    const url = `https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(messageFor(data))}`;
+    reopenWhatsApp.href = url;
+    whatsappActions.hidden = false;
+    return url;
+  }
 
   form.addEventListener("submit", event => {
     event.preventDefault(); clearFeedback();
     const data = application(); if (!data) return;
-    const url = `https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(messageFor(data))}`;
-    window.open(url, "_blank", "noopener,noreferrer");
-    feedback("WhatsApp se abre con tu solicitud preparada. Revisá el mensaje y tocá Enviar para completarla. Si no se abrió, usá Copiar solicitud y pegala en el chat con +54 9 3544 617342.");
+    const url = prepareWhatsApp(data);
+    try {
+      window.open(url, "_blank", "noopener,noreferrer");
+      feedback("Tu solicitud está preparada. En WhatsApp, revisá el mensaje y tocá Enviar. Si el chat no se abrió, tocá “Abrir mi solicitud en WhatsApp” o copiá la solicitud y pegala en el chat con +54 9 3544 617342.");
+    } catch (_) {
+      feedback("El navegador no pudo abrir el chat. Tocá “Abrir mi solicitud en WhatsApp” para continuar. También podés copiar la solicitud y pegarla en WhatsApp.");
+    }
   });
   document.getElementById("copy-request").addEventListener("click", async () => {
     clearFeedback();
     const data = application(); if (!data) return;
     const text = messageFor(data);
+    prepareWhatsApp(data);
     try {
       if (!navigator.clipboard?.writeText) throw new Error("No clipboard");
       await navigator.clipboard.writeText(text);
@@ -452,12 +480,12 @@
       calendarId = typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     }
     const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
-    const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Nicolas//Solicitud de prestamo//ES", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
-      "X-WR-CALNAME:Cuotas estimadas - Nicolás"];
+    const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Prestamos//Solicitud de prestamo//ES", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
+      "X-WR-CALNAME:Cuotas estimadas - Préstamos"];
     for (const item of quote.installments) {
-      const title = `Cuota ${item.number}/${quote.term_months} estimada · ${money(item.amount_cents)} · Nicolás`;
+      const title = `Cuota ${item.number}/${quote.term_months} estimada · ${money(item.amount_cents)} · Préstamos`;
       const description = `Vencimiento propuesto, sujeto a aprobación. Importe: ${money(item.amount_cents)}. Confirmá las fechas por WhatsApp con +${OWNER_WHATSAPP} antes de pagar. Si cambian, eliminá estos eventos e importá el calendario actualizado. Los avisos dependen de la configuración y los permisos de tu calendario.`;
-      lines.push("BEGIN:VEVENT", `UID:${calendarId}-${item.number}@nicolas-solicitud`, `DTSTAMP:${stamp}`,
+      lines.push("BEGIN:VEVENT", `UID:${calendarId}-${item.number}@prestamos-solicitud`, `DTSTAMP:${stamp}`,
         `DTSTART:${item.due_date.replace(/-/g, "")}T120000Z`, "DURATION:PT15M", "STATUS:TENTATIVE", "TRANSP:TRANSPARENT",
         "SUMMARY:" + calendarText(title), "DESCRIPTION:" + calendarText(description));
       for (const trigger of ["-P1D", "PT0M"]) lines.push("BEGIN:VALARM", `TRIGGER:${trigger}`, "ACTION:DISPLAY", "DESCRIPTION:" + calendarText(title), "END:VALARM");
@@ -483,6 +511,40 @@
   }
   form.addEventListener("input", onEdit);
   form.addEventListener("change", onEdit);
+
+  const shareStatus = document.getElementById("share-status");
+  function shareFeedback(text) { shareStatus.textContent = text; shareStatus.hidden = false; }
+  document.getElementById("share-page").addEventListener("click", async () => {
+    shareStatus.hidden = true;
+    document.getElementById("share-fallback")?.remove();
+    const url = new URL(window.location.href);
+    if (!/^https?:$/.test(url.protocol)) {
+      shareFeedback("Podés compartir el archivo PRESTAMOS.html. Para compartir un enlace, abrí la página publicada y usá este botón desde allí.");
+      return;
+    }
+    // Share only the public page, never form data, query parameters, or fragments.
+    url.search = ""; url.hash = "";
+    const publicUrl = url.href;
+    if (typeof navigator.share === "function") {
+      try {
+        await navigator.share({ title: "Préstamos", text: "Calculá tu cuota y enviá tu solicitud por WhatsApp.", url: publicUrl });
+        shareFeedback("Terminaste de compartir la página."); return;
+      } catch (error) {
+        if (error.name === "AbortError") { shareFeedback("Se canceló la acción de compartir."); return; }
+      }
+    }
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error("No clipboard");
+      await navigator.clipboard.writeText(publicUrl);
+      shareFeedback("Enlace copiado. Pegalo en WhatsApp para compartir la página.");
+    } catch (_) {
+      const panel = element("div"); panel.id = "share-fallback";
+      const label = element("label", "Copiá este enlace para compartir la página:"); label.htmlFor = "share-url-fallback";
+      const input = element("input"); input.id = "share-url-fallback"; input.type = "url"; input.readOnly = true; input.value = publicUrl;
+      panel.append(label, input); shareStatus.after(panel); input.focus(); input.select();
+      shareFeedback("Seleccioná y copiá el enlace que aparece debajo.");
+    }
+  });
   renderCalculator();
 })();
 

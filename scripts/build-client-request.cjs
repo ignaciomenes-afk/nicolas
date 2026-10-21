@@ -10,9 +10,11 @@ const vm = require("node:vm");
 const root = path.resolve(__dirname, "..");
 const sourceRoot = path.join(root, "client-request");
 const deliveryRoot = path.join(root, "entrega");
-const htmlName = "SOLICITAR-PRESTAMO.html";
+const htmlName = "PRESTAMOS.html";
+const htmlAliases = ["SOLICITAR-PRESTAMO.html"];
 const guideName = "LEEME-SOLICITUD.txt";
-const zipName = "Nicolas-solicitud-prestamo.zip";
+const zipName = "Prestamos.zip";
+const zipAliases = ["Nicolas-solicitud-prestamo.zip"];
 const readSource = name => fs.readFileSync(path.join(sourceRoot, name), "utf8");
 const csp = "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'";
 
@@ -46,7 +48,8 @@ function buildHtml() {
   const embedded = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script\s*>/gi)];
   if (embedded.length !== 2) throw new Error("La página debe incorporar exactamente los dos scripts de la solicitud.");
   for (const [index, match] of embedded.entries()) new vm.Script(match[1], { filename: `${htmlName}.inline-${index + 1}.js` });
-  if (!html.includes("https://wa.me/5493544617342")) throw new Error("La página no incluye el contacto de Nicolás acordado.");
+  if (!html.includes("https://wa.me/5493544617342")) throw new Error("La página no incluye el contacto de WhatsApp acordado.");
+  if (/\b(?:chatgpt|codex)\b/i.test(html)) throw new Error("La página cliente contiene una marca ajena a Préstamos.");
   return html.replace(/^[\t ]+$/gm, "");
 }
 
@@ -91,12 +94,17 @@ function createZip(files) {
 
 const html = buildHtml();
 const guide = fs.readFileSync(path.join(deliveryRoot, guideName), "utf8");
+if (/\b(?:chatgpt|codex)\b/i.test(guide)) throw new Error("La guía cliente contiene una marca ajena a Préstamos.");
 const zip = createZip([{ name: htmlName, data: html }, { name: guideName, data: guide }]);
 fs.mkdirSync(deliveryRoot, { recursive: true });
 fs.mkdirSync(path.join(root, "docs"), { recursive: true });
 fs.writeFileSync(path.join(deliveryRoot, htmlName), html, "utf8");
+for (const name of htmlAliases) fs.writeFileSync(path.join(deliveryRoot, name), html, "utf8");
 fs.writeFileSync(path.join(root, "docs", "index.html"), html, "utf8");
+fs.writeFileSync(path.join(root, "docs", ".nojekyll"), "");
 fs.writeFileSync(path.join(deliveryRoot, zipName), zip);
+for (const name of zipAliases) fs.writeFileSync(path.join(deliveryRoot, name), zip);
 console.log(`Solicitud lista: entrega/${htmlName} (${Buffer.byteLength(html)} bytes)`);
 console.log("Copia idéntica para publicación: docs/index.html");
+console.log("Alias anteriores actualizados; docs/.nojekyll preparado.");
 console.log(`Descarga: entrega/${zipName} (${zip.length} bytes, HTML y guía)`);

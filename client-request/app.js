@@ -9,6 +9,8 @@
   const schedule = document.getElementById("installments-body");
   const status = document.getElementById("send-status");
   const errorSummary = document.getElementById("form-error");
+  const whatsappActions = document.getElementById("whatsapp-actions");
+  const reopenWhatsApp = document.getElementById("reopen-whatsapp");
   const currency = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const dateFormatter = new Intl.DateTimeFormat("es-AR", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" });
   const loanFields = new Set(["principal", "term_months", "first_due_date"]);
@@ -72,6 +74,8 @@
   function clearFeedback() {
     status.replaceChildren(); status.hidden = true;
     document.getElementById("copy-fallback")?.remove();
+    whatsappActions.hidden = true;
+    reopenWhatsApp.removeAttribute("href");
     errorSummary.hidden = true;
   }
   function feedback(text) { status.textContent = text; status.hidden = false; }
@@ -143,7 +147,7 @@
   }
   function messageFor(data) {
     const q = data.quote;
-    return ["SOLICITUD DE PRÉSTAMO · NICOLÁS", "", "DATOS DEL CLIENTE",
+    return ["SOLICITUD · PRÉSTAMOS", "", "DATOS DEL CLIENTE",
       `Nombre y apellido: ${data.full_name}`, `CUIL: ${data.cuil}`,
       `Domicilio: ${data.address_street} ${data.address_number}`, `Localidad / Ciudad: ${data.locality}`,
       `Mi WhatsApp: +${data.client_whatsapp}`, "", "SIMULACIÓN EN PESOS ARGENTINOS",
@@ -157,18 +161,29 @@
       "", `Fecha de solicitud: ${displayDate(todayArgentina())}`,
       "Solicitud sujeta a evaluación y aprobación. Importes y fechas estimados hasta confirmar el préstamo."].join("\n");
   }
+  function prepareWhatsApp(data) {
+    const url = `https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(messageFor(data))}`;
+    reopenWhatsApp.href = url;
+    whatsappActions.hidden = false;
+    return url;
+  }
 
   form.addEventListener("submit", event => {
     event.preventDefault(); clearFeedback();
     const data = application(); if (!data) return;
-    const url = `https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(messageFor(data))}`;
-    window.open(url, "_blank", "noopener,noreferrer");
-    feedback("WhatsApp se abre con tu solicitud preparada. Revisá el mensaje y tocá Enviar para completarla. Si no se abrió, usá Copiar solicitud y pegala en el chat con +54 9 3544 617342.");
+    const url = prepareWhatsApp(data);
+    try {
+      window.open(url, "_blank", "noopener,noreferrer");
+      feedback("Tu solicitud está preparada. En WhatsApp, revisá el mensaje y tocá Enviar. Si el chat no se abrió, tocá “Abrir mi solicitud en WhatsApp” o copiá la solicitud y pegala en el chat con +54 9 3544 617342.");
+    } catch (_) {
+      feedback("El navegador no pudo abrir el chat. Tocá “Abrir mi solicitud en WhatsApp” para continuar. También podés copiar la solicitud y pegarla en WhatsApp.");
+    }
   });
   document.getElementById("copy-request").addEventListener("click", async () => {
     clearFeedback();
     const data = application(); if (!data) return;
     const text = messageFor(data);
+    prepareWhatsApp(data);
     try {
       if (!navigator.clipboard?.writeText) throw new Error("No clipboard");
       await navigator.clipboard.writeText(text);
@@ -200,12 +215,12 @@
       calendarId = typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     }
     const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
-    const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Nicolas//Solicitud de prestamo//ES", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
-      "X-WR-CALNAME:Cuotas estimadas - Nicolás"];
+    const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Prestamos//Solicitud de prestamo//ES", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
+      "X-WR-CALNAME:Cuotas estimadas - Préstamos"];
     for (const item of quote.installments) {
-      const title = `Cuota ${item.number}/${quote.term_months} estimada · ${money(item.amount_cents)} · Nicolás`;
+      const title = `Cuota ${item.number}/${quote.term_months} estimada · ${money(item.amount_cents)} · Préstamos`;
       const description = `Vencimiento propuesto, sujeto a aprobación. Importe: ${money(item.amount_cents)}. Confirmá las fechas por WhatsApp con +${OWNER_WHATSAPP} antes de pagar. Si cambian, eliminá estos eventos e importá el calendario actualizado. Los avisos dependen de la configuración y los permisos de tu calendario.`;
-      lines.push("BEGIN:VEVENT", `UID:${calendarId}-${item.number}@nicolas-solicitud`, `DTSTAMP:${stamp}`,
+      lines.push("BEGIN:VEVENT", `UID:${calendarId}-${item.number}@prestamos-solicitud`, `DTSTAMP:${stamp}`,
         `DTSTART:${item.due_date.replace(/-/g, "")}T120000Z`, "DURATION:PT15M", "STATUS:TENTATIVE", "TRANSP:TRANSPARENT",
         "SUMMARY:" + calendarText(title), "DESCRIPTION:" + calendarText(description));
       for (const trigger of ["-P1D", "PT0M"]) lines.push("BEGIN:VALARM", `TRIGGER:${trigger}`, "ACTION:DISPLAY", "DESCRIPTION:" + calendarText(title), "END:VALARM");
@@ -231,5 +246,39 @@
   }
   form.addEventListener("input", onEdit);
   form.addEventListener("change", onEdit);
+
+  const shareStatus = document.getElementById("share-status");
+  function shareFeedback(text) { shareStatus.textContent = text; shareStatus.hidden = false; }
+  document.getElementById("share-page").addEventListener("click", async () => {
+    shareStatus.hidden = true;
+    document.getElementById("share-fallback")?.remove();
+    const url = new URL(window.location.href);
+    if (!/^https?:$/.test(url.protocol)) {
+      shareFeedback("Podés compartir el archivo PRESTAMOS.html. Para compartir un enlace, abrí la página publicada y usá este botón desde allí.");
+      return;
+    }
+    // Share only the public page, never form data, query parameters, or fragments.
+    url.search = ""; url.hash = "";
+    const publicUrl = url.href;
+    if (typeof navigator.share === "function") {
+      try {
+        await navigator.share({ title: "Préstamos", text: "Calculá tu cuota y enviá tu solicitud por WhatsApp.", url: publicUrl });
+        shareFeedback("Terminaste de compartir la página."); return;
+      } catch (error) {
+        if (error.name === "AbortError") { shareFeedback("Se canceló la acción de compartir."); return; }
+      }
+    }
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error("No clipboard");
+      await navigator.clipboard.writeText(publicUrl);
+      shareFeedback("Enlace copiado. Pegalo en WhatsApp para compartir la página.");
+    } catch (_) {
+      const panel = element("div"); panel.id = "share-fallback";
+      const label = element("label", "Copiá este enlace para compartir la página:"); label.htmlFor = "share-url-fallback";
+      const input = element("input"); input.id = "share-url-fallback"; input.type = "url"; input.readOnly = true; input.value = publicUrl;
+      panel.append(label, input); shareStatus.after(panel); input.focus(); input.select();
+      shareFeedback("Seleccioná y copiá el enlace que aparece debajo.");
+    }
+  });
   renderCalculator();
 })();

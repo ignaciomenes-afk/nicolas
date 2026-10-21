@@ -12,13 +12,18 @@ const http = require("node:http");
 const { execFileSync } = require("node:child_process");
 const { pathToFileURL } = require("node:url");
 const { chromium } = require("playwright");
-const source = path.resolve(process.argv[2] || "/workspace/nicolas/entrega/SOLICITAR-PRESTAMO.html");
+const source = path.resolve(process.argv[2] || "/workspace/nicolas/entrega/PRESTAMOS.html");
 const owner = "5493544617342";
 const fixedTime = "2026-10-21T15:00:00.000Z";
 const fake = { full_name: "Cliente Sintético de Prueba", cuil: "20-00000000-1", address_street: "Calle de Prueba",
   address_number: "123", locality: "Localidad de Prueba", client_whatsapp: "+54 9 11 0000 0001", principal: "200000", term_months: "2" };
 let directory, context, server, staticUrl, fileUrl, checks = 0;
 const errors = [], external = [], extraResources = [];
+function isStaticDocument(value) {
+  if (!staticUrl) return false;
+  try { const target = new URL(value), expected = new URL(staticUrl); return target.origin === expected.origin && target.pathname === expected.pathname; }
+  catch (_) { return false; }
+}
 async function check(label, operation) {
   assert.deepEqual(errors, [], "JavaScript errors before a check"); await operation();
   assert.deepEqual(errors, [], `JavaScript error: ${label}`); console.log(`✓ ${label}`); checks++;
@@ -36,26 +41,36 @@ async function prepare() {
   if (/\.zip$/i.test(source)) {
     const extracted = path.join(directory, "ZIP solicitud extraído"); execFileSync("unzip", ["-q", source, "-d", extracted]);
     const files = await findHtml(extracted); assert.equal(files.length, 1, "Customer ZIP must contain one HTML only"); html = files[0];
-  } else { html = path.join(directory, "Solicitud préstamo cliente.html"); await fs.copyFile(source, html); }
+    const names = execFileSync("unzip", ["-Z1", source], { encoding: "utf8" }).trim().split(/\r?\n/).sort();
+    assert.deepEqual(names, ["LEEME-SOLICITUD.txt", "PRESTAMOS.html"]);
+  } else { html = path.join(directory, "PRESTAMOS.html"); await fs.copyFile(source, html); }
   const contents = await fs.readFile(html); fileUrl = pathToFileURL(html).href;
   server = http.createServer((request, response) => {
-    if (request.url !== "/solicitud.html") { response.writeHead(404); response.end(); return; }
+    if (new URL(request.url, "http://127.0.0.1").pathname !== "/PRESTAMOS.html") { response.writeHead(404); response.end(); return; }
     response.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" }); response.end(contents);
   });
   await new Promise((resolve, reject) => { server.once("error", reject); server.listen(0, "127.0.0.1", resolve); });
-  staticUrl = `http://127.0.0.1:${server.address().port}/solicitud.html`;
+  staticUrl = `http://127.0.0.1:${server.address().port}/PRESTAMOS.html`;
   context = await chromium.launchPersistentContext(path.join(directory, "profile"), { executablePath: process.env.CHROMIUM_PATH || "/usr/bin/chromium",
     headless: true, acceptDownloads: true, viewport: { width: 1440, height: 1000 }, args: ["--no-sandbox", "--disable-dev-shm-usage"] });
   context.on("request", request => {
-    if (/^(?:https?|wss?):/.test(request.url()) && request.url() !== staticUrl) external.push(request.url());
-    if (request.url() !== staticUrl && request.url() !== fileUrl && !/^(?:data:|blob:|about:)/.test(request.url())) extraResources.push(request.url());
+    const hostedDocument = isStaticDocument(request.url()) && request.isNavigationRequest() && request.resourceType() === "document";
+    if (/^(?:https?|wss?):/.test(request.url()) && !hostedDocument) external.push(request.url());
+    if (!hostedDocument && request.url() !== fileUrl && !/^(?:data:|blob:|about:)/.test(request.url())) extraResources.push(request.url());
   });
-  await context.route(/^https?:/, route => route.request().url() === staticUrl ? route.continue() : route.abort("internetdisconnected"));
+  await context.route(/^https?:/, route => isStaticDocument(route.request().url()) ? route.continue() : route.abort("internetdisconnected"));
   const track = page => page.on("pageerror", error => errors.push(error.stack || String(error)));
   context.pages().forEach(track); context.on("page", track);
   await context.addInitScript(() => {
-    window.__requestTargets = []; window.__copiedRequest = null; window.__denyClipboard = false;
-    window.open = target => { window.__requestTargets.push(String(target)); return { closed: false, opener: null, focus() {} }; };
+    window.__requestTargets = []; window.__openCalls = []; window.__copiedRequest = null; window.__denyClipboard = false; window.__popupMode = "normal";
+    window.__nativeShares = [];
+    window.open = (url, target, features) => {
+      window.__requestTargets.push(String(url)); window.__openCalls.push({ url: String(url), target, features });
+      if (window.__popupMode === "throw") throw new Error("Popup opening failed in this test");
+      if (window.__popupMode === "null") return null;
+      return { closed: false, opener: null, focus() {} };
+    };
+    Object.defineProperty(navigator, "share", { configurable: true, value: undefined });
     Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText: async text => {
       if (window.__denyClipboard) throw new DOMException("Clipboard is blocked for this test", "NotAllowedError"); window.__copiedRequest = String(text);
     } } });
@@ -93,10 +108,22 @@ function decodeTarget(value) {
 }
 async function main() {
   await prepare(); const page = await openPage(fileUrl);
-  await mathChecks(page); await validationChecks(page); await formChecks(page); await reminderChecks(page); await privacyChecks(page);
-  await monthEndChecks(); await staticHttpChecks();
+  await brandChecks(page); await mathChecks(page); await validationChecks(page); await formChecks(page);
+  await whatsappRecoveryChecks(page); await offlineShareCheck(page); await reminderChecks(page); await privacyChecks(page);
+  await monthEndChecks(); await staticHttpChecks(); await hostedShareChecks();
   await check("Todo el recorrido evita visitas externas y no produce errores JavaScript", async () => { assert.deepEqual(errors, []); assert.deepEqual(external, []); assert.deepEqual(extraResources, []); });
   console.log(`\n${checks} comprobaciones de solicitud correctas; ningún WhatsApp real enviado.`);
+}
+async function brandChecks(page) {
+  await check("La página se presenta como Préstamos, sin nombres anteriores ni marcas de IA", async () => {
+    assert.match(await page.title(), /pr[eé]stamos/i);
+    assert.match(await page.locator(".brand-name").textContent(), /pr[eé]stamos/i);
+    assert.match(await page.locator(".footer-brand").textContent(), /pr[eé]stamos/i);
+    const facing = await page.evaluate(() => [document.title, document.body.innerText,
+      document.querySelector('meta[name="description"]')?.content || "",
+      ...[...document.querySelectorAll("[aria-label]")].map(element => element.getAttribute("aria-label"))].join("\n"));
+    assert.doesNotMatch(facing, /nicol[aá]s|chatgpt|openai/i);
+  });
 }
 async function mathChecks(page) {
   await check("$200.000 en dos meses: interés total $70.000, total $270.000 y cuotas $135.000", async () => {
@@ -213,6 +240,65 @@ async function formChecks(page) {
     assert.doesNotMatch(await page.locator("#send-status").textContent(), /solicitud enviada|mensaje enviado/i);
   });
 }
+async function whatsappRecoveryChecks(page) {
+  await check("Consultas de cabecera y pie abren un mensaje genérico sin datos del formulario", async () => {
+    for (const section of ["header", "footer"]) {
+      const links = page.locator(`${section} a[href^="https://wa.me/"]`); assert.ok(await links.count() >= 1, section);
+      for (const link of await links.all()) {
+        const message = decodeTarget(await link.getAttribute("href"));
+        assert.match(message, /consulta|pregunt|informaci[oó]n/i);
+        for (const value of [fake.full_name, fake.cuil, fake.address_street, fake.locality, "20000000001", "5491100000001"]) assert.ok(!message.includes(value), value);
+        assert.equal(await link.evaluate(element => element.closest("form") === null), true);
+        assert.equal(await link.getAttribute("target"), "_blank"); assert.match(await link.getAttribute("rel"), /noopener/);
+      }
+    }
+  });
+  for (const mode of ["throw", "null"]) {
+    await check(`WhatsApp ${mode === "throw" ? "con apertura bloqueada" : "con retorno nulo"} conserva un enlace para reintentar manualmente`, async () => {
+      await fillValid(page); await page.evaluate(mode => { window.__popupMode = mode; }, mode);
+      const previous = await targetCount(page); await page.locator("#send-request").click(); assert.equal(await targetCount(page), previous + 1);
+      await page.locator("#whatsapp-actions").waitFor({ state: "visible" });
+      const latest = await page.evaluate(() => window.__requestTargets.at(-1)); assert.equal(await page.locator("#reopen-whatsapp").getAttribute("href"), latest);
+      const message = decodeTarget(latest); assert.ok(message.includes(fake.full_name)); assert.ok(message.includes("135.000"));
+      const call = await page.evaluate(() => window.__openCalls.at(-1)); assert.equal(call.target, "_blank"); assert.match(call.features, /noopener/); assert.match(call.features, /noreferrer/);
+      const status = await page.locator("#send-status").textContent(); assert.match(status, /WhatsApp/i); assert.match(status, /enviar|revis|abrir|toc[aá]/i);
+      assert.doesNotMatch(status, /solicitud enviada|mensaje enviado|enviad[oa] con [eé]xito/i);
+      await page.locator('[name="full_name"]').fill("Nombre cambiado tras preparar la solicitud");
+      assert.equal(await page.locator("#whatsapp-actions").isVisible(), false);
+      assert.equal(await page.locator("#reopen-whatsapp").getAttribute("href"), null, "An old link must not retain personal data after editing");
+      await page.locator('[name="full_name"]').fill(fake.full_name);
+    });
+  }
+  await page.evaluate(() => { window.__popupMode = "normal"; });
+  await check("Editar cualquier campo invalida el enlace de solicitud anterior", async () => {
+    const edits = { full_name: "Otro nombre de prueba", cuil: "27-00000000-6", address_street: "Otra calle de prueba",
+      address_number: "124", locality: "Otra localidad", client_whatsapp: "+54 9 11 0000 0002", principal: "210000", term_months: "3", first_due_date: "2026-11-22",
+      contact_consent: false, remind_me: false };
+    for (const [name, value] of Object.entries(edits)) {
+      await fillValid(page); await page.locator("#send-request").click(); await page.locator("#whatsapp-actions").waitFor({ state: "visible" });
+      const field = page.locator(`[name="${name}"]`), kind = await field.evaluate(element => element.type), original = kind === "checkbox" ? await field.isChecked() : await field.inputValue();
+      if (kind === "checkbox") await field.setChecked(value);
+      else if (kind === "select-one") await field.selectOption(value); else await field.fill(value);
+      assert.equal(await page.locator("#whatsapp-actions").isVisible(), false, name);
+      assert.equal(await page.locator("#reopen-whatsapp").getAttribute("href"), null, name);
+      if (kind === "checkbox") await field.setChecked(original);
+      else if (kind === "select-one") await field.selectOption(original); else await field.fill(original);
+      assert.equal(await page.locator("#whatsapp-actions").isVisible(), false, `${name}: restoring a field does not restore the old link`);
+    }
+    await storageIsEmpty(page);
+  });
+}
+async function offlineShareCheck(page) {
+  await check("Compartir un archivo local explica cómo publicar y evita ofrecer un enlace falso", async () => {
+    await page.evaluate(() => { window.__copiedRequest = null; }); const before = await targetCount(page);
+    assert.equal(await page.locator("#share-page").evaluate(element => element.form === null), true);
+    await page.locator("#share-page").click(); await page.locator("#share-status").waitFor({ state: "visible" });
+    const status = await page.locator("#share-status").textContent(); assert.match(status, /PRESTAMOS\.html/); assert.match(status, /publicad|publicar|enlace/i);
+    assert.doesNotMatch(status, /https?:\/\/|file:\/\//i);
+    assert.equal(await page.evaluate(() => window.__copiedRequest), null); assert.equal(await targetCount(page), before);
+    assert.equal(await page.locator("#share-url-fallback").isVisible(), false); await storageIsEmpty(page);
+  });
+}
 async function reminderChecks(page) {
   await check("Calendario estimado descarga sin datos personales ni consentimiento de contacto", async () => {
     for (const name of ["full_name", "cuil", "address_street", "address_number", "locality", "client_whatsapp"]) await page.locator(`[name="${name}"]`).fill("");
@@ -220,6 +306,7 @@ async function reminderChecks(page) {
     const downloading = page.waitForEvent("download"); await page.locator("#download-reminders").click();
     const saved = path.join(directory, "recordatorios.ics"); await (await downloading).saveAs(saved); const ics = await fs.readFile(saved, "utf8");
     assert.ok(ics.includes("BEGIN:VCALENDAR")); const events = [...ics.matchAll(/BEGIN:VEVENT([\s\S]*?)END:VEVENT/g)].map(match => match[1]);
+    assert.match(ics, /X-WR-CALNAME:.*Pr[eé]stamos/i); assert.doesNotMatch(ics, /nicol[aá]s|chatgpt|openai/i);
     assert.equal(events.length, 2);
     for (const [index, event] of events.entries()) {
       const day = index === 0 ? "20261121" : "20261221"; assert.match(event, new RegExp(`DTSTART:${day}T120000Z`));
@@ -267,6 +354,45 @@ async function staticHttpChecks() {
     await page.locator("#send-request").click(); assert.equal(await targetCount(page), 1); decodeTarget(await page.evaluate(() => window.__requestTargets[0]));
     await noOverflow(page); await storageIsEmpty(page);
     assert.doesNotMatch(await page.locator("#send-status").textContent(), /solicitud enviada|mensaje enviado/i);
+  });
+  await page.close();
+}
+async function hostedShareChecks() {
+  const contaminated = new URL(staticUrl); contaminated.searchParams.set("full_name", fake.full_name); contaminated.searchParams.set("cuil", fake.cuil); contaminated.hash = `whatsapp=${encodeURIComponent(fake.client_whatsapp)}`;
+  const page = await openPage(contaminated.href); await fillValid(page);
+  await check("Compartir la página publicada copia su URL limpia sin CUIL, teléfono ni otros datos", async () => {
+    assert.equal(await page.locator("#share-page").evaluate(element => element.form === null), true);
+    await page.locator("#share-page").click(); await page.waitForFunction(() => typeof window.__copiedRequest === "string");
+    assert.equal(await page.evaluate(() => window.__copiedRequest), staticUrl);
+    assert.equal(page.url(), contaminated.href, "Sharing must not navigate or submit the form");
+    const data = await page.evaluate(async () => ({ local: localStorage.length, session: sessionStorage.length, databases: (await indexedDB.databases()).length }));
+    assert.deepEqual(data, { local: 0, session: 0, databases: 0 });
+    assert.equal(await targetCount(page), 0); assert.ok((await page.locator("#share-status").textContent()).length > 0);
+  });
+  await check("La hoja nativa para compartir recibe solo la URL pública y cancelar no copia datos", async () => {
+    await page.evaluate(() => {
+      window.__copiedRequest = null;
+      Object.defineProperty(navigator, "share", { configurable: true, value: async data => { window.__nativeShares.push(data); } });
+    });
+    await page.locator("#share-page").click(); await page.waitForFunction(() => window.__nativeShares.length === 1);
+    const shared = await page.evaluate(() => window.__nativeShares[0]); assert.equal(shared.url, staticUrl); assert.match(shared.title, /pr[eé]stamos/i);
+    const serialized = JSON.stringify(shared);
+    for (const value of [fake.full_name, fake.cuil, fake.client_whatsapp, fake.address_street]) assert.ok(!serialized.includes(value), value);
+    assert.equal(await page.evaluate(() => window.__copiedRequest), null);
+    await page.evaluate(() => { Object.defineProperty(navigator, "share", { configurable: true, value: async () => { throw new DOMException("User cancelled", "AbortError"); } }); });
+    await page.locator("#share-page").click();
+    // Yield through the same event loop, without a timed sleep, so the rejected
+    // native-share promise and its catch handler finish before the assertions.
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)));
+    assert.equal(await page.evaluate(() => window.__copiedRequest), null);
+    assert.equal(await page.locator("#share-url-fallback").isVisible(), false);
+  });
+  await check("Si el portapapeles está bloqueado, compartir ofrece únicamente la URL pública para copiar", async () => {
+    await page.evaluate(() => { Object.defineProperty(navigator, "share", { configurable: true, value: undefined }); window.__denyClipboard = true; });
+    await page.locator("#share-page").click(); await page.locator("#share-url-fallback").waitFor({ state: "visible" });
+    assert.equal(await page.locator("#share-url-fallback").inputValue(), staticUrl);
+    assert.equal(await page.locator("#share-url-fallback").evaluate(element => element.readOnly), true);
+    assert.equal(await targetCount(page), 0);
   });
   await page.close();
 }

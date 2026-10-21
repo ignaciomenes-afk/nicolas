@@ -1,14 +1,24 @@
-SOLICITÁ TU PRÉSTAMO — NICOLÁS
+PRÉSTAMOS
 
-PARA ABRIR LA PÁGINA
-1. Descomprimí el ZIP si descargaste el paquete.
-2. Abrí SOLICITAR-PRESTAMO.html con un navegador actualizado, como Chrome o Edge.
-   Funciona sin instalar programas.
-3. Completá tus datos, el importe y la cantidad de meses. Revisá las cuotas.
-4. Tocá “Enviar solicitud por WhatsApp”. Se abrirá WhatsApp con el mensaje
-   preparado para Nicolás: +54 9 3544 617342.
-5. Revisá el mensaje y tocá ENVIAR dentro de WhatsApp para enviarlo.
+PARA USAR Y COMPARTIR LA PÁGINA
+Si recibiste un enlace web, abrilo en tu navegador. Usá “Compartir esta página”
+para pasarlo a tus clientes por WhatsApp o por otro medio.
+El enlace compartido abre la misma página; cada persona completa sus datos.
+La publicación y la permanencia de ese enlace dependen del alojamiento web.
+
+También podés conservar PRESTAMOS.html y abrirlo con un navegador actualizado,
+como Chrome o Edge. Es un único archivo: no necesita instalar programas
+y no tiene una fecha de vencimiento. Si lo recibiste dentro de Prestamos.zip,
+extraé PRESTAMOS.html antes de abrirlo.
+
+PARA SOLICITAR
+1. Completá tus datos, el importe y la cantidad de meses. Revisá las cuotas.
+2. Tocá “Enviar solicitud por WhatsApp”. Se abrirá el mensaje preparado para
+   el contacto de Préstamos: +54 9 3544 617342.
+3. Revisá el mensaje y tocá ENVIAR dentro de WhatsApp para enviarlo.
    Abrir el mensaje no completa la solicitud; debe enviarse desde WhatsApp.
+4. Si WhatsApp no se abre, usá el enlace de reintento o copiá la solicitud
+   y pegala en una conversación con ese contacto.
 
 CÓMO SE CALCULA
 El interés es del 35% TOTAL del capital, calculado una sola vez.
@@ -20,7 +30,7 @@ Cuando el total no se divide exactamente, la última cuota suma los centavos
 restantes para que todas las cuotas juntas coincidan con el total informado.
 
 FECHAS Y AVISOS
-Las fechas son propuestas hasta que Nicolás apruebe y acuerde el préstamo.
+Las fechas son propuestas hasta que se apruebe y acuerde el préstamo.
 El botón de calendario descarga un archivo .ics con los vencimientos estimados.
 Importalo en el calendario de tu celular y activá sus notificaciones para
 recibir los avisos. Los avisos dependen de la configuración de ese calendario.

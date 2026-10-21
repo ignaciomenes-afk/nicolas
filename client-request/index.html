@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#282344">
-  <meta name="description" content="Simulá tu préstamo con Nicolás. Conocé el importe de tus cuotas y prepará tu solicitud por WhatsApp.">
-  <title>Solicitá tu préstamo · Nicolás</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%236960df'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-family='Arial' font-size='43' font-weight='700' fill='white'%3EN%3C/text%3E%3C/svg%3E">
+  <meta name="description" content="Simulá tu préstamo. Conocé el importe de tus cuotas y prepará tu solicitud por WhatsApp.">
+  <title>Préstamos | Solicitá tu préstamo</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%236960df'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-family='Arial' font-size='43' font-weight='700' fill='white'%3EP%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="./styles.css">
   <script src="./loan-core.js" defer></script>
   <script src="./app.js" defer></script>
@@ -24,13 +24,14 @@
     <symbol id="icon-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></symbol>
     <symbol id="icon-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
     <symbol id="icon-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10h.01"/></symbol>
+    <symbol id="icon-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 10.5 6.8-4m-6.8 7 6.8 4"/></symbol>
     <symbol id="icon-document" viewBox="0 0 24 24"><path d="M14 3H5v18h14V8l-5-5Zm0 0v5h5M8 12h8m-8 4h6"/></symbol>
   </defs></svg>
 
   <header class="site-header">
     <div class="header-inner">
-      <a class="brand" href="#" aria-label="Nicolás, inicio"><span class="brand-mark">N<span></span></span><span class="brand-name">nicolás<span>PRÉSTAMOS</span></span></a>
-      <span class="header-badge"><span class="badge-dot"></span>Calculá tu cuota antes de solicitar</span>
+      <a class="brand" href="#" aria-label="Préstamos, inicio"><span class="brand-mark">P<span></span></span><span class="brand-name">préstamos<span>35% DE INTERÉS TOTAL</span></span></a>
+      <div class="header-actions"><span class="header-badge"><span class="badge-dot"></span>Calculá tu cuota antes de solicitar</span><a class="header-consult" href="https://wa.me/5493544617342?text=Hola%2C%20quisiera%20hacer%20una%20consulta%20sobre%20los%20pr%C3%A9stamos." target="_blank" rel="noopener noreferrer" aria-label="Hacer una consulta por WhatsApp"><svg class="icon"><use href="#icon-chat"/></svg>Consultar</a></div>
     </div>
   </header>
 
@@ -84,9 +85,10 @@
             <div class="field consent-field"><label class="checkbox-label" for="contact_consent"><input id="contact_consent" name="contact_consent" type="checkbox" required aria-describedby="error-contact_consent"><span>Acepto que me contacten por WhatsApp para responder esta solicitud y coordinar los pagos.</span></label><span class="field-error" id="error-contact_consent"></span></div>
             <p id="form-error" class="form-error" role="alert" hidden></p>
             <button id="send-request" class="btn btn-whatsapp btn-full" type="submit"><svg class="icon"><use href="#icon-chat"/></svg>Enviar solicitud por WhatsApp<svg class="icon action-arrow"><use href="#icon-arrow"/></svg></button>
-            <p class="send-explanation">Se abrirá WhatsApp con el mensaje preparado. Revisalo y tocá <strong>Enviar</strong> para completar la solicitud.</p>
+            <ol class="send-explanation send-steps" aria-label="Cómo completar el envío"><li><span>1</span><p>Abrí WhatsApp y <strong>revisá el mensaje</strong> con tus datos y la simulación.</p></li><li><span>2</span><p>Tocá <strong>Enviar en WhatsApp</strong> para completar tu solicitud.</p></li></ol>
             <button id="copy-request" class="btn btn-secondary btn-full copy-button" type="button"><svg class="icon"><use href="#icon-copy"/></svg>Copiar solicitud</button>
             <div id="send-status" class="status-card" role="status" aria-live="polite" hidden></div>
+            <div id="whatsapp-actions" class="whatsapp-actions" hidden><a id="reopen-whatsapp" class="btn btn-whatsapp btn-full" href="https://wa.me/5493544617342" target="_blank" rel="noopener noreferrer"><svg class="icon"><use href="#icon-chat"/></svg>Abrir mi solicitud en WhatsApp</a><a id="direct-whatsapp" class="btn btn-secondary btn-full" href="https://wa.me/5493544617342?text=Hola%2C%20quisiera%20hacer%20una%20consulta%20sobre%20los%20pr%C3%A9stamos." target="_blank" rel="noopener noreferrer">Hablar por WhatsApp<svg class="icon"><use href="#icon-arrow"/></svg></a></div>
           </section>
 
           <section class="reminder-card" aria-labelledby="reminder-title"><span class="reminder-icon"><svg class="icon"><use href="#icon-calendar"/></svg></span><div class="reminder-content"><h2 id="reminder-title">Que la fecha no se te pase</h2><label class="checkbox-label reminder-checkbox" for="remind_me"><input id="remind_me" name="remind_me" type="checkbox" checked><span>Quiero guardar las fechas de pago en mi calendario.</span></label><button id="download-reminders" class="calendar-button" type="button">Agregar fechas al calendario <svg class="icon"><use href="#icon-arrow"/></svg></button><p class="note">Al importar el calendario, tu celular podrá avisarte antes del vencimiento. Son fechas estimadas hasta confirmar el préstamo.</p></div></section>
@@ -97,7 +99,7 @@
     <section class="faq" aria-labelledby="faq-title"><div class="faq-intro"><span class="eyebrow">TODO UN POCO MÁS CLARO</span><h2 id="faq-title">Antes de solicitar</h2><p>Las respuestas que te ayudan a elegir.</p></div><div class="faq-list"><details><summary>¿Cómo se calcula el interés?<svg class="icon"><use href="#icon-chevron"/></svg></summary><p>El interés es del <strong>35% total sobre el importe solicitado</strong>. Por ejemplo, si pedís $ 200.000, el interés total es $ 70.000 y el total a devolver es $ 270.000. Si elegís 2 meses, son 2 cuotas de $ 135.000. Cambiar los meses distribuye el mismo total entre más o menos cuotas.</p></details><details><summary>¿La solicitud se envía desde esta página?<svg class="icon"><use href="#icon-chevron"/></svg></summary><p>Al tocar “Enviar solicitud por WhatsApp”, se abre un mensaje con tus datos y la simulación. Revisalo y tocá <strong>Enviar en WhatsApp</strong>. Preparar el mensaje no envía la solicitud ni confirma el préstamo.</p></details><details><summary>¿Cómo recibo los recordatorios de pago?<svg class="icon"><use href="#icon-chevron"/></svg></summary><p>Podés descargar las fechas e importarlas en el calendario de tu celular. Tu calendario podrá mostrarte avisos según su configuración. Esta página no envía recordatorios automáticos por WhatsApp. Las fechas son estimadas hasta confirmar el préstamo.</p></details></div></section>
   </main>
 
-  <footer class="site-footer"><div class="footer-inner"><div><span class="footer-brand">nicolás<span>.</span></span><p>Los números claros, desde el principio.</p></div><div class="footer-contact"><span>Atención por WhatsApp</span><a href="https://wa.me/5493544617342" target="_blank" rel="noopener noreferrer">+54 9 3544 617342<svg class="icon"><use href="#icon-arrow"/></svg></a></div></div></footer>
+  <footer class="site-footer"><div class="footer-inner"><div><span class="footer-brand">Préstamos<span>.</span></span><p>Los números claros, desde el principio.</p></div><div class="footer-actions"><div class="footer-contact"><span>¿Querés preguntar antes de solicitar?</span><a class="consult-button" href="https://wa.me/5493544617342?text=Hola%2C%20quisiera%20hacer%20una%20consulta%20sobre%20los%20pr%C3%A9stamos." target="_blank" rel="noopener noreferrer"><svg class="icon"><use href="#icon-chat"/></svg>Hacer una consulta<svg class="icon"><use href="#icon-arrow"/></svg></a></div><button id="share-page" class="btn btn-secondary share-button" type="button"><svg class="icon"><use href="#icon-share"/></svg>Compartir esta página</button></div><p id="share-status" class="share-status" role="status" aria-live="polite" hidden></p></div></footer>
   <noscript><div class="noscript-message">Activá JavaScript para calcular tus cuotas y preparar la solicitud por WhatsApp.</div></noscript>
 </body>
 </html>
