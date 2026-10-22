@@ -106,6 +106,15 @@ function decodeTarget(value) {
   const target = new URL(value); assert.equal(target.protocol, "https:"); assert.equal(target.hostname, "wa.me");
   assert.equal(target.pathname, `/${owner}`); const text = target.searchParams.get("text"); assert.ok(text); return text;
 }
+function assertCompactRequest(text) {
+  assert.match(text, /^Solicitud de pr[eé]stamo\b/i);
+  assert.equal(text.trim().split(/\r?\n/).filter(line => line.trim()).length, 7, "Request contains only its title and six personal-data/amount lines");
+  for (const value of [fake.full_name, fake.address_street, fake.address_number, fake.locality, "200.000"]) assert.ok(text.includes(value), value);
+  assert.ok(text.replace(/\D/g, "").includes("20000000001")); assert.ok(text.replace(/\D/g, "").includes("5491100000001"));
+  assert.match(text, /Monto solicitado:/i);
+  assert.doesNotMatch(text, /simulaci[oó]n|inter[eé]s|tasa|total\s+a\s+devolver|cuotas?|plazo|fecha|consent|recordatori|\d\s*%/i);
+  assert.doesNotMatch(text, /\b\d{4}-\d{2}-\d{2}\b|\b\d{1,2}\/\d{1,2}\/\d{4}\b/);
+}
 async function main() {
   await prepare(); const page = await openPage(fileUrl);
   await brandChecks(page); await mathChecks(page); await validationChecks(page); await formChecks(page);
@@ -131,16 +140,25 @@ async function mathChecks(page) {
     assert.equal(value.interest_percent, 35); assert.equal(value.interest_cents, 7000000); assert.equal(value.total_cents, 27000000);
     assert.deepEqual(value.installments.map(item => item.amount_cents), [13500000, 13500000]);
   });
-  await check("Cambiar de uno a 24 meses distribuye el mismo 35%, sin interés mensual adicional", async () => {
-    for (const months of [1, 2, 3, 6, 12, 24]) {
+  await check("Hasta tres meses aplica 35% total; desde cuatro aplica 40% total una sola vez", async () => {
+    for (const months of [1, 2, 3, 4, 5, 24]) {
       const value = await core(page, "calculate", { principal_cents: 20000000, term_months: months, first_due_date: "2026-11-21" });
-      assert.equal(value.interest_cents, 7000000); assert.equal(value.total_cents, 27000000); assert.equal(value.installments.length, months);
-      assert.equal(value.installments.reduce((sum, item) => sum + item.amount_cents, 0), 27000000);
+      const rate = months <= 3 ? 35 : 40, interest = months <= 3 ? 7000000 : 8000000, total = 20000000 + interest;
+      assert.equal(value.interest_percent, rate); assert.equal(value.interest_cents, interest); assert.equal(value.total_cents, total); assert.equal(value.installments.length, months);
+      assert.equal(value.installments.reduce((sum, item) => sum + item.amount_cents, 0), total);
     }
+    const three = await core(page, "calculate", { principal_cents: 20000000, term_months: 3, first_due_date: "2026-11-21" });
+    assert.deepEqual(three.installments.map(item => item.amount_cents), [9000000, 9000000, 9000000]);
+    const four = await core(page, "calculate", { principal_cents: 20000000, term_months: 4, first_due_date: "2026-11-21" });
+    assert.deepEqual(four.installments.map(item => item.amount_cents), [7000000, 7000000, 7000000, 7000000]);
+    const five = await core(page, "calculate", { principal_cents: 50000000, term_months: 5, first_due_date: "2026-11-21" });
+    assert.equal(five.interest_cents, 20000000); assert.equal(five.total_cents, 70000000);
+    assert.deepEqual(five.installments.map(item => item.amount_cents), [14000000, 14000000, 14000000, 14000000, 14000000]);
   });
   await check("Centavos y última cuota conservan exactamente la suma total", async () => {
-    for (const [principal, interest] of [[1, 0], [2, 1], [3, 1], [10, 4], [50, 18], [101, 35]]) {
-      for (const months of [1, 2, 3]) {
+    for (const [principal, shortInterest, longInterest] of [[1, 0, 0], [2, 1, 1], [3, 1, 1], [10, 4, 4], [50, 18, 20], [101, 35, 40]]) {
+      for (const months of [1, 2, 3, 4, 5, 24]) {
+        const interest = months <= 3 ? shortInterest : longInterest;
         const value = await core(page, "calculate", { principal_cents: principal, term_months: months, first_due_date: "2026-11-21" });
         assert.equal(value.interest_cents, interest); assert.equal(value.total_cents, principal + interest);
         assert.equal(value.installments.reduce((sum, item) => sum + item.amount_cents, 0), principal + interest);
@@ -191,6 +209,16 @@ async function formChecks(page) {
     assert.ok(text.includes("200.000")); assert.ok(text.includes("70.000")); assert.ok(text.includes("270.000"));
     assert.equal(await page.locator("#installments-body tr").count(), 2);
     for (const row of await page.locator("#installments-body tr").all()) assert.ok((await row.textContent()).includes("135.000"));
+    await page.locator('[name="term_months"]').selectOption("3");
+    await page.waitForFunction(() => document.getElementById("installments-body").children.length === 3);
+    assert.match(await page.locator("#calculator-result").textContent(), /35\s?%/);
+    assert.ok((await page.locator("#calculator-result").textContent()).includes("270.000"));
+    await page.locator('[name="term_months"]').selectOption("4");
+    await page.waitForFunction(() => document.getElementById("installments-body").children.length === 4);
+    assert.match(await page.locator("#calculator-result").textContent(), /40\s?%/);
+    assert.ok((await page.locator("#calculator-result").textContent()).includes("280.000"));
+    for (const row of await page.locator("#installments-body tr").all()) assert.ok((await row.textContent()).includes("70.000"));
+    await page.locator('[name="term_months"]').selectOption("2");
   });
   await check("CUIL, domicilio, teléfono, capital, plazo, fecha y consentimiento inválidos impiden abrir WhatsApp", async () => {
     const firstDate = await page.locator('[name="first_due_date"]').inputValue(), before = await targetCount(page);
@@ -215,18 +243,14 @@ async function formChecks(page) {
     assert.ok((await page.evaluate(() => window.__copiedRequest))?.includes(payload));
     await page.locator('[name="full_name"]').fill(fake.full_name);
   });
-  await check("WhatsApp se prepara para el número autorizado con datos completos y el interés total del 35%", async () => {
+  await check("WhatsApp prepara únicamente datos personales y monto solicitado para el número autorizado", async () => {
     const current = page.url(), before = await targetCount(page);
     await page.locator("#copy-request").click(); await page.waitForFunction(() => window.__copiedRequest);
     const copied = await page.evaluate(() => window.__copiedRequest);
     await page.locator("#send-request").click(); assert.equal(await targetCount(page), before + 1);
     const text = decodeTarget(await page.evaluate(() => window.__requestTargets.at(-1)));
     assert.equal(text, copied, "Copied request and WhatsApp request must agree exactly");
-    for (const value of [fake.full_name, fake.address_street, fake.address_number, fake.locality]) assert.ok(text.includes(value), value);
-    assert.ok(text.replace(/\D/g, "").includes("20000000001")); assert.ok(text.replace(/\D/g, "").includes("5491100000001"));
-    for (const amount of ["200.000", "70.000", "270.000", "135.000"]) assert.ok(text.includes(amount), amount);
-    assert.match(text, /35\s?%/); assert.match(text, /total/i); assert.doesNotMatch(text, /35\s?%\s*(mensual|por mes)/i);
-    assert.ok(text.includes("2026")); assert.equal(page.url(), current);
+    assertCompactRequest(text); assert.equal(page.url(), current);
     const status = await page.locator("#send-status").textContent(); assert.match(status, /WhatsApp/i); assert.match(status, /revis|toc[aá]|enviar/i);
     assert.doesNotMatch(status, /solicitud enviada|mensaje enviado|enviad[oa] con [eé]xito/i);
   });
@@ -234,6 +258,7 @@ async function formChecks(page) {
     await page.evaluate(() => { window.__denyClipboard = true; });
     await page.locator("#copy-request").click(); await page.locator("#copy-fallback-text").waitFor({ state: "visible" });
     const expected = decodeTarget(await page.evaluate(() => window.__requestTargets.at(-1)));
+    assertCompactRequest(expected);
     assert.equal(await page.locator("#copy-fallback-text").inputValue(), expected);
     assert.equal(await page.locator("#copy-fallback-text").getAttribute("readonly"), "");
     await page.evaluate(() => { window.__denyClipboard = false; });
@@ -259,7 +284,7 @@ async function whatsappRecoveryChecks(page) {
       const previous = await targetCount(page); await page.locator("#send-request").click(); assert.equal(await targetCount(page), previous + 1);
       await page.locator("#whatsapp-actions").waitFor({ state: "visible" });
       const latest = await page.evaluate(() => window.__requestTargets.at(-1)); assert.equal(await page.locator("#reopen-whatsapp").getAttribute("href"), latest);
-      const message = decodeTarget(latest); assert.ok(message.includes(fake.full_name)); assert.ok(message.includes("135.000"));
+      const message = decodeTarget(latest); assertCompactRequest(message);
       const call = await page.evaluate(() => window.__openCalls.at(-1)); assert.equal(call.target, "_blank"); assert.match(call.features, /noopener/); assert.match(call.features, /noreferrer/);
       const status = await page.locator("#send-status").textContent(); assert.match(status, /WhatsApp/i); assert.match(status, /enviar|revis|abrir|toc[aá]/i);
       assert.doesNotMatch(status, /solicitud enviada|mensaje enviado|enviad[oa] con [eé]xito/i);
@@ -351,7 +376,7 @@ async function staticHttpChecks() {
   const page = await openPage(staticUrl);
   await check("La misma página funciona por HTTP estático en móvil de 390 píxeles", async () => {
     await page.setViewportSize({ width: 390, height: 844 }); await fillValid(page); await noOverflow(page);
-    await page.locator("#send-request").click(); assert.equal(await targetCount(page), 1); decodeTarget(await page.evaluate(() => window.__requestTargets[0]));
+    await page.locator("#send-request").click(); assert.equal(await targetCount(page), 1); assertCompactRequest(decodeTarget(await page.evaluate(() => window.__requestTargets[0])));
     await noOverflow(page); await storageIsEmpty(page);
     assert.doesNotMatch(await page.locator("#send-status").textContent(), /solicitud enviada|mensaje enviado/i);
   });

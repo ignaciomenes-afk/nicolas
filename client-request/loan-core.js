@@ -8,6 +8,8 @@
   "use strict";
 
   const INTEREST_PERCENT = 35;
+  const LONG_TERM_INTEREST_PERCENT = 40;
+  const LONG_TERM_START_MONTHS = 4;
   const MAX_PRINCIPAL_CENTS = 100000000000;
   const MAX_TERM_MONTHS = 24;
   const CUIL_PREFIXES = new Set(["20", "23", "24", "27"]);
@@ -43,16 +45,17 @@
     return `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(resultDay).padStart(2, "0")}`;
   }
 
-  /** One total charge of 35%; the term only distributes that fixed total. */
+  /** One total charge on the principal: 35% for 1–3 months, 40% from 4 months. */
   function calculate(input) {
     if (!input || typeof input !== "object" || Array.isArray(input)) fail("Completá los datos del préstamo.");
     const principal = integer(input.principal_cents, 1, MAX_PRINCIPAL_CENTS, "El capital en centavos");
     const months = integer(input.term_months, 1, MAX_TERM_MONTHS, "El plazo en meses");
+    const interestPercent = months >= LONG_TERM_START_MONTHS ? LONG_TERM_INTEREST_PERCENT : INTEREST_PERCENT;
     const firstDate = dateParts(input.first_due_date);
     const anchor = input.due_anchor_day === undefined ? firstDate.day : integer(input.due_anchor_day, 1, 31, "El día de vencimiento");
     if (addMonths(input.first_due_date, 0, anchor) !== input.first_due_date) fail("El día de vencimiento no coincide con la primera fecha elegida.");
     // Round half up to one cent before distributing the total; no monthly compounding.
-    const interest = Number((BigInt(principal) * BigInt(INTEREST_PERCENT) + 50n) / 100n);
+    const interest = Number((BigInt(principal) * BigInt(interestPercent) + 50n) / 100n);
     const total = principal + interest;
     const regular = Math.floor(total / months), last = total - regular * (months - 1);
     const installments = Array.from({ length: months }, (_, index) => ({
@@ -68,7 +71,7 @@
       installments,
       regular_installment_cents: regular,
       last_installment_cents: last,
-      interest_percent: INTEREST_PERCENT,
+      interest_percent: interestPercent,
     };
   }
 
@@ -118,5 +121,5 @@
     return { valid: true, international, message: "" };
   }
 
-  return Object.freeze({ calculate, addMonths, parseMoney, validateCuil, normalizePhone, parseArgentinaPhone: normalizePhone, INTEREST_PERCENT, MAX_PRINCIPAL_CENTS, MAX_TERM_MONTHS });
+  return Object.freeze({ calculate, addMonths, parseMoney, validateCuil, normalizePhone, parseArgentinaPhone: normalizePhone, INTEREST_PERCENT, LONG_TERM_INTEREST_PERCENT, LONG_TERM_START_MONTHS, MAX_PRINCIPAL_CENTS, MAX_TERM_MONTHS });
 });

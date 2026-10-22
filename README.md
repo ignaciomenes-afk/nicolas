@@ -90,13 +90,13 @@ Los archivos descargables están en `entrega/`. La rama publicada es `codex/web-
 
 ## Página para clientes: Préstamos
 
-**Préstamos** es la página pública para simular y solicitar un préstamo por WhatsApp. Una vez publicada, se comparte su **enlace web** para que los clientes la abran directamente en el navegador. El botón **Compartir esta página** permite distribuir esa dirección desde la página publicada; si el navegador no ofrece un menú para compartir, copia el enlace o permite copiarlo manualmente.
+**Préstamos** está disponible en **[https://ignaciomenes-afk.github.io/nicolas/](https://ignaciomenes-afk.github.io/nicolas/)** para simular y solicitar un préstamo por WhatsApp. Ese es el enlace para compartir con los clientes y se conserva al actualizar la página. El botón **Compartir esta página** permite distribuirlo; si el navegador no ofrece un menú para compartir, copia el enlace o permite copiarlo manualmente.
 
 La copia local [PRESTAMOS.html](entrega/PRESTAMOS.html) es un único archivo para conservar y abrir sin instalaciones. El archivo no tiene fecha de vencimiento; la disponibilidad de un enlace web depende del alojamiento que lo publique. [Prestamos.zip](entrega/Prestamos.zip) reúne ese HTML y la guía de uso. Los nombres anteriores `SOLICITAR-PRESTAMO.html` y `Nicolas-solicitud-prestamo.zip` se mantienen como copias actualizadas para conservar los enlaces existentes.
 
-El cliente ingresa sus datos, el capital solicitado, la cantidad de cuotas y una fecha propuesta para el primer pago. La simulación aplica **35% de interés total, una sola vez sobre el capital**, sin multiplicarlo por la cantidad de meses. Por ejemplo, $200.000 generan $70.000 de interés y $270.000 de total: en 2 cuotas, son $135.000 por cuota. Esta condición corresponde a la página de solicitud; la aplicación de administración conserva sus planes y tasas mensuales.
+El cliente ingresa sus datos, el capital solicitado, la cantidad de cuotas y una fecha propuesta para el primer pago. La simulación aplica **35% de interés total para plazos de 1 a 3 meses** y **40% de interés total para plazos de 4 a 24 meses**. El porcentaje se calcula una sola vez sobre el capital, sin multiplicarlo por la cantidad de meses. Por ejemplo, $500.000 en 5 meses generan $200.000 de interés y $700.000 de total: 5 cuotas de $140.000. Los costos, condiciones y cuotas se muestran en el formulario antes de solicitar. Estas condiciones corresponden a la página de solicitud; la aplicación de administración conserva sus planes y tasas mensuales.
 
-El botón de WhatsApp prepara el mensaje dirigido al contacto **5493544617342**. El cliente debe revisar el texto y **enviarlo manualmente en WhatsApp**. Si WhatsApp no se abre, puede usar el enlace de reintento o **Copiar solicitud** y pegar el mensaje en la conversación con ese contacto. La consulta directa también está disponible desde el encabezado y el pie de página.
+El botón de WhatsApp prepara un mensaje con **solamente los datos del cliente y el importe solicitado**, dirigido al contacto **5493544617342**. El cliente ve el texto, lo revisa y debe **enviarlo manualmente en WhatsApp**. Si WhatsApp no se abre, puede usar el enlace de reintento o **Copiar solicitud** y pegar el mismo mensaje en la conversación con ese contacto. La consulta directa también está disponible desde el encabezado y el pie de página.
 
 La simulación, la solicitud y las fechas propuestas quedan pendientes de aprobación; completar el formulario no otorga el préstamo ni confirma sus vencimientos. Se puede descargar un calendario de las fechas propuestas e importarlo en una aplicación de calendario. Los avisos dependen de esa aplicación, su configuración y sus permisos; descargar el archivo no activa alarmas por sí solo.
 
@@ -113,13 +113,14 @@ CHROMIUM_PATH=/ruta/a/chrome node tests/client_request_smoke.cjs entrega/Prestam
 
 El ZIP contiene únicamente `PRESTAMOS.html` y `LEEME-SOLICITUD.txt`. El generador usa herramientas incluidas en Node, incorpora estilos y scripts, valida su sintaxis y prepara el archivo vacío `docs/.nojekyll` para servir el sitio estático.
 
-### Publicar Préstamos y obtener el enlace para compartir
+### Actualizar la página conservando el mismo enlace
 
-El generador prepara `docs/index.html` y `docs/.nojekyll` para publicar únicamente la página cliente desde `/docs`. Estos archivos no confirman por sí solos que el sitio esté publicado. Después de subirlos a la rama elegida:
+El sitio ya está publicado con GitHub Pages mediante el workflow oficial `.github/workflows/publish-prestamos.yml`, desde la rama **main**. El workflow publica únicamente la página cliente de `docs/`. El enlace público continúa siendo **https://ignaciomenes-afk.github.io/nicolas/**.
 
-1. Abrí el repositorio en GitHub y entrá en **Settings → Pages**.
-2. En **Build and deployment**, elegí **Source: Deploy from a branch**.
-3. Seleccioná la rama que contiene la página actualizada y la carpeta **/docs**.
-4. Pulsá **Save** y esperá a que GitHub indique que el despliegue terminó.
-5. Abrí la dirección que muestre GitHub Pages y verificá la página y su botón de WhatsApp.
-6. Compartí esa dirección con tus clientes mediante **Compartir esta página** o desde el navegador.
+1. Actualizá los fuentes de `client-request/` y ejecutá el generador anterior.
+2. Subí `docs/index.html` y `docs/.nojekyll` a **main**, preservando `.github/workflows/publish-prestamos.yml`.
+3. En **Actions**, esperá a que termine correctamente el workflow de publicación y su despliegue en GitHub Pages.
+4. Abrí **https://ignaciomenes-afk.github.io/nicolas/** y verificá los cambios y el botón de WhatsApp.
+5. Seguí compartiendo ese mismo enlace mediante **Compartir esta página** o desde el navegador.
+
+La configuración actual de **Settings → Pages → Build and deployment → Source** utiliza **GitHub Actions**. Solo es necesario revisar esa opción si se cambia o se restaura la configuración del repositorio.

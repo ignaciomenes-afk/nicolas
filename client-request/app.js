@@ -146,20 +146,11 @@
     return { ...values, cuil: cuil.normalized, client_whatsapp: phone.international, quote, remind_me: field("remind_me").checked };
   }
   function messageFor(data) {
-    const q = data.quote;
-    return ["SOLICITUD · PRÉSTAMOS", "", "DATOS DEL CLIENTE",
+    return ["Solicitud de préstamo", "",
       `Nombre y apellido: ${data.full_name}`, `CUIL: ${data.cuil}`,
       `Domicilio: ${data.address_street} ${data.address_number}`, `Localidad / Ciudad: ${data.locality}`,
-      `Mi WhatsApp: +${data.client_whatsapp}`, "", "SIMULACIÓN EN PESOS ARGENTINOS",
-      `Capital solicitado: ${money(q.principal_cents)}`, `Interés: ${q.interest_percent}% TOTAL sobre el capital, aplicado una sola vez (${money(q.interest_cents)}).`,
-      `Total a devolver: ${money(q.total_cents)}`, `Plazo: ${q.term_months} ${q.term_months === 1 ? "mes" : "meses"}`, "", "CUOTAS Y FECHAS ESTIMADAS",
-      ...q.installments.map(item => `${item.number}/${q.term_months} · ${displayDate(item.due_date)} · ${money(item.amount_cents)}`), "",
-      `Acepto contacto por WhatsApp para esta solicitud y la coordinación de pagos: SÍ.`,
-      `Contacto para coordinar pagos y recordatorios: +${data.client_whatsapp}`,
-      `Deseo guardar recordatorios en mi calendario: ${data.remind_me ? "SÍ" : "NO"}.`,
-      "Los avisos del calendario requieren importar el archivo y activar sus notificaciones; no son avisos automáticos por WhatsApp.",
-      "", `Fecha de solicitud: ${displayDate(todayArgentina())}`,
-      "Solicitud sujeta a evaluación y aprobación. Importes y fechas estimados hasta confirmar el préstamo."].join("\n");
+      `WhatsApp: +${data.client_whatsapp}`, "",
+      `Monto solicitado: ${money(data.quote.principal_cents)}`].join("\n");
   }
   function prepareWhatsApp(data) {
     const url = `https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(messageFor(data))}`;

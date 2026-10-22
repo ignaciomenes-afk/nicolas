@@ -1,10 +1,10 @@
 PRÉSTAMOS
 
 PARA USAR Y COMPARTIR LA PÁGINA
-Si recibiste un enlace web, abrilo en tu navegador. Usá “Compartir esta página”
-para pasarlo a tus clientes por WhatsApp o por otro medio.
-El enlace compartido abre la misma página; cada persona completa sus datos.
-La publicación y la permanencia de ese enlace dependen del alojamiento web.
+Abrí https://ignaciomenes-afk.github.io/nicolas/ en tu navegador.
+Usá “Compartir esta página” para pasarlo por WhatsApp o por otro medio.
+Este enlace se conserva al actualizar la página. Cada persona completa sus datos.
+La disponibilidad de la página depende de su alojamiento en GitHub Pages.
 
 También podés conservar PRESTAMOS.html y abrirlo con un navegador actualizado,
 como Chrome o Edge. Es un único archivo: no necesita instalar programas
@@ -13,19 +13,22 @@ extraé PRESTAMOS.html antes de abrirlo.
 
 PARA SOLICITAR
 1. Completá tus datos, el importe y la cantidad de meses. Revisá las cuotas.
-2. Tocá “Enviar solicitud por WhatsApp”. Se abrirá el mensaje preparado para
-   el contacto de Préstamos: +54 9 3544 617342.
+2. Tocá “Enviar solicitud por WhatsApp”. Se abrirá el mensaje con solamente
+   tus datos de contacto, CUIL, domicilio e importe solicitado, dirigido al
+   contacto de Préstamos: +54 9 3544 617342.
 3. Revisá el mensaje y tocá ENVIAR dentro de WhatsApp para enviarlo.
    Abrir el mensaje no completa la solicitud; debe enviarse desde WhatsApp.
 4. Si WhatsApp no se abre, usá el enlace de reintento o copiá la solicitud
    y pegala en una conversación con ese contacto.
 
 CÓMO SE CALCULA
-El interés es del 35% TOTAL del capital, calculado una sola vez.
-Ejemplo: pedís $200.000 en 2 meses.
-Interés total: $70.000. Total a devolver: $270.000.
-Dos cuotas de $135.000 cada una.
-Cambiar el plazo reparte el mismo total entre más o menos cuotas.
+Para plazos de 1 a 3 meses, el interés es del 35% TOTAL del capital.
+Para plazos de 4 a 24 meses, el interés es del 40% TOTAL del capital.
+El porcentaje se calcula una sola vez; no se multiplica por la cantidad de meses.
+Ejemplo: pedís $500.000 en 5 meses.
+Interés total: $200.000. Total a devolver: $700.000.
+Cinco cuotas de $140.000 cada una.
+El formulario muestra el interés, el total y las cuotas antes de solicitar.
 Cuando el total no se divide exactamente, la última cuota suma los centavos
 restantes para que todas las cuotas juntas coincidan con el total informado.
 
