@@ -6,8 +6,8 @@ Los registros existentes de Nicolás siguen en su bóveda cifrada local. La band
 
 ## Preparar el proyecto
 
-1. Creá o elegí un proyecto Supabase y conservá el control de su administración. Revisá el plan, la región y las condiciones de tratamiento de datos antes de usar información real.
-2. En el editor SQL del proyecto, ejecutá `supabase/migrations/202610230001_private_requests.sql` completo como administrador. Usa `auth.users`, `auth.uid()`, los roles estándar `anon`/`authenticated` y PostgreSQL; no requiere una extensión adicional.
+1. Entrá a tu cuenta en [Supabase](https://supabase.com/dashboard), creá un proyecto o abrí el que ya tenés y esperá a que esté disponible. Conservá el acceso de administración. Revisá el plan, la región y las condiciones de tratamiento de datos antes de usar información real.
+2. Abrí [el archivo de instalación SQL](../supabase/migrations/202610230001_private_requests.sql), copiá todo su contenido y pegalo en una consulta nueva del **SQL Editor** de ese proyecto. Ejecutalo completo con **Run**. Este paso instala la bandeja; copiar la URL y la clave pública no lo reemplaza. La migración usa los componentes estándar de Supabase y no requiere una extensión adicional.
 3. En **Authentication → Users**, creá la cuenta de correo y contraseña que usará el prestamista. No reutilices la contraseña de la bóveda local. Copiá su UUID de usuario; no su contraseña ni una sesión.
 4. Autorizá ese UUID mediante SQL administrativo:
 
@@ -19,7 +19,7 @@ Los registros existentes de Nicolás siguen en su bóveda cifrada local. La band
 
 5. Desactivá el registro público de usuarios si no lo necesitás. Crear otra cuenta no otorga acceso a la bandeja: cada operación privada comprueba el UUID contra `owner_users` en el servidor.
 6. En la configuración de la Data API, mantené **`nicolas_private` fuera de los esquemas expuestos**. Las cuatro funciones RPC están en `public`; las tablas privadas tienen RLS habilitado y no conceden acceso directo a `anon` ni `authenticated`.
-7. Tomá la URL HTTPS del proyecto y su **publishable key** (`sb_publishable_…`), o la antigua clave JWT con rol `anon`. Son configuración pública. Nunca uses una clave `sb_secret_…`, `service_role`, contraseña de base de datos o token de administración en el HTML, JSON, repositorio o GitHub Pages.
+7. En la configuración de API del **mismo proyecto**, copiá la **Project URL** HTTPS y su **publishable key** (`sb_publishable_…`), o la antigua clave JWT con rol `anon`. Cargá esos dos valores públicos en las variables del entorno `SUPABASE_URL` y `SUPABASE_PUBLISHABLE_KEY`. Una variable presente pero incompleta no conecta la bandeja. Nunca uses una clave `sb_secret_…`, `service_role`, contraseña de base de datos o token de administración en el HTML, JSON, repositorio o GitHub Pages.
 
 También se puede aplicar la migración con la CLI oficial Supabase, ya autenticada en la cuenta correcta:
 
@@ -32,32 +32,40 @@ La CLI puede necesitar `SUPABASE_ACCESS_TOKEN` y `SUPABASE_DB_PASSWORD` para las
 
 ## Activar y generar los HTML
 
-Editá únicamente los valores públicos de `integration/requests-config.json`:
+Con `SUPABASE_URL` y `SUPABASE_PUBLISHABLE_KEY` cargadas, comprobá primero la conexión sin activar ni modificar archivos:
 
-```json
-{
-  "enabled": true,
-  "supabase_url": "https://REFERENCIA_DEL_PROYECTO.supabase.co",
-  "publishable_key": "REEMPLAZAR_POR_LA_PUBLISHABLE_KEY_PUBLICA"
-}
+```bash
+node scripts/configure-requests.cjs --check
 ```
 
-Después ejecutá los generadores del proyecto:
+La comprobación valida el formato de ambos valores y consulta la función remota con un formulario vacío (`{"p_payload":{}}`). La respuesta esperada es **HTTP 400, código `PT400`, `Invalid request fields.`**: confirma que la función instalada rechaza datos incompletos antes de escribir. No crea una solicitud, no consulta datos personales ni modifica el proyecto. `--check` tampoco cambia `integration/requests-config.json`.
+
+Si la comprobación pasa, activá la configuración pública:
+
+```bash
+node scripts/configure-requests.cjs
+```
+
+El comando sin opciones hace **la misma comprobación remota antes de guardar**. Solo si pasa escribe `integration/requests-config.json` con `enabled: true`. Ante un error conserva la configuración anterior; no crea el proyecto, instala SQL ni autoriza usuarios. No actives el JSON manualmente para saltar una comprobación fallida.
+
+Después generá ambos HTML:
 
 ```bash
 node scripts/build-client-request.cjs
 node scripts/build-standalone.cjs
 ```
 
-Como alternativa a editar el JSON, cargá las variables públicas `SUPABASE_URL` y `SUPABASE_PUBLISHABLE_KEY` en el entorno y ejecutá:
+| Resultado de la comprobación | Qué hacer |
+| --- | --- |
+| Faltan variables, URL inválida o clave no reconocida | Volvé a copiar la URL completa y la clave pública del proyecto. No uses textos de ejemplo ni valores abreviados. |
+| HTTP 401/403 o clave rechazada | Verificá que URL y clave pertenezcan al mismo proyecto y que la clave siga vigente. Una clave de otro proyecto no sirve. |
+| HTTP 404 o `PGRST202` | Comprobá que ejecutaste la migración completa en ese proyecto y que la Data API expone `public`. |
+| Fallo de red, espera agotada o proyecto no disponible | Revisá que el proyecto esté activo y que la red permita su origen HTTPS; repetí después de corregirlo. |
+| Respuesta distinta del rechazo `400 / PT400` esperado | Revisá la instalación y su versión; el ayudante conserva la configuración anterior. |
 
-```bash
-node scripts/configure-requests.cjs
-```
+Una comprobación anónima correcta **no confirma que el dueño esté autorizado**. Para verificarlo, abrí la nueva versión de Nicolás, desbloqueá la bóveda e iniciá sesión en **Solicitudes** con el usuario creado en Supabase. Si no tiene permiso, revisá el UUID registrado en `nicolas_private.owner_users`; la clave pública no permite agregarlo. La contraseña de esa cuenta se ingresa en Nicolás, no se incorpora al HTML.
 
-Ese ayudante valida y guarda la configuración pública; no crea ni configura el proyecto Supabase. Después hay que volver a generar ambos HTML. Estas variables son opcionales si se usa el JSON; no incluyas en ellas una contraseña, token administrativo o clave privada.
-
-Cada generador incorpora esa configuración antes de `shared/requests-cloud.js`. La política CSP debe permitir conexiones **solo al origen HTTPS exacto del proyecto**. No hace falta un SDK externo ni abrir destinos con comodines. Para desactivar la integración, usá `enabled: false` y volvé a generar ambos HTML.
+Cada generador incorpora esa configuración antes de `shared/requests-cloud.js`. La política CSP debe permitir conexiones **solo al origen HTTPS exacto del proyecto**. No hace falta un SDK externo ni abrir destinos con comodines. Para desactivar la integración, ejecutá `node scripts/configure-requests.cjs --disable` y volvé a generar ambos HTML.
 
 Publicá la nueva página cliente en GitHub Pages y distribuí la nueva versión de Nicolás al prestamista. La URL pública y la clave pública identifican el backend; los datos de las solicitudes no se guardan en GitHub. El servidor Supabase debe admitir solicitudes CORS tanto desde la página pública como desde el HTML local (`Origin: null`); CORS no reemplaza la autenticación del prestamista.
 

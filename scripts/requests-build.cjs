@@ -4,13 +4,15 @@ const path = require("node:path");
 const root = path.resolve(__dirname, "..");
 
 // Only the project's public browser key belongs here. Owner credentials stay in Auth.
-function connection() {
-  const value = JSON.parse(fs.readFileSync(path.join(root, "integration", "requests-config.json"), "utf8"));
+function connection(value = JSON.parse(fs.readFileSync(path.join(root, "integration", "requests-config.json"), "utf8"))) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Configuración de solicitudes incompleta.");
   if (typeof value.enabled !== "boolean" || typeof value.supabase_url !== "string" || typeof value.publishable_key !== "string") throw new Error("Configuración de solicitudes incompleta.");
   if (Object.keys(value).some(key => !["enabled", "supabase_url", "publishable_key"].includes(key))) throw new Error("La configuración solo admite URL y clave pública del proyecto.");
   let origin = "";
   if (value.supabase_url) {
-    const url = new URL(value.supabase_url);
+    let url;
+    try { url = new URL(value.supabase_url); }
+    catch (_) { throw new Error("Usá la URL HTTPS real del proyecto Supabase, copiada desde su configuración."); }
     if (url.protocol !== "https:" || url.username || url.password || url.port || url.search || url.hash || url.pathname !== "/" || !/^[a-z0-9-]+\.supabase\.co$/.test(url.hostname)) throw new Error("Usá la URL HTTPS oficial del proyecto Supabase.");
     origin = url.origin;
   }

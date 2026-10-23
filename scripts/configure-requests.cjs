@@ -3,22 +3,29 @@
 // Developer setup only. The generated pages need just a browser.
 const fs = require("node:fs");
 const path = require("node:path");
-const { connection } = require("./requests-build.cjs");
-const filename = path.resolve(__dirname, "../integration/requests-config.json");
-const previous = fs.readFileSync(filename, "utf8");
-const disable = process.argv.includes("--disable");
-if (!disable && (!process.env.SUPABASE_URL || !process.env.SUPABASE_PUBLISHABLE_KEY)) {
-  console.error("Faltan SUPABASE_URL y SUPABASE_PUBLISHABLE_KEY. Cargá únicamente la URL y la clave pública del proyecto en la configuración del entorno.");
-  process.exit(1);
+const { environmentConfiguration, verifyBackend } = require("./requests-preflight.cjs");
+
+async function configureRequests({ filename = path.resolve(__dirname, "../integration/requests-config.json"), environment = process.env, disable = false, checkOnly = false, verify = verifyBackend } = {}) {
+  if (disable && checkOnly) throw new Error("Elegí --disable o --check; no se usan juntos.");
+  const config = disable ? { enabled: false, supabase_url: "", publishable_key: "" } : environmentConfiguration(environment);
+  if (!disable) await verify(config);
+  if (!checkOnly) {
+    const temporary = `${filename}.${process.pid}.tmp`;
+    try {
+      fs.writeFileSync(temporary, JSON.stringify(config, null, 2) + "\n", { flag: "wx" });
+      fs.renameSync(temporary, filename);
+    } finally { try { fs.unlinkSync(temporary); } catch (_) {} }
+  }
+  return { disabled: disable, checked: !disable, changed: !checkOnly, owner_verified: false };
 }
-try {
-  fs.writeFileSync(filename, JSON.stringify(disable ? { enabled: false, supabase_url: "", publishable_key: "" } : {
-    enabled: true, supabase_url: process.env.SUPABASE_URL, publishable_key: process.env.SUPABASE_PUBLISHABLE_KEY,
-  }, null, 2) + "\n");
-  connection();
-  console.log(disable ? "Conexión de solicitudes desactivada." : "Conexión pública configurada. Verificá la migración y el propietario antes de generar y publicar las páginas.");
-} catch (error) {
-  fs.writeFileSync(filename, previous);
-  console.error(error.message);
-  process.exitCode = 1;
+
+if (require.main === module) {
+  const unknown = process.argv.slice(2).some(arg => !["--disable", "--check"].includes(arg));
+  if (unknown) { console.error("Uso: node scripts/configure-requests.cjs [--check | --disable]"); process.exitCode = 1; }
+  else configureRequests({ disable: process.argv.includes("--disable"), checkOnly: process.argv.includes("--check") }).then(result => {
+    console.log(result.disabled ? "Conexión de solicitudes desactivada." : result.changed
+      ? "Recepción comprobada y configuración pública guardada. Falta verificar el acceso del propietario en Nicolás y generar/publicar ambas páginas."
+      : "Recepción comprobada sin crear solicitudes ni cambiar la configuración. El acceso del propietario se verifica al iniciar sesión en Nicolás.");
+  }).catch(error => { console.error(error.message); process.exitCode = 1; });
 }
+module.exports = { configureRequests };
