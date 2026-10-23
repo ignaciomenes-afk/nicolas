@@ -13,6 +13,8 @@
   const reopenWhatsApp = document.getElementById("reopen-whatsapp");
   const currency = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const dateFormatter = new Intl.DateTimeFormat("es-AR", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" });
+  const todayFormatter = new Intl.DateTimeFormat("en", { timeZone: "America/Argentina/Buenos_Aires", year: "numeric", month: "2-digit", day: "2-digit" });
+  const amountButtons = form.querySelectorAll("[data-loan-amount]");
   const loanFields = new Set(["principal", "term_months", "first_due_date"]);
   let automaticFirstDate = true;
   let calendarKey = "", calendarId = "";
@@ -26,7 +28,7 @@
   function money(cents) { return currency.format(cents / 100); }
   function displayDate(iso) { return dateFormatter.format(new Date(iso + "T12:00:00Z")); }
   function todayArgentina() {
-    const parts = new Intl.DateTimeFormat("en", { timeZone: "America/Argentina/Buenos_Aires", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date());
+    const parts = todayFormatter.formatToParts(new Date());
     const part = name => parts.find(item => item.type === name).value;
     return `${part("year")}-${part("month")}-${part("day")}`;
   }
@@ -91,10 +93,11 @@
     const months = Number(field("term_months").value);
     if (!Number.isInteger(months) || months < 1 || months > core.MAX_TERM_MONTHS) errors.term_months = "Elegí un plazo entre 1 y 24 meses.";
     const date = field("first_due_date").value;
-    field("first_due_date").min = nextDay(todayArgentina());
+    const today = todayArgentina();
+    field("first_due_date").min = nextDay(today);
     try {
       core.addMonths(date, 0);
-      if (date <= todayArgentina()) errors.first_due_date = "Elegí una fecha de primera cuota posterior a hoy.";
+      if (date <= today) errors.first_due_date = "Elegí una fecha de primera cuota posterior a hoy.";
     } catch (_) { errors.first_due_date = "Elegí una fecha válida para la primera cuota."; }
     if (Object.keys(errors).length) return { errors, quote: null };
     try {
@@ -104,6 +107,7 @@
   }
   function renderCalculator() {
     const { quote, errors } = readLoan();
+    amountButtons.forEach(button => button.setAttribute("aria-pressed", String(Number(field("principal").value) === Number(button.dataset.loanAmount))));
     result.replaceChildren(); schedule.replaceChildren();
     if (!quote) {
       result.append(element("p", field("principal").value ? Object.values(errors)[0] : "Elegí el importe y los meses para ver tu cuota.", "empty-result"));
@@ -119,10 +123,10 @@
     total.append(element("span", "Total a devolver"), element("strong", money(quote.total_cents)));
     const highlight = element("div", undefined, "installment-highlight");
     const equal = quote.regular_installment_cents === quote.last_installment_cents;
-    highlight.append(element("span", quote.term_months === 1 ? "Tu única cuota" : equal ? `Cada cuota · ${quote.term_months} meses` : "Cuota mensual"),
+    highlight.append(element("span", quote.term_months === 1 ? "Una única cuota de" : equal ? `${quote.term_months} cuotas mensuales de` : `${quote.term_months} cuotas mensuales`),
       element("strong", money(quote.term_months === 1 ? quote.total_cents : quote.regular_installment_cents)));
-    highlight.append(element("p", equal || quote.term_months === 1 ? `${quote.term_months} ${quote.term_months === 1 ? "pago" : "pagos"} en total. El interés se aplica una sola vez.` : `La última cuota es de ${money(quote.last_installment_cents)} por el ajuste de centavos.`));
-    result.append(summary, total, highlight);
+    highlight.append(element("p", equal || quote.term_months === 1 ? "El interés se aplica una sola vez sobre el capital." : `La última cuota es de ${money(quote.last_installment_cents)} por el ajuste de centavos.`));
+    result.append(highlight, summary, total);
     for (const item of quote.installments) {
       const row = element("tr");
       row.append(element("td", `${item.number} de ${quote.term_months}`), element("td", displayDate(item.due_date)), element("td", money(item.amount_cents), "text-right")); schedule.append(row);
@@ -145,12 +149,20 @@
     if (Object.keys(errors).length) return null;
     return { ...values, cuil: cuil.normalized, client_whatsapp: phone.international, quote, remind_me: field("remind_me").checked };
   }
+  function installmentSummary(quote) {
+    if (quote.term_months === 1) return `1 cuota de ${money(quote.total_cents)}`;
+    if (quote.regular_installment_cents === quote.last_installment_cents) return `${quote.term_months} cuotas mensuales de ${money(quote.regular_installment_cents)}`;
+    const regularCount = quote.term_months - 1;
+    return `${regularCount} ${regularCount === 1 ? "cuota" : "cuotas"} de ${money(quote.regular_installment_cents)} y una última de ${money(quote.last_installment_cents)}`;
+  }
   function messageFor(data) {
     return ["Solicitud de préstamo", "",
       `Nombre y apellido: ${data.full_name}`, `CUIL: ${data.cuil}`,
       `Domicilio: ${data.address_street} ${data.address_number}`, `Localidad / Ciudad: ${data.locality}`,
       `WhatsApp: +${data.client_whatsapp}`, "",
-      `Monto solicitado: ${money(data.quote.principal_cents)}`].join("\n");
+      `Monto solicitado: ${money(data.quote.principal_cents)}`,
+      `Cuotas: ${installmentSummary(data.quote)}`,
+      `Primera cuota estimada: ${displayDate(data.quote.installments[0].due_date)}`].join("\n");
   }
   function prepareWhatsApp(data) {
     const url = `https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(messageFor(data))}`;
@@ -237,6 +249,10 @@
   }
   form.addEventListener("input", onEdit);
   form.addEventListener("change", onEdit);
+  amountButtons.forEach(button => button.addEventListener("click", () => {
+    field("principal").value = button.dataset.loanAmount;
+    field("principal").dispatchEvent(new Event("input", { bubbles: true }));
+  }));
 
   const shareStatus = document.getElementById("share-status");
   function shareFeedback(text) { shareStatus.textContent = text; shareStatus.hidden = false; }

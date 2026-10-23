@@ -12,13 +12,16 @@ y no tiene una fecha de vencimiento. Si lo recibiste dentro de Prestamos.zip,
 extraé PRESTAMOS.html antes de abrirlo.
 
 PARA SOLICITAR
-1. Completá tus datos, el importe y la cantidad de meses. Revisá las cuotas.
-2. Tocá “Enviar solicitud por WhatsApp”. Se abrirá el mensaje con solamente
-   tus datos de contacto, CUIL, domicilio e importe solicitado, dirigido al
-   contacto de Préstamos: +54 9 3544 617342.
-3. Revisá el mensaje y tocá ENVIAR dentro de WhatsApp para enviarlo.
+1. Elegí el monto y los meses. Tus cuotas aparecen al instante.
+   Podés usar $100.000, $200.000 o $500.000 como importes rápidos, o escribir
+   otro importe. Esas opciones solo cambian la simulación.
+2. Revisá las cuotas y completá tus datos personales.
+3. Tocá “Continuar en WhatsApp”. Se preparará un mensaje breve con tus datos,
+   el importe solicitado, el resumen de cuotas y el primer vencimiento estimado,
+   dirigido al contacto de Préstamos: +54 9 3544 617342.
+4. Revisá el mensaje y tocá ENVIAR dentro de WhatsApp como último paso.
    Abrir el mensaje no completa la solicitud; debe enviarse desde WhatsApp.
-4. Si WhatsApp no se abre, usá el enlace de reintento o copiá la solicitud
+5. Si WhatsApp no se abre, usá el enlace de reintento o copiá la solicitud
    y pegala en una conversación con ese contacto.
 
 CÓMO SE CALCULA

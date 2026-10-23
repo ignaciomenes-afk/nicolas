@@ -106,22 +106,48 @@ function decodeTarget(value) {
   const target = new URL(value); assert.equal(target.protocol, "https:"); assert.equal(target.hostname, "wa.me");
   assert.equal(target.pathname, `/${owner}`); const text = target.searchParams.get("text"); assert.ok(text); return text;
 }
-function assertCompactRequest(text) {
+function assertCompactRequest(text, { amount = "200.000", months = 2, installment = "135.000", lastInstallment = installment } = {}) {
   assert.match(text, /^Solicitud de pr[eé]stamo\b/i);
-  assert.equal(text.trim().split(/\r?\n/).filter(line => line.trim()).length, 7, "Request contains only its title and six personal-data/amount lines");
-  for (const value of [fake.full_name, fake.address_street, fake.address_number, fake.locality, "200.000"]) assert.ok(text.includes(value), value);
+  const lines = text.trim().split(/\r?\n/).filter(line => line.trim());
+  assert.equal(lines.length, 9, "Request contains title, personal data, amount, installments and the first estimated due date only");
+  for (const value of [fake.full_name, fake.address_street, fake.address_number, fake.locality]) assert.ok(text.includes(value), value);
   assert.ok(text.replace(/\D/g, "").includes("20000000001")); assert.ok(text.replace(/\D/g, "").includes("5491100000001"));
-  assert.match(text, /Monto solicitado:/i);
-  assert.doesNotMatch(text, /simulaci[oó]n|inter[eé]s|tasa|total\s+a\s+devolver|cuotas?|plazo|fecha|consent|recordatori|\d\s*%/i);
-  assert.doesNotMatch(text, /\b\d{4}-\d{2}-\d{2}\b|\b\d{1,2}\/\d{1,2}\/\d{4}\b/);
+  assert.ok(lines.find(line => /^Monto solicitado:/i.test(line))?.includes(amount));
+  const schedule = lines.find(line => /^Cuotas?:/i.test(line)); assert.ok(schedule, "Monthly payment summary is present");
+  if (installment === lastInstallment) assert.match(schedule, new RegExp(`${months}\\s+cuota${months === 1 ? "\\b" : "s"}`));
+  else { assert.match(schedule, new RegExp(`${months - 1}\\s+cuotas?`)); assert.match(schedule, /[uú]ltima/i); }
+  assert.ok(schedule.includes(installment)); assert.ok(schedule.includes(lastInstallment));
+  assert.match(text, /Primera cuota estimada:\s*21\/11\/2026/i);
+  for (const line of lines.slice(1)) assert.match(line, /^(Nombre y apellido|CUIL|Domicilio|Localidad\s*\/\s*Ciudad|WhatsApp|Monto solicitado|Cuotas?|Primera cuota estimada):/i);
+  assert.doesNotMatch(text, /simulaci[oó]n|inter[eé]s|tasa|total\s+a\s+devolver|plazo|consent|recordatori|\d\s*%/i);
 }
 async function main() {
   await prepare(); const page = await openPage(fileUrl);
-  await brandChecks(page); await mathChecks(page); await validationChecks(page); await formChecks(page);
+  await brandChecks(page); await layoutChecks(page); await mathChecks(page); await validationChecks(page); await formChecks(page);
   await whatsappRecoveryChecks(page); await offlineShareCheck(page); await reminderChecks(page); await privacyChecks(page);
   await monthEndChecks(); await staticHttpChecks(); await hostedShareChecks();
   await check("Todo el recorrido evita visitas externas y no produce errores JavaScript", async () => { assert.deepEqual(errors, []); assert.deepEqual(external, []); assert.deepEqual(extraResources, []); });
   console.log(`\n${checks} comprobaciones de solicitud correctas; ningún WhatsApp real enviado.`);
+}
+async function layoutChecks(page) {
+  await check("El ejemplo se muestra alineado en escritorio y en móvil, sin rotación", async () => {
+    for (const [width, height] of [[1440, 1000], [390, 844]]) {
+      await page.setViewportSize({ width, height });
+      assert.equal(await page.locator(".example-card").evaluate(element => getComputedStyle(element).transform), "none");
+      await noOverflow(page);
+    }
+    await page.setViewportSize({ width: 1440, height: 1000 });
+  });
+  await check("En móvil el importe y las cuotas aparecen antes de pedir los datos personales", async () => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const tops = await page.evaluate(() => ({
+      loan: document.getElementById("loan-title").closest("section").getBoundingClientRect().top,
+      quote: document.getElementById("quote-title").closest("section").getBoundingClientRect().top,
+      personal: document.getElementById("personal-title").closest("section").getBoundingClientRect().top,
+    }));
+    assert.ok(tops.loan < tops.quote && tops.quote < tops.personal, JSON.stringify(tops));
+    await page.setViewportSize({ width: 1440, height: 1000 });
+  });
 }
 async function brandChecks(page) {
   await check("La página se presenta como Préstamos, sin nombres anteriores ni marcas de IA", async () => {
@@ -220,6 +246,33 @@ async function formChecks(page) {
     for (const row of await page.locator("#installments-body tr").all()) assert.ok((await row.textContent()).includes("70.000"));
     await page.locator('[name="term_months"]').selectOption("2");
   });
+  await check("Los importes rápidos actualizan cuotas y selección sin abrir ni enviar WhatsApp", async () => {
+    const before = await targetCount(page), copied = await page.evaluate(() => window.__copiedRequest);
+    await page.evaluate(() => {
+      window.__presetInputEvents = 0;
+      document.querySelector('[name="principal"]').addEventListener("input", () => window.__presetInputEvents++);
+    });
+    for (const [amount, payment] of [["100000", "67.500"], ["200000", "135.000"], ["500000", "337.500"]]) {
+      const button = page.locator(`[data-loan-amount="${amount}"]`);
+      assert.equal(await button.getAttribute("type"), "button"); await button.click();
+      assert.equal(await page.locator('[name="principal"]').inputValue(), amount);
+      assert.ok((await page.locator(".installment-highlight").textContent()).includes(payment));
+      assert.match(await page.locator(".installment-highlight").textContent(), /2\s+cuotas/i);
+      for (const preset of await page.locator("[data-loan-amount]").all()) {
+        assert.equal(await preset.getAttribute("aria-pressed"), (await preset.getAttribute("data-loan-amount")) === amount ? "true" : "false");
+      }
+      assert.equal(await targetCount(page), before);
+    }
+    assert.ok(await page.evaluate(() => window.__presetInputEvents >= 3), "Preset changes must dispatch input events");
+    await page.locator('[name="principal"]').fill("123456");
+    assert.equal(await page.locator('[data-loan-amount][aria-pressed="true"]').count(), 0);
+    await page.locator('[name="term_months"]').selectOption("5"); await page.locator('[data-loan-amount="500000"]').click();
+    assert.equal(await page.locator("#installments-body tr").count(), 5);
+    assert.ok((await page.locator(".installment-highlight").textContent()).includes("140.000"));
+    assert.match(await page.locator(".installment-highlight").textContent(), /5\s+cuotas/i);
+    assert.equal(await targetCount(page), before); assert.equal(await page.evaluate(() => window.__copiedRequest), copied);
+    await page.locator('[name="term_months"]').selectOption("2"); await page.locator('[data-loan-amount="200000"]').click();
+  });
   await check("CUIL, domicilio, teléfono, capital, plazo, fecha y consentimiento inválidos impiden abrir WhatsApp", async () => {
     const firstDate = await page.locator('[name="first_due_date"]').inputValue(), before = await targetCount(page);
     const invalid = { full_name: " ", cuil: "20-00000000-2", address_street: " ", address_number: " ", locality: " ", client_whatsapp: "12345", principal: "0", term_months: "", first_due_date: "2026-10-20" };
@@ -243,8 +296,10 @@ async function formChecks(page) {
     assert.ok((await page.evaluate(() => window.__copiedRequest))?.includes(payload));
     await page.locator('[name="full_name"]').fill(fake.full_name);
   });
-  await check("WhatsApp prepara únicamente datos personales y monto solicitado para el número autorizado", async () => {
+  await check("Continuar en WhatsApp prepara datos, monto, cuotas y primera fecha sin enviar automáticamente", async () => {
     const current = page.url(), before = await targetCount(page);
+    assert.equal(await page.locator("#send-request").getAttribute("type"), "submit");
+    assert.match(await page.locator("#send-request").textContent(), /Continuar en WhatsApp/i);
     await page.locator("#copy-request").click(); await page.waitForFunction(() => window.__copiedRequest);
     const copied = await page.evaluate(() => window.__copiedRequest);
     await page.locator("#send-request").click(); assert.equal(await targetCount(page), before + 1);
@@ -263,6 +318,20 @@ async function formChecks(page) {
     assert.equal(await page.locator("#copy-fallback-text").getAttribute("readonly"), "");
     await page.evaluate(() => { window.__denyClipboard = false; });
     assert.doesNotMatch(await page.locator("#send-status").textContent(), /solicitud enviada|mensaje enviado/i);
+  });
+  await check("El resumen de WhatsApp distingue cinco cuotas, una cuota y el ajuste de la última", async () => {
+    for (const fixture of [
+      { principal: "500000", months: "5", amount: "500.000", installment: "140.000" },
+      { principal: "200000", months: "1", amount: "200.000", installment: "270.000" },
+      { principal: "0.50", months: "3", amount: "0,50", installment: "0,22", lastInstallment: "0,24" },
+    ]) {
+      await page.locator('[name="principal"]').fill(fixture.principal); await page.locator('[name="term_months"]').selectOption(fixture.months);
+      const before = await targetCount(page); await page.locator("#send-request").click(); assert.equal(await targetCount(page), before + 1);
+      assertCompactRequest(decodeTarget(await page.evaluate(() => window.__requestTargets.at(-1))), {
+        amount: fixture.amount, months: Number(fixture.months), installment: fixture.installment, lastInstallment: fixture.lastInstallment || fixture.installment,
+      });
+    }
+    await fillValid(page);
   });
 }
 async function whatsappRecoveryChecks(page) {
