@@ -10,6 +10,7 @@
   const INTEREST_PERCENT = 35;
   const LONG_TERM_INTEREST_PERCENT = 40;
   const LONG_TERM_START_MONTHS = 4;
+  const INSTALLMENT_ROUNDING_CENTS = 100000;
   const MAX_PRINCIPAL_CENTS = 100000000000;
   const MAX_TERM_MONTHS = 24;
   const CUIL_PREFIXES = new Set(["20", "23", "24", "27"]);
@@ -45,7 +46,7 @@
     return `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(resultDay).padStart(2, "0")}`;
   }
 
-  /** One total charge on the principal: 35% for 1–3 months, 40% from 4 months. */
+  /** Base interest once on principal, then equal installments rounded up to ARS 1,000. */
   function calculate(input) {
     if (!input || typeof input !== "object" || Array.isArray(input)) fail("Completá los datos del préstamo.");
     const principal = integer(input.principal_cents, 1, MAX_PRINCIPAL_CENTS, "El capital en centavos");
@@ -56,21 +57,27 @@
     if (addMonths(input.first_due_date, 0, anchor) !== input.first_due_date) fail("El día de vencimiento no coincide con la primera fecha elegida.");
     // Round half up to one cent before distributing the total; no monthly compounding.
     const interest = Number((BigInt(principal) * BigInt(interestPercent) + 50n) / 100n);
-    const total = principal + interest;
-    const regular = Math.floor(total / months), last = total - regular * (months - 1);
+    const baseTotal = principal + interest;
+    // Every installment is equal, rounded upward to a multiple of ARS 1,000.
+    const divisor = BigInt(months) * BigInt(INSTALLMENT_ROUNDING_CENTS);
+    const regular = Number((BigInt(baseTotal) + divisor - 1n) / divisor) * INSTALLMENT_ROUNDING_CENTS;
+    const total = regular * months;
+    const adjustment = total - baseTotal;
     const installments = Array.from({ length: months }, (_, index) => ({
       number: index + 1,
       due_date: addMonths(input.first_due_date, index, anchor),
-      amount_cents: index === months - 1 ? last : regular,
+      amount_cents: regular,
     }));
     return {
       principal_cents: principal,
       interest_cents: interest,
+      base_total_cents: baseTotal,
+      rounding_adjustment_cents: adjustment,
       total_cents: total,
       term_months: months,
       installments,
       regular_installment_cents: regular,
-      last_installment_cents: last,
+      last_installment_cents: regular,
       interest_percent: interestPercent,
     };
   }
@@ -121,5 +128,5 @@
     return { valid: true, international, message: "" };
   }
 
-  return Object.freeze({ calculate, addMonths, parseMoney, validateCuil, normalizePhone, parseArgentinaPhone: normalizePhone, INTEREST_PERCENT, LONG_TERM_INTEREST_PERCENT, LONG_TERM_START_MONTHS, MAX_PRINCIPAL_CENTS, MAX_TERM_MONTHS });
+  return Object.freeze({ calculate, addMonths, parseMoney, validateCuil, normalizePhone, parseArgentinaPhone: normalizePhone, INTEREST_PERCENT, LONG_TERM_INTEREST_PERCENT, LONG_TERM_START_MONTHS, INSTALLMENT_ROUNDING_CENTS, MAX_PRINCIPAL_CENTS, MAX_TERM_MONTHS });
 });

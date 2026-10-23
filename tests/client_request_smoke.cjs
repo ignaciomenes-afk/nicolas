@@ -106,20 +106,36 @@ function decodeTarget(value) {
   const target = new URL(value); assert.equal(target.protocol, "https:"); assert.equal(target.hostname, "wa.me");
   assert.equal(target.pathname, `/${owner}`); const text = target.searchParams.get("text"); assert.ok(text); return text;
 }
-function assertCompactRequest(text, { amount = "200.000", months = 2, installment = "135.000", lastInstallment = installment } = {}) {
+function assertCompactRequest(text, { amount = "200.000", repayment = "270.000", months = 2, installment = "135.000" } = {}) {
   assert.match(text, /^Solicitud de pr[eé]stamo\b/i);
   const lines = text.trim().split(/\r?\n/).filter(line => line.trim());
-  assert.equal(lines.length, 9, "Request contains title, personal data, amount, installments and the first estimated due date only");
+  assert.equal(lines.length, 10, "Request contains title, personal data, requested amount, repayment, equal installments and first estimated due date only");
   for (const value of [fake.full_name, fake.address_street, fake.address_number, fake.locality]) assert.ok(text.includes(value), value);
   assert.ok(text.replace(/\D/g, "").includes("20000000001")); assert.ok(text.replace(/\D/g, "").includes("5491100000001"));
-  assert.ok(lines.find(line => /^Monto solicitado:/i.test(line))?.includes(amount));
+  const amountIndex = lines.findIndex(line => /^Monto solicitado:/i.test(line));
+  assert.ok(amountIndex > 0); assert.ok(lines[amountIndex].includes(amount));
+  assert.match(lines[amountIndex + 1], /^Monto a devolver:/i);
+  assert.ok(lines[amountIndex + 1].includes(repayment));
   const schedule = lines.find(line => /^Cuotas?:/i.test(line)); assert.ok(schedule, "Monthly payment summary is present");
-  if (installment === lastInstallment) assert.match(schedule, new RegExp(`${months}\\s+cuota${months === 1 ? "\\b" : "s"}`));
-  else { assert.match(schedule, new RegExp(`${months - 1}\\s+cuotas?`)); assert.match(schedule, /[uú]ltima/i); }
-  assert.ok(schedule.includes(installment)); assert.ok(schedule.includes(lastInstallment));
+  assert.match(schedule, new RegExp(`${months}\\s+cuota${months === 1 ? "\\b" : "s"}`));
+  if (months > 1) assert.match(schedule, /mensual(?:es)?/i);
+  assert.doesNotMatch(schedule, /[uú]ltima/i);
+  assert.ok(schedule.includes(installment));
   assert.match(text, /Primera cuota estimada:\s*21\/11\/2026/i);
-  for (const line of lines.slice(1)) assert.match(line, /^(Nombre y apellido|CUIL|Domicilio|Localidad\s*\/\s*Ciudad|WhatsApp|Monto solicitado|Cuotas?|Primera cuota estimada):/i);
-  assert.doesNotMatch(text, /simulaci[oó]n|inter[eé]s|tasa|total\s+a\s+devolver|plazo|consent|recordatori|\d\s*%/i);
+  for (const line of lines.slice(1)) assert.match(line, /^(Nombre y apellido|CUIL|Domicilio|Localidad\s*\/\s*Ciudad|WhatsApp|Monto solicitado|Monto a devolver|Cuotas?|Primera cuota estimada):/i);
+  assert.doesNotMatch(text, /simulaci[oó]n|inter[eé]s|tasa|plazo|consent|recordatori|\d\s*%/i);
+}
+function assertRoundedSchedule(value, { principal, months, rate, interest }) {
+  const unit = 100000, installment = value.regular_installment_cents, base = principal + interest;
+  assert.equal(value.principal_cents, principal); assert.equal(value.interest_percent, rate); assert.equal(value.interest_cents, interest);
+  assert.equal(value.base_total_cents, base); assert.equal(value.installments.length, months);
+  assert.ok(Number.isSafeInteger(installment) && installment > 0); assert.equal(installment % unit, 0);
+  assert.equal(value.last_installment_cents, installment);
+  assert.ok(value.installments.every(item => item.amount_cents === installment), "All installments, including the last, must be equal");
+  assert.equal(value.total_cents, installment * months); assert.equal(value.installments.reduce((sum, item) => sum + item.amount_cents, 0), value.total_cents);
+  assert.equal(value.rounding_adjustment_cents, value.total_cents - base);
+  assert.ok(value.total_cents >= base, "Rounded installments must cover the base total");
+  assert.ok(value.total_cents - unit * months < base, "Choosing the previous $1,000 installment must fail to cover the base total");
 }
 async function main() {
   await prepare(); const page = await openPage(fileUrl);
@@ -166,12 +182,11 @@ async function mathChecks(page) {
     assert.equal(value.interest_percent, 35); assert.equal(value.interest_cents, 7000000); assert.equal(value.total_cents, 27000000);
     assert.deepEqual(value.installments.map(item => item.amount_cents), [13500000, 13500000]);
   });
-  await check("Hasta tres meses aplica 35% total; desde cuatro aplica 40% total una sola vez", async () => {
+  await check("La base usa 35% hasta tres meses y 40% desde cuatro; las cuotas iguales se redondean hacia arriba a $1.000", async () => {
     for (const months of [1, 2, 3, 4, 5, 24]) {
       const value = await core(page, "calculate", { principal_cents: 20000000, term_months: months, first_due_date: "2026-11-21" });
-      const rate = months <= 3 ? 35 : 40, interest = months <= 3 ? 7000000 : 8000000, total = 20000000 + interest;
-      assert.equal(value.interest_percent, rate); assert.equal(value.interest_cents, interest); assert.equal(value.total_cents, total); assert.equal(value.installments.length, months);
-      assert.equal(value.installments.reduce((sum, item) => sum + item.amount_cents, 0), total);
+      const rate = months <= 3 ? 35 : 40, interest = months <= 3 ? 7000000 : 8000000;
+      assertRoundedSchedule(value, { principal: 20000000, months, rate, interest });
     }
     const three = await core(page, "calculate", { principal_cents: 20000000, term_months: 3, first_due_date: "2026-11-21" });
     assert.deepEqual(three.installments.map(item => item.amount_cents), [9000000, 9000000, 9000000]);
@@ -181,16 +196,31 @@ async function mathChecks(page) {
     assert.equal(five.interest_cents, 20000000); assert.equal(five.total_cents, 70000000);
     assert.deepEqual(five.installments.map(item => item.amount_cents), [14000000, 14000000, 14000000, 14000000, 14000000]);
   });
-  await check("Centavos y última cuota conservan exactamente la suma total", async () => {
+  await check("El interés base redondea medio centavo hacia arriba; incluso importes pequeños generan cuotas iguales de miles", async () => {
     for (const [principal, shortInterest, longInterest] of [[1, 0, 0], [2, 1, 1], [3, 1, 1], [10, 4, 4], [50, 18, 20], [101, 35, 40]]) {
       for (const months of [1, 2, 3, 4, 5, 24]) {
         const interest = months <= 3 ? shortInterest : longInterest;
         const value = await core(page, "calculate", { principal_cents: principal, term_months: months, first_due_date: "2026-11-21" });
-        assert.equal(value.interest_cents, interest); assert.equal(value.total_cents, principal + interest);
-        assert.equal(value.installments.reduce((sum, item) => sum + item.amount_cents, 0), principal + interest);
+        assertRoundedSchedule(value, { principal, months, rate: months <= 3 ? 35 : 40, interest });
+        assert.equal(value.regular_installment_cents, 100000);
       }
     }
     assert.equal(await core(page, "parseMoney", "200000,50"), 20000050); assert.equal(await core(page, "parseMoney", "0.01"), 1);
+  });
+  await check("$1.000.000 en seis cuotas produce $234.000 por cuota, total $1.404.000 y ajuste visible de $4.000", async () => {
+    const value = await core(page, "calculate", { principal_cents: 100000000, term_months: 6, first_due_date: "2026-11-21" });
+    assertRoundedSchedule(value, { principal: 100000000, months: 6, rate: 40, interest: 40000000 });
+    assert.equal(value.base_total_cents, 140000000); assert.equal(value.total_cents, 140400000);
+    assert.equal(value.regular_installment_cents, 23400000); assert.equal(value.rounding_adjustment_cents, 400000);
+  });
+  await check("El redondeo de $100.000 en dos meses y $200.000 en 24 meses informa el ajuste separado de la base", async () => {
+    const short = await core(page, "calculate", { principal_cents: 10000000, term_months: 2, first_due_date: "2026-11-21" });
+    assertRoundedSchedule(short, { principal: 10000000, months: 2, rate: 35, interest: 3500000 });
+    assert.equal(short.regular_installment_cents, 6800000); assert.equal(short.base_total_cents, 13500000);
+    assert.equal(short.total_cents, 13600000); assert.equal(short.rounding_adjustment_cents, 100000);
+    const long = await core(page, "calculate", { principal_cents: 20000000, term_months: 24, first_due_date: "2026-11-21" });
+    assertRoundedSchedule(long, { principal: 20000000, months: 24, rate: 40, interest: 8000000 });
+    assert.equal(long.regular_installment_cents, 1200000); assert.equal(long.total_cents, 28800000); assert.equal(long.rounding_adjustment_cents, 800000);
   });
   await check("Calendario conserva el día 31 y distingue un vencimiento personalizado", async () => {
     const value = await core(page, "calculate", { principal_cents: 10000, term_months: 3, first_due_date: "2027-02-28", due_anchor_day: 31 });
@@ -252,7 +282,7 @@ async function formChecks(page) {
       window.__presetInputEvents = 0;
       document.querySelector('[name="principal"]').addEventListener("input", () => window.__presetInputEvents++);
     });
-    for (const [amount, payment] of [["100000", "67.500"], ["200000", "135.000"], ["500000", "337.500"]]) {
+    for (const [amount, payment] of [["100000", "68.000"], ["200000", "135.000"], ["500000", "338.000"]]) {
       const button = page.locator(`[data-loan-amount="${amount}"]`);
       assert.equal(await button.getAttribute("type"), "button"); await button.click();
       assert.equal(await page.locator('[name="principal"]').inputValue(), amount);
@@ -272,6 +302,18 @@ async function formChecks(page) {
     assert.match(await page.locator(".installment-highlight").textContent(), /5\s+cuotas/i);
     assert.equal(await targetCount(page), before); assert.equal(await page.evaluate(() => window.__copiedRequest), copied);
     await page.locator('[name="term_months"]').selectOption("2"); await page.locator('[data-loan-amount="200000"]').click();
+  });
+  await check("El formulario separa el interés base del ajuste y muestra las seis cuotas iguales de $234.000", async () => {
+    const before = await targetCount(page);
+    await page.locator('[name="principal"]').fill("1000000"); await page.locator('[name="term_months"]').selectOption("6");
+    await page.waitForFunction(() => document.getElementById("installments-body").children.length === 6);
+    const summary = await page.locator("#calculator-result").textContent();
+    assert.match(summary, /inter[eé]s\s+base/i); assert.match(summary, /ajuste\s+por\s+redondeo/i);
+    assert.ok(summary.includes("400.000")); assert.ok(summary.includes("4.000")); assert.ok(summary.includes("1.404.000"));
+    assert.match(await page.locator(".installment-highlight").textContent(), /6\s+cuotas\s+mensuales/i);
+    for (const row of await page.locator("#installments-body tr").all()) assert.ok((await row.textContent()).includes("234.000"));
+    assert.equal(await targetCount(page), before, "Changing the simulation must not open WhatsApp");
+    await page.locator('[name="principal"]').fill("200000"); await page.locator('[name="term_months"]').selectOption("2");
   });
   await check("CUIL, domicilio, teléfono, capital, plazo, fecha y consentimiento inválidos impiden abrir WhatsApp", async () => {
     const firstDate = await page.locator('[name="first_due_date"]').inputValue(), before = await targetCount(page);
@@ -296,7 +338,7 @@ async function formChecks(page) {
     assert.ok((await page.evaluate(() => window.__copiedRequest))?.includes(payload));
     await page.locator('[name="full_name"]').fill(fake.full_name);
   });
-  await check("Continuar en WhatsApp prepara datos, monto, cuotas y primera fecha sin enviar automáticamente", async () => {
+  await check("Continuar en WhatsApp prepara datos, monto solicitado, monto a devolver, cuotas iguales y primera fecha sin enviar automáticamente", async () => {
     const current = page.url(), before = await targetCount(page);
     assert.equal(await page.locator("#send-request").getAttribute("type"), "submit");
     assert.match(await page.locator("#send-request").textContent(), /Continuar en WhatsApp/i);
@@ -319,16 +361,18 @@ async function formChecks(page) {
     await page.evaluate(() => { window.__denyClipboard = false; });
     assert.doesNotMatch(await page.locator("#send-status").textContent(), /solicitud enviada|mensaje enviado/i);
   });
-  await check("El resumen de WhatsApp distingue cinco cuotas, una cuota y el ajuste de la última", async () => {
+  await check("WhatsApp informa el total a devolver y todas las cuotas mensuales iguales, incluso cuando hay ajuste por redondeo", async () => {
     for (const fixture of [
-      { principal: "500000", months: "5", amount: "500.000", installment: "140.000" },
-      { principal: "200000", months: "1", amount: "200.000", installment: "270.000" },
-      { principal: "0.50", months: "3", amount: "0,50", installment: "0,22", lastInstallment: "0,24" },
+      { principal: "500000", months: "5", amount: "500.000", repayment: "700.000", installment: "140.000" },
+      { principal: "200000", months: "1", amount: "200.000", repayment: "270.000", installment: "270.000" },
+      { principal: "200000", months: "24", amount: "200.000", repayment: "288.000", installment: "12.000" },
+      { principal: "1000000", months: "6", amount: "1.000.000", repayment: "1.404.000", installment: "234.000" },
+      { principal: "0.50", months: "3", amount: "0,50", repayment: "3.000", installment: "1.000" },
     ]) {
       await page.locator('[name="principal"]').fill(fixture.principal); await page.locator('[name="term_months"]').selectOption(fixture.months);
       const before = await targetCount(page); await page.locator("#send-request").click(); assert.equal(await targetCount(page), before + 1);
       assertCompactRequest(decodeTarget(await page.evaluate(() => window.__requestTargets.at(-1))), {
-        amount: fixture.amount, months: Number(fixture.months), installment: fixture.installment, lastInstallment: fixture.lastInstallment || fixture.installment,
+        amount: fixture.amount, repayment: fixture.repayment, months: Number(fixture.months), installment: fixture.installment,
       });
     }
     await fillValid(page);

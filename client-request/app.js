@@ -115,17 +115,18 @@
       cell.colSpan = 3; row.append(cell); schedule.append(row); return;
     }
     const summary = element("div", undefined, "summary-grid");
-    for (const [label, value] of [["Importe que pedís", quote.principal_cents], [`Interés total · ${quote.interest_percent}%`, quote.interest_cents]]) {
+    const items = [["Importe que pedís", quote.principal_cents], [`Interés base · ${quote.interest_percent}%`, quote.interest_cents]];
+    if (quote.rounding_adjustment_cents > 0) items.push(["Ajuste por redondeo", quote.rounding_adjustment_cents]);
+    for (const [label, value] of items) {
       const item = element("div", undefined, "summary-item");
       item.append(element("span", label), element("strong", money(value))); summary.append(item);
     }
     const total = element("div", undefined, "summary-total");
     total.append(element("span", "Total a devolver"), element("strong", money(quote.total_cents)));
     const highlight = element("div", undefined, "installment-highlight");
-    const equal = quote.regular_installment_cents === quote.last_installment_cents;
-    highlight.append(element("span", quote.term_months === 1 ? "Una única cuota de" : equal ? `${quote.term_months} cuotas mensuales de` : `${quote.term_months} cuotas mensuales`),
-      element("strong", money(quote.term_months === 1 ? quote.total_cents : quote.regular_installment_cents)));
-    highlight.append(element("p", equal || quote.term_months === 1 ? "El interés se aplica una sola vez sobre el capital." : `La última cuota es de ${money(quote.last_installment_cents)} por el ajuste de centavos.`));
+    highlight.append(element("span", quote.term_months === 1 ? "Una única cuota de" : `${quote.term_months} cuotas mensuales de`),
+      element("strong", money(quote.regular_installment_cents)));
+    highlight.append(element("p", quote.rounding_adjustment_cents > 0 ? "Cuotas iguales, redondeadas hacia arriba a miles. El total incluye el ajuste." : "Todas las cuotas tienen el mismo importe."));
     result.append(highlight, summary, total);
     for (const item of quote.installments) {
       const row = element("tr");
@@ -151,9 +152,7 @@
   }
   function installmentSummary(quote) {
     if (quote.term_months === 1) return `1 cuota de ${money(quote.total_cents)}`;
-    if (quote.regular_installment_cents === quote.last_installment_cents) return `${quote.term_months} cuotas mensuales de ${money(quote.regular_installment_cents)}`;
-    const regularCount = quote.term_months - 1;
-    return `${regularCount} ${regularCount === 1 ? "cuota" : "cuotas"} de ${money(quote.regular_installment_cents)} y una última de ${money(quote.last_installment_cents)}`;
+    return `${quote.term_months} cuotas mensuales de ${money(quote.regular_installment_cents)}`;
   }
   function messageFor(data) {
     return ["Solicitud de préstamo", "",
@@ -161,6 +160,7 @@
       `Domicilio: ${data.address_street} ${data.address_number}`, `Localidad / Ciudad: ${data.locality}`,
       `WhatsApp: +${data.client_whatsapp}`, "",
       `Monto solicitado: ${money(data.quote.principal_cents)}`,
+      `Monto a devolver: ${money(data.quote.total_cents)}`,
       `Cuotas: ${installmentSummary(data.quote)}`,
       `Primera cuota estimada: ${displayDate(data.quote.installments[0].due_date)}`].join("\n");
   }

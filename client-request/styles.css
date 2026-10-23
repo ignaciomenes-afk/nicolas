@@ -38,3 +38,5 @@
 @media(max-width:370px){.amount-shortcuts{gap:6px}.amount-chip{font-size:12px;min-height:37px;padding:7px 6px}}
 
 .calculator-result>.installment-highlight{margin:0 0 20px}
+
+.rate-note p+p{margin-top:8px}
