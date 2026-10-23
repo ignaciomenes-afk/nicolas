@@ -7,7 +7,24 @@ NICOLAS - PRESTAMOS Y COBROS
 5. Registra capital entregado, tasa mensual, plazo en meses, emision y plan.
 6. Revisa el cronograma, imprime el pagare y registra los cobros.
 
-No requiere Python, instalaciones, servidor ni Internet para funcionar.
+No requiere Python ni instalar programas. La cartera funciona sin Internet.
+
+SOLICITUDES DE LA PAGINA PUBLICA
+La nueva seccion Solicitudes permite aprobar o rechazar pedidos. Al aprobar,
+se incorporan el cliente, el prestamo, el plazo y las cuotas pactadas, con el
+pagare pendiente de firma. Reintentar la misma aprobacion no crea duplicados.
+Los pedidos conservan los importes de la pagina del cliente y no usan la tasa
+mensual de carga manual.
+
+Para recibir pedidos desde otros celulares hay que activar una base privada
+Supabase y autorizar tu cuenta. Esta entrega deja la conexion desactivada
+hasta completar esa configuracion; WhatsApp sigue funcionando como antes.
+La guia tecnica de activacion esta en integration/README.md del repositorio.
+La cuenta de Solicitudes es independiente de la contrasena de esta cartera.
+Nunca ingreses la contrasena de la cartera como clave del servidor.
+
+La conexion necesita Internet. Guarda pedidos y decisiones, pero no sincroniza
+los cobros ni los adjuntos locales. Segui guardando tu copia cifrada habitual.
 
 PAGARE
 Se crea pendiente de firma. Imprimelo, completa los datos faltantes y firmalo.

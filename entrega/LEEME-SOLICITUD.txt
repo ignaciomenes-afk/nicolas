@@ -21,7 +21,9 @@ PARA SOLICITAR
    cuotas iguales y el primer vencimiento estimado, dirigido al contacto de
    Préstamos: +54 9 3544 617342. El monto a devolver aparece debajo del solicitado.
 4. Revisá el mensaje y tocá ENVIAR dentro de WhatsApp como último paso.
-   Abrir el mensaje no completa la solicitud; debe enviarse desde WhatsApp.
+   Si esta activa la recepcion privada, la pagina confirma primero que guardo
+   el pedido para evaluacion. En WhatsApp debes tocar ENVIAR para mandar el
+   mensaje; abrirlo no lo envia automaticamente.
 5. Si WhatsApp no se abre, usá el enlace de reintento o copiá la solicitud
    y pegala en una conversación con ese contacto.
 
@@ -48,6 +50,8 @@ Si se acuerdan otras fechas, actualizá los eventos de tu calendario.
 La página no envía mensajes automáticos de recordatorio por WhatsApp.
 
 TUS DATOS
-Los datos del formulario se comparten al enviar la solicitud por WhatsApp.
-La página no guarda tus datos personales. Necesitás conexión a Internet para
-abrir WhatsApp y enviar el mensaje.
+Los datos del formulario no se guardan en tu navegador. Cuando esta activa la
+recepcion privada, se envian al prestamista para evaluar tu pedido antes de
+abrir WhatsApp. La pagina informa si el envio falla y permite reintentar.
+Si la conexion privada no esta configurada, solo se prepara el mensaje que
+elegis enviar por WhatsApp. Necesitas Internet para estas acciones.

@@ -6,6 +6,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
+const requests = require("./requests-build.cjs");
 
 const root = path.resolve(__dirname, "..");
 const sourceRoot = path.join(root, "client-request");
@@ -16,7 +17,7 @@ const guideName = "LEEME-SOLICITUD.txt";
 const zipName = "Prestamos.zip";
 const zipAliases = ["Nicolas-solicitud-prestamo.zip"];
 const readSource = name => fs.readFileSync(path.join(sourceRoot, name), "utf8");
-const csp = "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'";
+const csp = `default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src ${requests.connection().connectSource}; base-uri 'none'; form-action 'none'`;
 
 function inlineScript(name, source) {
   new vm.Script(source, { filename: name });
@@ -26,7 +27,7 @@ function inlineScript(name, source) {
 function buildHtml() {
   let html = readSource("index.html");
   const css = readSource("styles.css");
-  const scripts = ["loan-core.js", "app.js"].map(name => inlineScript(name, readSource(name)));
+  const scripts = [inlineScript("requests-cloud.js", requests.browserSource()), ...["loan-core.js", "app.js"].map(name => inlineScript(name, readSource(name)))];
   let stylesheetCount = 0;
   html = html.replace(/<link\b(?=[^>]*\brel=["']stylesheet["'])(?=[^>]*\bhref=["'](?:\.\/)?styles\.css["'])[^>]*>/gi, () => {
     stylesheetCount += 1;
@@ -46,7 +47,7 @@ function buildHtml() {
   html = html.replace(/<\/body\s*>/i, () => `${scripts.join("\n")}\n</body>`);
   if (/<script\b[^>]*\bsrc\s*=/i.test(html) || /<link\b[^>]*\brel=["']stylesheet["']/i.test(html)) throw new Error("La página todavía depende de scripts o estilos externos.");
   const embedded = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script\s*>/gi)];
-  if (embedded.length !== 2) throw new Error("La página debe incorporar exactamente los dos scripts de la solicitud.");
+  if (embedded.length !== 3) throw new Error("Faltan componentes de la solicitud.");
   for (const [index, match] of embedded.entries()) new vm.Script(match[1], { filename: `${htmlName}.inline-${index + 1}.js` });
   if (!html.includes("https://wa.me/5493544617342")) throw new Error("La página no incluye el contacto de WhatsApp acordado.");
   if (/\b(?:chatgpt|codex)\b/i.test(html)) throw new Error("La página cliente contiene una marca ajena a Préstamos.");

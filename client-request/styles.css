@@ -40,3 +40,5 @@
 .calculator-result>.installment-highlight{margin:0 0 20px}
 
 .rate-note p+p{margin-top:8px}
+
+.status-card.is-pending{background:#f4f0fa;border-color:#e5dced;color:#82718f}#request-form[aria-busy=true] input:not([type=checkbox]),#request-form[aria-busy=true] select{background:#faf8fc;color:#81788d}#send-request[aria-busy=true]{cursor:progress}

@@ -11,7 +11,17 @@
 5. En **Nuevo préstamo**, ingresá el capital entregado, tasa mensual, plazo en meses, fecha de emisión y plan de devolución. Revisá el cronograma antes de guardar.
 6. Abrí el detalle para imprimir el pagaré, registrar la firma, adjuntar el documento firmado y registrar los cobros.
 
-No necesita Python, instalaciones, servidor ni conexión a Internet para funcionar después de descargarlo.
+No necesita Python ni instalar programas. La cartera local funciona sin Internet; recibir y revisar solicitudes de otros celulares requiere conexión y la configuración privada descrita en [integration/README.md](integration/README.md).
+
+## Solicitudes de la página a Nicolás
+
+La sección **Solicitudes** permite revisar los datos del cliente, capital, total, plazo, fechas y cuotas, y **aprobar o rechazar** el pedido. Al aprobar, se incorpora el cliente y el préstamo a la cartera cifrada en una sola operación, con el pagaré pendiente de firma. Una repetición o un corte de conexión no crea otro préstamo: se puede reintentar la incorporación de la misma aprobación.
+
+La conexión se entrega **desactivada hasta configurar un proyecto Supabase y autorizar al propietario**. Mientras esté desactivada, la página pública sigue preparando el pedido por WhatsApp y no anuncia una recepción en la bandeja. GitHub Pages no incluye una base de datos privada. La guía enlazada incluye la migración SQL y los pasos de activación; ninguna página necesita una clave de administrador.
+
+El acceso a solicitudes usa una cuenta de propietario independiente de la contraseña de la cartera. La contraseña local nunca se envía al servidor. El cliente conserva la página pública y su enlace; no recibe controles de aprobación ni acceso a pedidos ajenos. La conexión guarda los pedidos en el servidor privado para recibirlos aunque Nicolás esté cerrado. La cartera, los cobros y los adjuntos siguen siendo locales y requieren sus copias cifradas; esto no sincroniza toda la contabilidad entre equipos.
+
+Las solicitudes conservan su **tasa base total de 35% hasta 3 meses o 40% desde 4 meses**, su total y sus cuotas exactas. Nunca se convierten a una tasa mensual. La carga manual conserva los planes mensuales anteriores. Si un CUIL ya existe con datos incompatibles o el primer vencimiento ya pasó, se debe resolver el caso antes de incorporarlo.
 
 ## Qué registra
 
@@ -61,13 +71,13 @@ El préstamo se crea con el pagaré **pendiente de firma**. Después de firmarlo
 
 ## Cobros y correcciones
 
-Los cobros se imputan por orden de registro a la cuota pendiente más antigua, primero a su interés y luego a su capital. Se aceptan pagos parciales; se rechazan importes superiores al saldo y cobros con fecha futura.
+Los cobros se imputan por orden de registro a la cuota pendiente más antigua, primero a sus intereses y costos y luego a su capital. Se aceptan pagos parciales; se rechazan importes superiores al saldo y cobros con fecha futura.
 
 **Anular error de cobro** conserva el registro como anulado y vuelve a calcular la imputación de los cobros posteriores. **Anular error de carga** de un préstamo solo está disponible cuando no tiene cobros activos. Son correcciones de registros: estas acciones no documentan una devolución real de efectivo.
 
 ## Datos privados y copias
 
-Los datos se guardan automáticamente cifrados en ese navegador, equipo y perfil. No se envían a GitHub ni se escriben dentro del HTML del programa. No hay sincronización automática entre equipos ni recuperación de contraseña.
+La cartera se guarda automáticamente cifrada en ese navegador, equipo y perfil. No se envía a GitHub ni se escribe dentro del HTML del programa. La conexión opcional guarda los pedidos y sus decisiones en la base privada; no sincroniza la cartera completa entre equipos. La contraseña local no tiene recuperación.
 
 Guardá una **Copia de seguridad** al finalizar la jornada o tras cambios importantes. Conservá el archivo y su contraseña. Borrar los datos del navegador o usar otro perfil puede dejarte sin acceso a los registros locales; el respaldo permite restaurarlos.
 
@@ -98,13 +108,13 @@ El cliente elige primero el **monto y los meses** y ve sus cuotas al instante. P
 
 Las tasas base configuradas son **35% para plazos de 1 a 3 meses** y **40% para plazos de 4 a 24 meses**. Antes de solicitar, el formulario muestra directamente el **importe solicitado**, el **costo del préstamo**, el **monto final a devolver** y todas las **cuotas mensuales iguales**. El costo informado es la diferencia entre el monto final y el importe solicitado; el monto final coincide con la suma de todas las cuotas.
 
-Por ejemplo, $1.000.000 en 6 meses se muestran con $404.000 de costo, $1.404.000 de monto final y 6 cuotas iguales de $234.000. $500.000 en 5 meses se muestran con $200.000 de costo, $700.000 de monto final y 5 cuotas de $140.000. Estas condiciones corresponden a la página de solicitud; la aplicación de administración conserva sus planes y tasas mensuales.
+Por ejemplo, $1.000.000 en 6 meses se muestran con $404.000 de costo, $1.404.000 de monto final y 6 cuotas iguales de $234.000. $500.000 en 5 meses se muestran con $200.000 de costo, $700.000 de monto final y 5 cuotas de $140.000. Estas condiciones corresponden a la página de solicitud; al aprobar el pedido, la administración conserva esos mismos importes. La carga manual sigue ofreciendo sus planes y tasas mensuales.
 
 **Continuar en WhatsApp** prepara un mensaje breve con **los datos del cliente, el importe solicitado, el monto final a devolver, el resumen de todas las cuotas iguales y el primer vencimiento estimado**, dirigido al contacto **5493544617342**. El monto a devolver aparece inmediatamente después del monto solicitado. El cliente ve el texto, lo revisa y debe **enviarlo manualmente en WhatsApp** como último paso. Si WhatsApp no se abre, puede usar el enlace de reintento o **Copiar solicitud** y pegar el mismo mensaje en la conversación con ese contacto. La consulta directa también está disponible desde el encabezado y el pie de página.
 
 La simulación, la solicitud y las fechas propuestas quedan pendientes de aprobación; completar el formulario no otorga el préstamo ni confirma sus vencimientos. Se puede descargar un calendario de las fechas propuestas e importarlo en una aplicación de calendario. Los avisos dependen de esa aplicación, su configuración y sus permisos; descargar el archivo no activa alarmas por sí solo.
 
-Los datos personales del formulario no se guardan por la página ni se envían a un backend propio. Se utilizan para preparar la solicitud que el cliente decide enviar por WhatsApp.
+Los datos personales del formulario no se guardan en el navegador del cliente. Si la conexión está activa, se envían al servidor privado para evaluación antes de abrir WhatsApp. Si no está configurada, se utilizan únicamente para preparar el mensaje que el cliente decide enviar por WhatsApp. No se publican en GitHub.
 
 ### Desarrollo y validación de la solicitud
 

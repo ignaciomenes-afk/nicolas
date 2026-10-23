@@ -68,7 +68,7 @@
             </div>
           </section>
 
-          <div class="privacy-note"><svg class="icon"><use href="#icon-lock"/></svg><p>Los datos se comparten al enviar por WhatsApp.<br><strong>No se guardan en esta página.</strong></p></div>
+          <div class="privacy-note"><svg class="icon"><use href="#icon-lock"/></svg><p id="request-privacy">Los datos se comparten al enviar por WhatsApp.<br><strong>No se guardan en esta página.</strong></p></div>
         </div>
 
         <aside class="quote-column" aria-label="Tu simulación y envío de la solicitud">
@@ -82,9 +82,9 @@
 
           <section class="send-card" aria-labelledby="send-title">
             <div class="send-heading"><span class="mini-step">3</span><h2 id="send-title">Revisá y enviá tu solicitud</h2></div>
-            <div class="field consent-field"><label class="checkbox-label" for="contact_consent"><input id="contact_consent" name="contact_consent" type="checkbox" required aria-describedby="error-contact_consent"><span>Acepto que me contacten por WhatsApp para responder esta solicitud y coordinar los pagos.</span></label><span class="field-error" id="error-contact_consent"></span></div>
+            <div class="field consent-field"><label class="checkbox-label" for="contact_consent"><input id="contact_consent" name="contact_consent" type="checkbox" required aria-describedby="error-contact_consent"><span id="contact-consent-text">Acepto que me contacten por WhatsApp para responder esta solicitud y coordinar los pagos.</span></label><span class="field-error" id="error-contact_consent"></span></div>
             <p id="form-error" class="form-error" role="alert" hidden></p>
-            <button id="send-request" class="btn btn-whatsapp btn-full" type="submit"><svg class="icon"><use href="#icon-chat"/></svg>Continuar en WhatsApp<svg class="icon action-arrow"><use href="#icon-arrow"/></svg></button>
+            <button id="send-request" class="btn btn-whatsapp btn-full" type="submit"><svg class="icon"><use href="#icon-chat"/></svg><span id="send-request-label">Continuar en WhatsApp</span><svg class="icon action-arrow"><use href="#icon-arrow"/></svg></button>
             <ol class="send-explanation send-steps" aria-label="Cómo completar el envío"><li><span>1</span><p>Verás tus datos, el monto solicitado, el total a devolver y las cuotas antes de tocar <strong>Enviar en WhatsApp</strong>.</p></li><li><span>2</span><p>Tocá <strong>Enviar en WhatsApp</strong> para completar tu solicitud.</p></li></ol>
             <button id="copy-request" class="btn btn-secondary btn-full copy-button" type="button"><svg class="icon"><use href="#icon-copy"/></svg>Copiar solicitud</button>
             <div id="send-status" class="status-card" role="status" aria-live="polite" hidden></div>

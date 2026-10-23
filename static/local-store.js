@@ -185,9 +185,13 @@
     });
   }
   function defaultSettings() { return { lender_name: "", lender_document: "", lender_phone: "", lender_address: "", city: "", reminder_days: 3 }; }
-  function emptyData() { return { schema_version: 2, seq: { product: 0, client: 0, invoice: 0, movement: 0, loan: 0, payment: 0 }, products: [], clients: [], invoices: [], movements: [], settings: defaultSettings(), loans: [], payments: [] }; }
+  function emptyData() { return { schema_version: 3, seq: { product: 0, client: 0, invoice: 0, movement: 0, loan: 0, payment: 0 }, products: [], clients: [], invoices: [], movements: [], settings: defaultSettings(), loans: [], payments: [] }; }
   function migrateData(data) {
     if (data.schema_version === 1) { data.schema_version = 2; data.seq.loan = 0; data.seq.payment = 0; data.settings = defaultSettings(); data.loans = []; data.payments = []; }
+    if (data.schema_version === 2) {
+      for (const loan of data.loans) { loan.pricing_mode = "monthly"; loan.request_quote = null; loan.request_customer = null; }
+      data.schema_version = 3;
+    }
     return data;
   }
   function checkArray(value, max, label) { if (!Array.isArray(value) || value.length > max) fail(`La copia contiene una lista de ${label} no válida.`); }
@@ -357,6 +361,8 @@
     const today = localDate(now()), calculated = paymentAllocation(data, loan), result = { ...loan };
     delete result.request_hash; delete result.cancelled;
     result.lender = { ...loan.lender }; result.note = { ...loan.note, attachment: loan.note.attachment ? { ...loan.note.attachment } : null };
+    if (loan.request_quote) result.request_quote = { ...loan.request_quote, installments: loan.request_quote.installments.map(item => ({ ...item })) };
+    if (loan.request_customer) result.request_customer = { ...loan.request_customer };
     result.installment_count = loan.installments.length;
     result.installments = loan.installments.map((item, index) => {
       const balance = calculated.balances[index].principal + calculated.balances[index].interest, paid = item.total_cents - balance;
@@ -385,6 +391,7 @@
     if (request.issued_date > localDate(now())) fail("La fecha de emisión de un préstamo registrado no puede ser futura.");
     requireRoom(data.loans, "préstamos"); const client = activeClient(data, request.client_id), settings = data.settings, id = nextID(data, "loan");
     const loan = { id, number: `P-${String(id).padStart(6, "0")}`, client_id: client.id, client_name: client.name, client_document: client.document, client_phone: client.phone, client_email: client.email, client_address: client.address, lender: { name: settings.lender_name, document: settings.lender_document, phone: settings.lender_phone, address: settings.lender_address, city: settings.city }, created_at: now(), principal_cents: preview.principal_cents, monthly_rate_bps: preview.monthly_rate_bps, term_months: preview.term_months, issued_date: preview.issued_date, first_due_date: preview.first_due_date, due_anchor_day: preview.due_anchor_day, interest_method: preview.interest_method, payment_plan: preview.payment_plan, interest_cents: preview.interest_cents, total_cents: preview.total_cents, notes: request.notes, cancelled: false, cancel_reason: "", cancelled_at: "", request_id: requestId, request_hash: hash, installments: preview.installments.map(item => ({ ...item })), note: { signed: false, signed_date: "", attachment: null } };
+    Object.assign(loan, { pricing_mode: "monthly", request_quote: null, request_customer: null });
     data.loans.push(loan); return { loan: loanResult(data, loan) };
   }
   function saveLoanNote(data, id, body) {
@@ -419,10 +426,109 @@
     if (payment.status !== "reversed") { payment.reversal_reason = field(body, "reason", "", 500, true); payment.reversed_at = now(); payment.status = "reversed"; }
     return { payment: paymentResult(data, payment), loan: loanResult(data, loan) };
   }
+  // Accepted online requests use their own fixed total policy. Never send this
+  // policy through loanPreview(), which intentionally remains a monthly calculator.
+  const REQUEST_QUOTE_KEYS = ["policy_version", "principal_cents", "term_months", "first_due_date", "due_anchor_day", "interest_percent", "interest_cents", "base_total_cents", "rounding_adjustment_cents", "total_cents", "installments"];
+  const REQUEST_CUSTOMER_KEYS = ["full_name", "cuil", "address_street", "address_number", "locality", "client_whatsapp"];
+  function canonicalCuil(value) {
+    if (typeof value !== "string" || !/^[\d\s-]+$/.test(value)) fail("El CUIL debe contener números, espacios o guiones.");
+    const cuil = value.replace(/[\s-]/g, "");
+    if (!/^\d{11}$/.test(cuil) || !["20", "23", "24", "27"].includes(cuil.slice(0, 2))) fail("El CUIL de la solicitud no es válido.");
+    const weights = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2]; let sum = 0;
+    for (let index = 0; index < weights.length; index++) sum += Number(cuil[index]) * weights[index];
+    if ((sum + Number(cuil[10])) % 11 !== 0) fail("El dígito verificador del CUIL no coincide.");
+    return cuil;
+  }
+  function canonicalRequestCustomer(value) {
+    exactObject(value, REQUEST_CUSTOMER_KEYS, "los datos del solicitante");
+    const customer = { full_name: field(value, "full_name", "", 160, true), cuil: canonicalCuil(field(value, "cuil", "", 32, true)), address_street: field(value, "address_street", "", 160, true), address_number: field(value, "address_number", "", 40, true), locality: field(value, "locality", "", 120, true), client_whatsapp: field(value, "client_whatsapp", "", 40, true) };
+    if (!/^\+?[\d\s().-]+$/.test(customer.client_whatsapp)) fail("El WhatsApp de la solicitud no es válido.");
+    customer.client_whatsapp = customer.client_whatsapp.replace(/[\s().-]/g, "").replace(/^\+/, "");
+    if (!/^[1-9]\d{7,14}$/.test(customer.client_whatsapp)) fail("El WhatsApp debe incluir el código de país y entre 8 y 15 dígitos.");
+    if (customer.client_whatsapp.startsWith("54") && !/^54(?:9)?\d{10}$/.test(customer.client_whatsapp)) fail("El WhatsApp argentino debe incluir 54 y el número completo, sin 0 ni 15.");
+    return customer;
+  }
+  function canonicalApprovedAt(value) {
+    if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|\+00:00)$/.test(value)) fail("approved_at debe ser una fecha y hora UTC válida.");
+    calendarDate(value.slice(0, 10), "approved_at");
+    if (Number(value.slice(11, 13)) > 23 || Number(value.slice(14, 16)) > 59 || Number(value.slice(17, 19)) > 59) fail("La hora de aprobación no es válida.");
+    const timestamp = Date.parse(value);
+    if (!Number.isFinite(timestamp) || timestamp > Date.now()) fail("La aprobación no puede tener una fecha futura.");
+    return new Date(timestamp).toISOString();
+  }
+  function canonicalRequestQuote(value, issuedDate) {
+    exactObject(value, REQUEST_QUOTE_KEYS, "la simulación aprobada");
+    if (value.policy_version !== "nicolas-total-v1") fail("La política de la solicitud no está admitida.");
+    const principal = int(value.principal_cents, 1, 100000000000, "principal_cents"), months = int(value.term_months, 1, 24, "term_months");
+    const firstDue = calendarDate(value.first_due_date, "first_due_date"), anchor = int(value.due_anchor_day, 1, 31, "due_anchor_day");
+    if (firstDue <= issuedDate) fail("La primera cuota debe ser posterior a la emisión; revisá la solicitud antes de aprobarla.", 409);
+    if (addMonths(firstDue, 0, anchor) !== firstDue) fail("El día de cobro no coincide con la primera cuota.");
+    const rate = months <= 3 ? 35 : 40, interest = Number((BigInt(principal) * BigInt(rate) + 50n) / 100n), base = principal + interest;
+    const unit = 100000n, divisor = BigInt(months) * unit, amount = Number((BigInt(base) + divisor - 1n) / divisor * unit), total = amount * months;
+    const expected = { policy_version: "nicolas-total-v1", principal_cents: principal, term_months: months, first_due_date: firstDue, due_anchor_day: anchor, interest_percent: rate, interest_cents: interest, base_total_cents: base, rounding_adjustment_cents: total - base, total_cents: total, installments: [] };
+    checkArray(value.installments, 24, "cuotas aprobadas");
+    if (value.installments.length !== months) fail("La cantidad de cuotas de la solicitud no coincide con el plazo.");
+    for (const key of REQUEST_QUOTE_KEYS) if (key !== "installments" && value[key] !== expected[key]) fail(`El campo ${key} no coincide con el cálculo de la solicitud.`);
+    for (let index = 0; index < months; index++) {
+      const item = value.installments[index], wanted = { number: index + 1, due_date: addMonths(firstDue, index, anchor), amount_cents: amount };
+      exactObject(item, ["number", "due_date", "amount_cents"], "una cuota aprobada");
+      for (const key of Object.keys(wanted)) if (item[key] !== wanted[key]) fail("El cronograma aprobado no coincide con su cálculo.");
+      expected.installments.push(wanted);
+    }
+    return expected;
+  }
+  function requestSchedule(quote) {
+    const regularPrincipal = Math.floor(quote.principal_cents / quote.term_months);
+    return quote.installments.map((item, index) => {
+      const principal = index === quote.term_months - 1 ? quote.principal_cents - regularPrincipal * (quote.term_months - 1) : regularPrincipal;
+      const cost = item.amount_cents - principal;
+      int(cost, 0, MAX_MONEY, "costo de financiación de la cuota");
+      return { number: item.number, due_date: item.due_date, principal_cents: principal, interest_cents: cost, total_cents: item.amount_cents };
+    });
+  }
+  function requestAddress(customer) { return `${customer.address_street} ${customer.address_number}, ${customer.locality}`; }
+  function comparableName(value) { return value.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, " ").toLocaleLowerCase("es"); }
+  function documentCuil(value) { return typeof value === "string" && /^[\d\s-]+$/.test(value) && /^\d{11}$/.test(value.replace(/[\s-]/g, "")) ? value.replace(/[\s-]/g, "") : null; }
+  async function normalizedRequestImport(body) {
+    exactObject(body, ["request_id", "approved_at", "issued_date", "customer", "quote"], "una solicitud aprobada");
+    const requestId = field(body, "request_id", "", 80, true).toLowerCase(); if (!validUUID(requestId)) fail("request_id debe ser un UUID válido.");
+    const approvedAt = canonicalApprovedAt(body.approved_at), issued = calendarDate(body.issued_date, "issued_date");
+    if (issued !== localDate(approvedAt)) fail("La emisión debe coincidir con el día de aprobación en Argentina.");
+    const customer = canonicalRequestCustomer(body.customer), quote = canonicalRequestQuote(body.quote, issued);
+    const request = { pricing_mode: "request_total", approved_at: approvedAt, issued_date: issued, customer, quote };
+    return { requestId, request, hash: await hashRequest(request) };
+  }
+  function importedRequestResult(data, loan, created) {
+    const client = data.clients.find(client => client.id === loan.client_id);
+    if (!client) fail("La solicitud importada perdió su referencia al cliente.");
+    return { client: clientResult(client), loan: loanResult(data, loan), created };
+  }
+  function importRequest(data, normalized) {
+    const { requestId, request, hash } = normalized, existing = data.loans.find(loan => loan.request_id === requestId);
+    if (existing) {
+      if (existing.pricing_mode !== "request_total" || existing.request_hash !== hash) fail("Ese identificador ya corresponde a otra solicitud o a datos diferentes.", 409);
+      return importedRequestResult(data, existing, false);
+    }
+    requireRoom(data.loans, "préstamos");
+    const customer = request.customer, quote = request.quote, matches = data.clients.filter(client => documentCuil(client.document) === customer.cuil);
+    if (matches.length > 1) fail("Hay varios clientes con ese CUIL. Resolvé la coincidencia antes de importar la solicitud.", 409);
+    let client = matches[0];
+    if (client && !client.active) fail("El cliente de ese CUIL está archivado. Revisalo antes de importar la solicitud.", 409);
+    if (client && comparableName(client.name) !== comparableName(customer.full_name)) fail("El CUIL coincide con un cliente de nombre diferente. Revisá su identidad antes de importar la solicitud.", 409);
+    if (!client) {
+      requireRoom(data.clients, "clientes");
+      client = { id: nextID(data, "client"), name: customer.full_name, document: customer.cuil, email: "", phone: customer.client_whatsapp, address: requestAddress(customer), active: true };
+      data.clients.push(client);
+    }
+    const settings = data.settings, id = nextID(data, "loan");
+    const loan = { id, number: `P-${String(id).padStart(6, "0")}`, client_id: client.id, client_name: customer.full_name, client_document: customer.cuil, client_phone: customer.client_whatsapp, client_email: "", client_address: requestAddress(customer), lender: { name: settings.lender_name, document: settings.lender_document, phone: settings.lender_phone, address: settings.lender_address, city: settings.city }, created_at: request.approved_at, principal_cents: quote.principal_cents, monthly_rate_bps: 0, term_months: quote.term_months, issued_date: request.issued_date, first_due_date: quote.first_due_date, due_anchor_day: quote.due_anchor_day, interest_method: "flat", payment_plan: "installments", interest_cents: quote.total_cents - quote.principal_cents, total_cents: quote.total_cents, notes: "", cancelled: false, cancel_reason: "", cancelled_at: "", request_id: requestId, request_hash: hash, installments: requestSchedule(quote), note: { signed: false, signed_date: "", attachment: null }, pricing_mode: "request_total", request_quote: quote, request_customer: customer };
+    data.loans.push(loan);
+    return importedRequestResult(data, loan, true);
+  }
   function validateData(data) {
     if (data?.schema_version === 1) return validateLegacyData(data);
     exactObject(data, ["schema_version", "seq", "products", "clients", "invoices", "movements", "settings", "loans", "payments"], "datos");
-    if (data.schema_version !== 2) fail("La versión de los datos no es compatible.");
+    if (![2, 3].includes(data.schema_version)) fail("La versión de los datos no es compatible.");
     exactObject(data.seq, ["product", "client", "invoice", "movement", "loan", "payment"], "secuencias");
     validateLegacyData({ schema_version: 1, seq: { product: data.seq.product, client: data.seq.client, invoice: data.seq.invoice, movement: data.seq.movement }, products: data.products, clients: data.clients, invoices: data.invoices, movements: data.movements });
     validateSettings(data.settings); checkArray(data.loans, MAX_RECORDS, "préstamos"); checkArray(data.payments, MAX_RECORDS, "cobros");
@@ -430,7 +536,9 @@
     for (const [key, rows] of [["loan", data.loans], ["payment", data.payments]]) { int(data.seq[key], 0, MAX_ID, `secuencia ${key}`); if (rows.some(row => row.id > data.seq[key])) fail("Las secuencias de la copia no coinciden con sus registros."); }
     const clientIds = new Set(data.clients.map(client => client.id)), loanRequests = new Set(), paymentRequests = new Set();
     for (const loan of data.loans) {
-      exactObject(loan, ["id", "number", "client_id", "client_name", "client_document", "client_phone", "client_email", "client_address", "lender", "created_at", "principal_cents", "monthly_rate_bps", "term_months", "issued_date", "first_due_date", "due_anchor_day", "interest_method", "payment_plan", "interest_cents", "total_cents", "notes", "cancelled", "cancel_reason", "cancelled_at", "request_id", "request_hash", "installments", "note"], "un préstamo");
+      const loanKeys = ["id", "number", "client_id", "client_name", "client_document", "client_phone", "client_email", "client_address", "lender", "created_at", "principal_cents", "monthly_rate_bps", "term_months", "issued_date", "first_due_date", "due_anchor_day", "interest_method", "payment_plan", "interest_cents", "total_cents", "notes", "cancelled", "cancel_reason", "cancelled_at", "request_id", "request_hash", "installments", "note"];
+      if (data.schema_version === 3) loanKeys.push("pricing_mode", "request_quote", "request_customer");
+      exactObject(loan, loanKeys, "un préstamo");
       if (loan.number !== `P-${String(loan.id).padStart(6, "0")}` || !clientIds.has(loan.client_id)) fail("La numeración o el cliente de un préstamo no es válido.");
       for (const key of ["client_name", "client_document", "client_phone", "client_email", "client_address"]) text(loan[key], key, key === "client_address" ? 500 : 250, key === "client_name");
       exactObject(loan.lender, ["name", "document", "phone", "address", "city"], "datos del prestamista"); for (const key of ["name", "document", "phone", "address", "city"]) text(loan.lender[key], key, key === "address" ? 500 : 250);
@@ -438,7 +546,21 @@
       if (typeof loan.cancelled !== "boolean") fail("El estado del préstamo no es válido.");
       if (loan.cancelled) { dateValue(loan.cancelled_at); text(loan.cancel_reason, "cancel_reason", 500, true); } else if (loan.cancelled_at !== "" || loan.cancel_reason !== "") fail("Un préstamo activo contiene datos de cancelación.");
       if (!validUUID(loan.request_id) || loan.request_id !== loan.request_id.toLowerCase() || loanRequests.has(loan.request_id) || !/^[0-9a-f]{64}$/.test(loan.request_hash)) fail("Los identificadores de un préstamo no son válidos."); loanRequests.add(loan.request_id);
-      const preview = loanPreview(loan, true); if (loan.issued_date > localDate(now())) fail("La copia contiene un préstamo con emisión futura."); int(loan.interest_cents, 0, MAX_MONEY, "interest_cents"); int(loan.total_cents, 1, MAX_MONEY, "total_cents");
+      calendarDate(loan.issued_date, "issued_date");
+      if (loan.issued_date > localDate(now())) fail("La copia contiene un préstamo con emisión futura.");
+      let preview;
+      if (data.schema_version === 3 && loan.pricing_mode === "request_total") {
+        const approvedAt = canonicalApprovedAt(loan.created_at), customer = canonicalRequestCustomer(loan.request_customer), quote = canonicalRequestQuote(loan.request_quote, loan.issued_date);
+        if (loan.created_at !== approvedAt || loan.issued_date !== localDate(approvedAt)) fail("La aprobación y la emisión de la solicitud no coinciden.");
+        for (const key of REQUEST_CUSTOMER_KEYS) if (loan.request_customer[key] !== customer[key]) fail("Los datos del solicitante no tienen un formato canónico.");
+        const expected = { principal_cents: quote.principal_cents, monthly_rate_bps: 0, term_months: quote.term_months, first_due_date: quote.first_due_date, due_anchor_day: quote.due_anchor_day, interest_method: "flat", payment_plan: "installments", client_name: customer.full_name, client_document: customer.cuil, client_phone: customer.client_whatsapp, client_email: "", client_address: requestAddress(customer) };
+        for (const key of Object.keys(expected)) if (loan[key] !== expected[key]) fail("Las condiciones o los datos del préstamo no coinciden con la solicitud aprobada.");
+        preview = { interest_cents: quote.total_cents - quote.principal_cents, total_cents: quote.total_cents, installments: requestSchedule(quote) };
+      } else {
+        if (data.schema_version === 3 && (loan.pricing_mode !== "monthly" || loan.request_quote !== null || loan.request_customer !== null)) fail("El tipo de cálculo o los datos de origen del préstamo no son válidos.");
+        preview = loanPreview(loan, true);
+      }
+      int(loan.interest_cents, 0, MAX_MONEY, "interest_cents"); int(loan.total_cents, 1, MAX_MONEY, "total_cents");
       if (loan.interest_cents !== preview.interest_cents || loan.total_cents !== preview.total_cents) fail("Los importes del préstamo no coinciden con su cálculo.");
       checkArray(loan.installments, 120, "cuotas"); if (loan.installments.length !== preview.installments.length) fail("La cantidad de cuotas es incompatible con el préstamo.");
       for (let index = 0; index < loan.installments.length; index++) { const item = loan.installments[index]; exactObject(item, ["number", "due_date", "principal_cents", "interest_cents", "total_cents"], "una cuota"); for (const key of Object.keys(item)) if (item[key] !== preview.installments[index][key]) fail("El cronograma de la copia no coincide con las condiciones del préstamo."); }
@@ -484,16 +606,16 @@
   }
   function loansCsv(data, kind) {
     let rows, filename;
-    if (kind === "loans") { filename = "prestamos.csv"; rows = [["Número", "Cliente", "Emisión", "Capital (centavos)", "Tasa mensual (%)", "Meses", "Interés (centavos)", "Total (centavos)", "Cobrado (centavos)", "Saldo (centavos)", "Estado", "Próximo vencimiento"], ...data.loans.map(loan => { const value = loanResult(data, loan); return [value.number, value.client_name, value.issued_date, value.principal_cents, value.monthly_rate_bps / 100, value.term_months, value.interest_cents, value.total_cents, value.paid_cents, value.balance_cents, value.status, value.next_due_date || ""]; })]; }
-    else if (kind === "payments") { filename = "cobros.csv"; rows = [["Número", "Préstamo", "Cliente", "Fecha", "Importe (centavos)", "Capital (centavos)", "Interés (centavos)", "Medio", "Estado"], ...data.payments.map(payment => { const value = paymentResult(data, payment); return [value.number, value.loan_number, value.client_name, value.paid_date, value.amount_cents, value.principal_cents, value.interest_cents, value.method, value.status]; })]; }
+    if (kind === "loans") { filename = "prestamos.csv"; rows = [["Número", "Cliente", "Emisión", "Capital (centavos)", "Tasa mensual (%)", "Meses", "Interés / coste financiero (centavos)", "Total (centavos)", "Cobrado (centavos)", "Saldo (centavos)", "Estado", "Próximo vencimiento", "Modalidad de cálculo", "Tasa base total (%)", "Interés base total (centavos)", "Ajuste por redondeo (centavos)"], ...data.loans.map(loan => { const value = loanResult(data, loan), quote = value.request_quote; return [value.number, value.client_name, value.issued_date, value.principal_cents, quote ? "" : value.monthly_rate_bps / 100, value.term_months, value.interest_cents, value.total_cents, value.paid_cents, value.balance_cents, value.status, value.next_due_date || "", quote ? "Total de solicitud aprobada" : "Interés mensual", quote ? quote.interest_percent : "", quote ? quote.interest_cents : "", quote ? quote.rounding_adjustment_cents : 0]; })]; }
+    else if (kind === "payments") { filename = "cobros.csv"; rows = [["Número", "Préstamo", "Cliente", "Fecha", "Importe (centavos)", "Capital (centavos)", "Interés / coste financiero (centavos)", "Medio", "Estado"], ...data.payments.map(payment => { const value = paymentResult(data, payment); return [value.number, value.loan_number, value.client_name, value.paid_date, value.amount_cents, value.principal_cents, value.interest_cents, value.method, value.status]; })]; }
     else if (kind === "clients") { filename = "clientes.csv"; rows = [["ID", "Cliente", "Documento", "Teléfono", "Correo", "Dirección", "Activo"], ...data.clients.map(client => [client.id, client.name, client.document, client.phone, client.email, client.address, client.active ? 1 : 0])]; }
-    else { filename = "libro.csv"; rows = [["Fecha", "Tipo", "Número", "Cliente", "Descripción", "Salida (centavos)", "Entrada (centavos)", "Saldo (centavos)", "Capital (centavos)", "Interés (centavos)"], ...ledger(data).entries.map(entry => [entry.date, entry.type, entry.number, entry.client_name, entry.description, entry.debit_cents, entry.credit_cents, entry.balance_cents, entry.principal_cents, entry.interest_cents])]; }
+    else { filename = "libro.csv"; rows = [["Fecha", "Tipo", "Número", "Cliente", "Descripción", "Salida (centavos)", "Entrada (centavos)", "Saldo (centavos)", "Capital (centavos)", "Interés / coste financiero (centavos)"], ...ledger(data).entries.map(entry => [entry.date, entry.type, entry.number, entry.client_name, entry.description, entry.debit_cents, entry.credit_cents, entry.balance_cents, entry.principal_cents, entry.interest_cents])]; }
     return { csv: `\uFEFF${rows.map(row => row.map(csvCell).join(",")).join("\r\n")}\r\n`, filename };
   }
   async function loadSession(token) {
     const active = checkSession(token), envelope = await readEnvelope(); checkSession(token);
     if (!envelope || descriptor(envelope) !== active.descriptor) { lock(); fail("Los datos o la contraseña cambiaron en otra pestaña. Volvé a desbloquear el sistema.", 409); }
-    const data = await decrypt(envelope, active.key, token, false), needsMigration = data.schema_version === 1;
+    const data = await decrypt(envelope, active.key, token, false), needsMigration = data.schema_version !== 3;
     return { envelope, data: migrateData(data), active, needsMigration };
   }
   async function mutate(operation, token) {
@@ -611,6 +733,13 @@
   function parseRoute(path) { if (typeof path !== "string" || path.includes("?") || path.includes("#") || !path.startsWith("/")) fail("La ruta no es válida.", 404); return path.replace(/\/$/, ""); }
   function routeID(value) { if (!/^[1-9]\d*$/.test(value)) fail("El identificador no es válido."); return int(Number(value), 1, MAX_ID, "identificador"); }
   function readRoute(data, path) {
+    const importedMatch = /^\/loan-requests\/imported\/([^/]+)$/.exec(path);
+    if (importedMatch) {
+      const requestId = importedMatch[1].toLowerCase(); if (!validUUID(requestId)) fail("El identificador de solicitud no es válido.");
+      const loan = data.loans.find(loan => loan.request_id === requestId && loan.pricing_mode === "request_total");
+      if (!loan) fail("La solicitud todavía no está importada en este espacio.", 404);
+      return importedRequestResult(data, loan, false);
+    }
     if (path === "/settings") return { settings: { ...data.settings } };
     if (path === "/loans") return { loans: data.loans.slice().sort((a, b) => b.id - a.id).map(loan => loanResult(data, loan)) };
     const loanMatch = /^\/loans\/([^/]+)$/.exec(path); if (loanMatch) return { loan: loanResult(data, findLoan(data, routeID(loanMatch[1]))) };
@@ -629,6 +758,7 @@
     fail("Ruta no encontrada o método no permitido.", 404);
   }
   function writeRoute(data, path, method, body, invoiceInput) {
+    if (path === "/loan-requests/import" && method === "POST") return importRequest(data, invoiceInput);
     if (path === "/settings" && method === "PUT") return saveSettings(data, body);
     if (path === "/loans" && method === "POST") return createLoan(data, invoiceInput);
     if (path === "/payments" && method === "POST") return createPayment(data, invoiceInput);
@@ -662,7 +792,7 @@
       if (serialized.length > maxBody) fail("La petición supera el tamaño máximo permitido.", 413);
       body = JSON.parse(serialized);
       if (path === "/loans/preview" && method === "POST") return { preview: loanPreview(body) };
-      const invoiceInput = method === "POST" ? path === "/invoices" ? await normalizedInvoice(body) : path === "/loans" ? await normalizedLoan(body) : path === "/payments" ? await normalizedPayment(body) : null : null;
+      const invoiceInput = method === "POST" ? path === "/invoices" ? await normalizedInvoice(body) : path === "/loans" ? await normalizedLoan(body) : path === "/payments" ? await normalizedPayment(body) : path === "/loan-requests/import" ? await normalizedRequestImport(body) : null : null;
       checkSession(token); return mutate(data => writeRoute(data, path, method, body, invoiceInput), token);
     });
   }

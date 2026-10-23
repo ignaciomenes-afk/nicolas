@@ -1,4 +1,4 @@
-/* Página del cliente. Los datos del formulario solo viven en esta pestaña. */
+/* Página del cliente. El formulario no se guarda en el almacenamiento del navegador. */
 (function () {
   "use strict";
   const OWNER_WHATSAPP = "5493544617342";
@@ -11,6 +11,10 @@
   const errorSummary = document.getElementById("form-error");
   const whatsappActions = document.getElementById("whatsapp-actions");
   const reopenWhatsApp = document.getElementById("reopen-whatsapp");
+  const sendButton = document.getElementById("send-request");
+  const sendLabel = document.getElementById("send-request-label");
+  const privacyText = document.getElementById("request-privacy");
+  const consentText = document.getElementById("contact-consent-text");
   const currency = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const dateFormatter = new Intl.DateTimeFormat("es-AR", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" });
   const todayFormatter = new Intl.DateTimeFormat("en", { timeZone: "America/Argentina/Buenos_Aires", year: "numeric", month: "2-digit", day: "2-digit" });
@@ -18,6 +22,9 @@
   const loanFields = new Set(["principal", "term_months", "first_due_date"]);
   let automaticFirstDate = true;
   let calendarKey = "", calendarId = "";
+  let submissionBusy = false, editVersion = 0, pendingSubmission = null;
+  const defaultPrivacy = privacyText?.innerHTML;
+  const defaultConsent = consentText?.textContent;
 
   function element(tag, text, className) {
     const node = document.createElement(tag);
@@ -80,7 +87,23 @@
     reopenWhatsApp.removeAttribute("href");
     errorSummary.hidden = true;
   }
-  function feedback(text) { status.textContent = text; status.hidden = false; }
+  function feedback(text, kind = "") {
+    status.textContent = text; status.hidden = false;
+    status.classList.toggle("is-pending", kind === "pending");
+  }
+  function cloudConfigured() { return window.NicolasCloud?.configured === true; }
+  function updateCloudNotice() {
+    const configured = cloudConfigured();
+    if (privacyText) {
+      if (configured) {
+        privacyText.replaceChildren(document.createTextNode("Al continuar, tu solicitud se envía de forma privada para evaluación. Después podés revisar y enviar el mensaje por WhatsApp."),
+          document.createElement("br"), element("strong", "Los datos no se guardan en este navegador."));
+      } else privacyText.innerHTML = defaultPrivacy;
+    }
+    if (consentText) consentText.textContent = configured
+      ? "Autorizo el envío de mis datos para evaluar esta solicitud y acepto que me contacten por WhatsApp para responderla y coordinar los pagos."
+      : defaultConsent;
+  }
 
   function readLoan() {
     const errors = {};
@@ -101,8 +124,9 @@
     } catch (_) { errors.first_due_date = "Elegí una fecha válida para la primera cuota."; }
     if (Object.keys(errors).length) return { errors, quote: null };
     try {
-      return { errors, quote: core.calculate({ principal_cents: principal, term_months: months, first_due_date: date,
-        ...(automaticFirstDate ? { due_anchor_day: originalDay } : {}) }) };
+      const anchor = automaticFirstDate ? originalDay : Number(date.slice(8));
+      return { errors, due_anchor_day: anchor,
+        quote: core.calculate({ principal_cents: principal, term_months: months, first_due_date: date, due_anchor_day: anchor }) };
     } catch (error) { return { errors: { first_due_date: error.message }, quote: null }; }
   }
   function renderCalculator() {
@@ -132,7 +156,7 @@
     }
   }
   function application() {
-    const { quote, errors } = readLoan();
+    const { quote, errors, due_anchor_day } = readLoan();
     const values = {};
     for (const name of ["full_name", "address_street", "address_number", "locality"]) values[name] = cleanText(field(name).value);
     if (values.full_name.length < 3 || values.full_name.split(" ").length < 2) errors.full_name = "Ingresá tu nombre y apellido completos.";
@@ -146,7 +170,7 @@
     if (!field("contact_consent").checked) errors.contact_consent = "Marcá la casilla si aceptás que te contacten por esta solicitud y sus pagos.";
     showErrors(errors);
     if (Object.keys(errors).length) return null;
-    return { ...values, cuil: cuil.normalized, client_whatsapp: phone.international, quote, remind_me: field("remind_me").checked };
+    return { ...values, cuil: cuil.normalized, client_whatsapp: phone.international, quote, due_anchor_day, remind_me: field("remind_me").checked };
   }
   function installmentSummary(quote) {
     if (quote.term_months === 1) return `1 cuota de ${money(quote.total_cents)}`;
@@ -169,9 +193,7 @@
     return url;
   }
 
-  form.addEventListener("submit", event => {
-    event.preventDefault(); clearFeedback();
-    const data = application(); if (!data) return;
+  function openWhatsApp(data) {
     const url = prepareWhatsApp(data);
     try {
       window.open(url, "_blank", "noopener,noreferrer");
@@ -179,23 +201,124 @@
     } catch (_) {
       feedback("El navegador no pudo abrir el chat. Tocá “Abrir mi solicitud en WhatsApp” para continuar. También podés copiar la solicitud y pegarla en WhatsApp.");
     }
-  });
-  document.getElementById("copy-request").addEventListener("click", async () => {
-    clearFeedback();
-    const data = application(); if (!data) return;
+  }
+  async function copyRequest(data, received = false) {
     const text = messageFor(data);
     prepareWhatsApp(data);
+    const receiptText = received ? "Tu solicitud se recibió para evaluación. " : "";
     try {
       if (!navigator.clipboard?.writeText) throw new Error("No clipboard");
       await navigator.clipboard.writeText(text);
-      feedback("Solicitud copiada. Pegala en el chat de WhatsApp con +54 9 3544 617342, revisala y tocá Enviar.");
+      feedback(receiptText + "Solicitud copiada. Pegala en el chat de WhatsApp con +54 9 3544 617342, revisala y tocá Enviar.");
     } catch (_) {
       const panel = element("div"); panel.id = "copy-fallback";
       const label = element("label", "Copiá este texto y pegalo en WhatsApp:"); label.htmlFor = "copy-fallback-text";
       const area = element("textarea"); area.id = "copy-fallback-text"; area.readOnly = true; area.value = text;
       panel.append(label, area); status.after(panel); area.focus(); area.select();
-      feedback("El navegador no permitió copiar automáticamente. Seleccioná y copiá el texto que aparece debajo.");
+      feedback(receiptText + "El navegador no permitió copiar automáticamente. Seleccioná y copiá el texto que aparece debajo.");
     }
+  }
+
+  function requestUUID() {
+    if (typeof window.crypto?.randomUUID === "function") return window.crypto.randomUUID();
+    if (typeof window.crypto?.getRandomValues !== "function") throw new Error("UUID unavailable");
+    const bytes = window.crypto.getRandomValues(new Uint8Array(16));
+    bytes[6] = bytes[6] & 15 | 64; bytes[8] = bytes[8] & 63 | 128;
+    const value = [...bytes].map(byte => byte.toString(16).padStart(2, "0")).join("");
+    return `${value.slice(0, 8)}-${value.slice(8, 12)}-${value.slice(12, 16)}-${value.slice(16, 20)}-${value.slice(20)}`;
+  }
+  function submissionFor(data) {
+    const customer = {};
+    for (const key of ["full_name", "cuil", "address_street", "address_number", "locality", "client_whatsapp"]) customer[key] = data[key];
+    const body = { customer, quote: { policy_version: "nicolas-total-v1", principal_cents: data.quote.principal_cents,
+      term_months: data.quote.term_months, first_due_date: data.quote.installments[0].due_date,
+      due_anchor_day: data.due_anchor_day }, contact_consent: true };
+    const fingerprint = JSON.stringify(body);
+    if (!pendingSubmission || pendingSubmission.fingerprint !== fingerprint) {
+      pendingSubmission = { fingerprint, payload: { request_id: requestUUID(), ...body }, receipt: null };
+    }
+    return pendingSubmission;
+  }
+  function lockForm() {
+    submissionBusy = true; form.setAttribute("aria-busy", "true");
+    const controls = [...form.elements].filter(control => "disabled" in control).map(control => [control, control.disabled]);
+    controls.forEach(([control]) => { control.disabled = true; });
+    const label = sendLabel?.textContent;
+    if (sendLabel) sendLabel.textContent = "Enviando solicitud…";
+    sendButton.setAttribute("aria-busy", "true");
+    return () => {
+      controls.forEach(([control, disabled]) => { if (control.isConnected) control.disabled = disabled; });
+      if (sendLabel) sendLabel.textContent = label;
+      sendButton.removeAttribute("aria-busy"); form.removeAttribute("aria-busy"); submissionBusy = false;
+    };
+  }
+  function pendingWindow() {
+    let popup = null;
+    try { popup = window.open("about:blank", "_blank"); } catch (_) { return null; }
+    if (popup) {
+      try { popup.opener = null; } catch (_) { closePendingWindow(popup); return null; }
+      try {
+        const meta = popup.document.createElement("meta"); meta.name = "referrer"; meta.content = "no-referrer";
+        popup.document.head.append(meta);
+        popup.document.title = "Enviando solicitud";
+        popup.document.body.textContent = "Estamos enviando tu solicitud de forma privada. WhatsApp se abrirá cuando se confirme la recepción.";
+      } catch (_) { /* The explicit WhatsApp link remains available if popup access is restricted. */ }
+    }
+    return popup;
+  }
+  function closePendingWindow(popup) { try { if (popup && !popup.closed) popup.close(); } catch (_) {} }
+  function continuePendingWindow(popup, url) {
+    try {
+      if (!popup || popup.closed) return false;
+      popup.location.replace(url); return true;
+    } catch (_) { closePendingWindow(popup); return false; }
+  }
+  async function submitStoredRequest(data, mode) {
+    const version = editVersion, cloud = window.NicolasCloud;
+    const unlock = lockForm();
+    let popup = null;
+    try {
+      const submission = submissionFor(data);
+      if (mode === "whatsapp") popup = pendingWindow();
+      feedback("Enviando tu solicitud de forma privada para evaluación…", "pending");
+      if (!submission.receipt) {
+        const receipt = await cloud.submit(submission.payload);
+        if (receipt?.request_id !== submission.payload.request_id || receipt?.status !== "pending") throw new Error("Receipt not confirmed");
+        submission.receipt = receipt;
+      }
+      if (version !== editVersion) {
+        closePendingWindow(popup);
+        feedback("Se recibió la solicitud anterior para evaluación. El formulario cambió: revisá los datos y continuá nuevamente para enviar la nueva versión.");
+        return;
+      }
+      if (mode === "copy") {
+        await copyRequest(data, true);
+      } else {
+        const opened = continuePendingWindow(popup, prepareWhatsApp(data));
+        feedback(opened
+          ? "Tu solicitud se recibió para evaluación. En WhatsApp, revisá el mensaje y tocá Enviar. El préstamo todavía debe confirmarse."
+          : "Tu solicitud se recibió para evaluación. Tocá “Abrir mi solicitud en WhatsApp” para revisar y enviar el mensaje. El préstamo todavía debe confirmarse.");
+      }
+    } catch (_) {
+      closePendingWindow(popup);
+      status.hidden = true;
+      errorSummary.textContent = "No pudimos confirmar la recepción de tu solicitud. Tus datos siguen en el formulario. Volvé a intentar; WhatsApp no se abrió.";
+      errorSummary.hidden = false;
+    } finally { unlock(); }
+  }
+  form.addEventListener("submit", async event => {
+    event.preventDefault(); if (submissionBusy) return;
+    clearFeedback(); updateCloudNotice();
+    const data = application(); if (!data) return;
+    if (cloudConfigured()) await submitStoredRequest(data, "whatsapp");
+    else openWhatsApp(data);
+  });
+  document.getElementById("copy-request").addEventListener("click", async () => {
+    if (submissionBusy) return;
+    clearFeedback(); updateCloudNotice();
+    const data = application(); if (!data) return;
+    if (cloudConfigured()) await submitStoredRequest(data, "copy");
+    else await copyRequest(data);
   });
 
   // RFC 5545: fold lines at 75 UTF-8 octets without splitting a Unicode character.
@@ -241,6 +364,7 @@
   function onEdit(event) {
     const name = event.target.name;
     if (!name) return;
+    editVersion++; pendingSubmission = null;
     clearFeedback(); clearFieldError(name);
     if (name === "first_due_date") automaticFirstDate = false;
     if (loanFields.has(name)) renderCalculator();
@@ -285,5 +409,6 @@
       shareFeedback("Seleccioná y copiá el enlace que aparece debajo.");
     }
   });
+  updateCloudNotice();
   renderCalculator();
 })();

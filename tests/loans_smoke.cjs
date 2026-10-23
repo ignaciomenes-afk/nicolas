@@ -144,7 +144,7 @@ async function gateCheck(page) {
     await page.locator("#privacy-access-error").waitFor({ state: "visible" }); await rejects(page, "/loans");
     await page.locator("#privacy-password-repeat").fill(password); await page.locator("#privacy-access-form").evaluate(form => form.requestSubmit());
     await page.locator("#privacy-gate").waitFor({ state: "hidden" });
-    assert.equal((await exportData(page)).data.schema_version, 2);
+    assert.equal((await exportData(page)).data.schema_version, 3);
   });
 }
 async function businessChecks(page) {
@@ -547,7 +547,7 @@ async function migrationCheck() {
       assert.deepEqual((await api(page, "/loans")).loans, []);
       await api(page, "/settings", "PUT", { lender_name: "Prestamista actualizado" });
       const migrated = await exportData(page);
-      assert.equal(migrated.data.schema_version, 2);
+      assert.equal(migrated.data.schema_version, 3);
       for (const key of ["products", "clients", "invoices", "movements"]) assert.deepEqual(migrated.data[key], old.data[key], key);
       assert.equal(migrated.envelope.vault_id, old.envelope.vault_id); assert.deepEqual(migrated.envelope.kdf, old.envelope.kdf);
       assert.equal((await api(page, "/clients")).clients[0].name, "Cliente anterior conservado");
@@ -556,7 +556,7 @@ async function migrationCheck() {
       await createLoan(page, client.id, { principal_cents: 10000, term_months: 1 });
       assert.equal((await api(page, "/loans")).loans.length, 1);
       await page.evaluate(({ backup, secret }) => NicolasStore.restoreBackup(backup, secret), { backup: oldBackup, secret: password });
-      const restored = await exportData(page); assert.equal(restored.data.schema_version, 2); assert.deepEqual(restored.data.loans, []);
+      const restored = await exportData(page); assert.equal(restored.data.schema_version, 3); assert.deepEqual(restored.data.loans, []);
       for (const key of ["products", "clients", "invoices", "movements"]) assert.deepEqual(restored.data[key], old.data[key]);
     } finally { await closeBrowser(browser); }
   });
