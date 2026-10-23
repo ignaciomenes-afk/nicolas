@@ -96,9 +96,9 @@ La copia local [PRESTAMOS.html](entrega/PRESTAMOS.html) es un único archivo par
 
 El cliente elige primero el **monto y los meses** y ve sus cuotas al instante. Puede usar los importes rápidos de **$100.000, $200.000 o $500.000**, o escribir otro importe; esos botones solo actualizan la simulación. Después completa sus datos personales y toca **Continuar en WhatsApp** para preparar la solicitud.
 
-La simulación calcula **35% de interés base para plazos de 1 a 3 meses** y **40% de interés base para plazos de 4 a 24 meses**. El porcentaje se aplica una sola vez sobre el capital, sin multiplicarlo por la cantidad de meses. El capital más ese interés forma el total base. Para obtener cuotas iguales, cada cuota se redondea **hacia arriba al múltiplo de $1.000**. Todas las cuotas, incluida la última, tienen el mismo importe. El **monto final a devolver** es la cuota redondeada multiplicada por los meses; el **ajuste adicional por redondeo** se muestra por separado del interés base en el formulario.
+Las tasas base configuradas son **35% para plazos de 1 a 3 meses** y **40% para plazos de 4 a 24 meses**. Antes de solicitar, el formulario muestra directamente el **importe solicitado**, el **costo del préstamo**, el **monto final a devolver** y todas las **cuotas mensuales iguales**. El costo informado es la diferencia entre el monto final y el importe solicitado; el monto final coincide con la suma de todas las cuotas.
 
-Por ejemplo, $1.000.000 en 6 meses generan $400.000 de interés base y $1.400.000 de total base. Las 6 cuotas iguales son de $234.000: el monto final a devolver es $1.404.000, con $4.000 de ajuste por redondeo. $500.000 en 5 meses generan 5 cuotas de $140.000 y $700.000 de monto final, sin ajuste. Los costos, condiciones y cuotas se muestran antes de solicitar. Estas condiciones corresponden a la página de solicitud; la aplicación de administración conserva sus planes y tasas mensuales.
+Por ejemplo, $1.000.000 en 6 meses se muestran con $404.000 de costo, $1.404.000 de monto final y 6 cuotas iguales de $234.000. $500.000 en 5 meses se muestran con $200.000 de costo, $700.000 de monto final y 5 cuotas de $140.000. Estas condiciones corresponden a la página de solicitud; la aplicación de administración conserva sus planes y tasas mensuales.
 
 **Continuar en WhatsApp** prepara un mensaje breve con **los datos del cliente, el importe solicitado, el monto final a devolver, el resumen de todas las cuotas iguales y el primer vencimiento estimado**, dirigido al contacto **5493544617342**. El monto a devolver aparece inmediatamente después del monto solicitado. El cliente ve el texto, lo revisa y debe **enviarlo manualmente en WhatsApp** como último paso. Si WhatsApp no se abre, puede usar el enlace de reintento o **Copiar solicitud** y pegar el mismo mensaje en la conversación con ese contacto. La consulta directa también está disponible desde el encabezado y el pie de página.
 
@@ -116,6 +116,8 @@ CHROMIUM_PATH=/ruta/a/chrome node tests/client_request_smoke.cjs entrega/Prestam
 ```
 
 El ZIP contiene únicamente `PRESTAMOS.html` y `LEEME-SOLICITUD.txt`. El generador usa herramientas incluidas en Node, incorpora estilos y scripts, valida su sintaxis y prepara el archivo vacío `docs/.nojekyll` para servir el sitio estático.
+
+**Modelo de cálculo interno:** el interés base se calcula una sola vez sobre el capital, con 35% para 1–3 meses y 40% para 4–24 meses, utilizando `BigInt` y redondeo al centavo con mitades hacia arriba. `base_total_cents` es capital más interés base. La cuota es `ceil(base_total_cents / (meses × 100000)) × 100000` centavos, un múltiplo de $1.000. Todas las cuotas, incluida la última, son iguales; `total_cents` es cuota por meses y `rounding_adjustment_cents` conserva la diferencia entre el total final y el total base. La interfaz muestra **Costo del préstamo** como `total_cents - principal_cents`, por lo que incluye íntegramente el costo final. Las pruebas comprueban el interés base, el redondeo mínimo, la igualdad de las cuotas y la suma exacta; estos cálculos también se aplican a importes de pocos centavos.
 
 ### Actualizar la página conservando el mismo enlace
 

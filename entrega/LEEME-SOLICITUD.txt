@@ -25,21 +25,19 @@ PARA SOLICITAR
 5. Si WhatsApp no se abre, usá el enlace de reintento o copiá la solicitud
    y pegala en una conversación con ese contacto.
 
-CÓMO SE CALCULA
-Para plazos de 1 a 3 meses, el interés base es del 35% del capital.
-Para plazos de 4 a 24 meses, el interés base es del 40% del capital.
-El porcentaje se calcula una sola vez; no se multiplica por la cantidad de meses.
-El capital más el interés forma el total base. Cada cuota se redondea hacia
-arriba al múltiplo de $1.000. Todas son iguales, incluida la última.
-El monto final a devolver es la cuota redondeada multiplicada por los meses.
-El ajuste adicional por redondeo se muestra separado del interés base.
+TUS IMPORTES
+Tasa base configurada para plazos de 1 a 3 meses: 35%.
+Tasa base configurada para plazos de 4 a 24 meses: 40%.
+El formulario muestra el importe solicitado, el costo del préstamo,
+el monto final a devolver y todas las cuotas mensuales iguales.
+El costo del préstamo es la diferencia entre el monto final y el solicitado.
+El monto final coincide con la suma de todas las cuotas.
 
 Ejemplo: pedís $1.000.000 en 6 meses.
-Interés base: $400.000. Total base: $1.400.000.
-Seis cuotas iguales de $234.000. Monto final a devolver: $1.404.000.
-Ajuste por redondeo: $4.000.
-Si pedís $500.000 en 5 meses, son cinco cuotas de $140.000: $700.000 de monto
-final, sin ajuste. El formulario muestra estos importes antes de solicitar.
+Costo del préstamo: $404.000. Monto final a devolver: $1.404.000.
+Seis cuotas iguales de $234.000.
+Si pedís $500.000 en 5 meses, el costo es $200.000 y el monto final es $700.000,
+en cinco cuotas de $140.000. Revisá estos importes antes de solicitar.
 
 FECHAS Y AVISOS
 Las fechas son propuestas hasta que se apruebe y acuerde el préstamo.

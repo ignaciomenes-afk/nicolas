@@ -115,18 +115,16 @@
       cell.colSpan = 3; row.append(cell); schedule.append(row); return;
     }
     const summary = element("div", undefined, "summary-grid");
-    const items = [["Importe que pedís", quote.principal_cents], [`Interés base · ${quote.interest_percent}%`, quote.interest_cents]];
-    if (quote.rounding_adjustment_cents > 0) items.push(["Ajuste por redondeo", quote.rounding_adjustment_cents]);
+    const items = [["Monto solicitado", quote.principal_cents], ["Costo del préstamo", quote.total_cents - quote.principal_cents]];
     for (const [label, value] of items) {
       const item = element("div", undefined, "summary-item");
       item.append(element("span", label), element("strong", money(value))); summary.append(item);
     }
     const total = element("div", undefined, "summary-total");
-    total.append(element("span", "Total a devolver"), element("strong", money(quote.total_cents)));
+    total.append(element("span", "Monto a devolver"), element("strong", money(quote.total_cents)));
     const highlight = element("div", undefined, "installment-highlight");
     highlight.append(element("span", quote.term_months === 1 ? "Una única cuota de" : `${quote.term_months} cuotas mensuales de`),
       element("strong", money(quote.regular_installment_cents)));
-    highlight.append(element("p", quote.rounding_adjustment_cents > 0 ? "Cuotas iguales, redondeadas hacia arriba a miles. El total incluye el ajuste." : "Todas las cuotas tienen el mismo importe."));
     result.append(highlight, summary, total);
     for (const item of quote.installments) {
       const row = element("tr");

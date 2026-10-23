@@ -172,8 +172,10 @@ async function brandChecks(page) {
     assert.match(await page.locator(".footer-brand").textContent(), /pr[eé]stamos/i);
     const facing = await page.evaluate(() => [document.title, document.body.innerText,
       document.querySelector('meta[name="description"]')?.content || "",
+      ...[...document.querySelectorAll("details")].map(element => element.textContent),
       ...[...document.querySelectorAll("[aria-label]")].map(element => element.getAttribute("aria-label"))].join("\n"));
     assert.doesNotMatch(facing, /nicol[aá]s|chatgpt|openai/i);
+    assert.doesNotMatch(facing, /redonde|ajust/i, "Visible page copy and FAQ must describe costs without internal calculation terms");
   });
 }
 async function mathChecks(page) {
@@ -259,7 +261,7 @@ async function formChecks(page) {
     await storageIsEmpty(page);
   });
   await fillValid(page);
-  await check("La calculadora visible muestra dos cuotas, capital, interés total y total a devolver", async () => {
+  await check("La calculadora visible muestra cuotas, capital, costo del préstamo y monto a devolver", async () => {
     await page.waitForFunction(() => document.getElementById("calculator-result").textContent.includes("270.000"));
     const text = await page.locator("#calculator-result").textContent();
     assert.ok(text.includes("200.000")); assert.ok(text.includes("70.000")); assert.ok(text.includes("270.000"));
@@ -267,11 +269,12 @@ async function formChecks(page) {
     for (const row of await page.locator("#installments-body tr").all()) assert.ok((await row.textContent()).includes("135.000"));
     await page.locator('[name="term_months"]').selectOption("3");
     await page.waitForFunction(() => document.getElementById("installments-body").children.length === 3);
-    assert.match(await page.locator("#calculator-result").textContent(), /35\s?%/);
+    assert.match(await page.locator("#calculator-result").textContent(), /Costo del pr[eé]stamo/);
+    assert.ok((await page.locator("#calculator-result").textContent()).includes("70.000"));
     assert.ok((await page.locator("#calculator-result").textContent()).includes("270.000"));
     await page.locator('[name="term_months"]').selectOption("4");
     await page.waitForFunction(() => document.getElementById("installments-body").children.length === 4);
-    assert.match(await page.locator("#calculator-result").textContent(), /40\s?%/);
+    assert.ok((await page.locator("#calculator-result").textContent()).includes("80.000"));
     assert.ok((await page.locator("#calculator-result").textContent()).includes("280.000"));
     for (const row of await page.locator("#installments-body tr").all()) assert.ok((await row.textContent()).includes("70.000"));
     await page.locator('[name="term_months"]').selectOption("2");
@@ -303,13 +306,17 @@ async function formChecks(page) {
     assert.equal(await targetCount(page), before); assert.equal(await page.evaluate(() => window.__copiedRequest), copied);
     await page.locator('[name="term_months"]').selectOption("2"); await page.locator('[data-loan-amount="200000"]').click();
   });
-  await check("El formulario separa el interés base del ajuste y muestra las seis cuotas iguales de $234.000", async () => {
+  await check("El formulario muestra costo $404.000, total $1.404.000 y seis cuotas de $234.000 con textos claros", async () => {
     const before = await targetCount(page);
     await page.locator('[name="principal"]').fill("1000000"); await page.locator('[name="term_months"]').selectOption("6");
     await page.waitForFunction(() => document.getElementById("installments-body").children.length === 6);
     const summary = await page.locator("#calculator-result").textContent();
-    assert.match(summary, /inter[eé]s\s+base/i); assert.match(summary, /ajuste\s+por\s+redondeo/i);
-    assert.ok(summary.includes("400.000")); assert.ok(summary.includes("4.000")); assert.ok(summary.includes("1.404.000"));
+    assert.match(summary, /costo\s+del\s+pr[eé]stamo/i);
+    const cost = page.locator("#calculator-result .summary-item").filter({ hasText: "Costo del préstamo" });
+    assert.equal(await cost.count(), 1); assert.ok((await cost.locator("strong").textContent()).includes("404.000"));
+    assert.ok(summary.includes("1.000.000")); assert.ok(summary.includes("1.404.000")); assert.ok(!summary.includes("400.000"));
+    const facing = await page.evaluate(() => [document.body.innerText, ...[...document.querySelectorAll("details")].map(element => element.textContent)].join("\n"));
+    assert.doesNotMatch(facing, /redonde|ajust/i);
     assert.match(await page.locator(".installment-highlight").textContent(), /6\s+cuotas\s+mensuales/i);
     for (const row of await page.locator("#installments-body tr").all()) assert.ok((await row.textContent()).includes("234.000"));
     assert.equal(await targetCount(page), before, "Changing the simulation must not open WhatsApp");
