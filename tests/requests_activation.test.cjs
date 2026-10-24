@@ -106,3 +106,15 @@ test("disabling remains available offline with no credentials or network", async
     assert.deepEqual(JSON.parse(fs.readFileSync(f.filename, "utf8")), { enabled: false, supabase_url: "", publishable_key: "" });
   } finally { f.clean(); }
 });
+test("--from-config uses the saved public connection and still verifies before activation", async () => {
+  const f = fixture();
+  try {
+    const saved = { ...environmentConfiguration(environment), enabled: false };
+    fs.writeFileSync(f.filename, JSON.stringify(saved));
+    const verify = c => { assert.equal(c.supabase_url, saved.supabase_url); assert.equal(c.publishable_key, saved.publishable_key); return verifyBackend(c, async () => ready); };
+    await configureRequests({ filename: f.filename, fromConfig: true, checkOnly: true, environment: {}, verify });
+    assert.deepEqual(JSON.parse(fs.readFileSync(f.filename, "utf8")), saved);
+    await configureRequests({ filename: f.filename, fromConfig: true, environment: {}, verify });
+    assert.equal(JSON.parse(fs.readFileSync(f.filename, "utf8")).enabled, true);
+  } finally { f.clean(); }
+});

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#242442">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="referrer" content="no-referrer">
+  <title>Activar tu bandeja · Préstamos</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%237970df'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-family='Arial' font-size='43' font-weight='700' fill='white'%3EN%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a href="#setup-main" class="skip-link">Ir a los pasos</a>
+  <header class="setup-header"><div class="setup-header-inner"><div class="setup-brand"><span class="setup-mark" aria-hidden="true">N<span></span></span><span>préstamos<span>NICOLÁS · ESPACIO DE ADMINISTRACIÓN</span></span></div><span class="setup-private"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Configuración de tu bandeja</span></div></header>
+  <main id="setup-main" class="setup-main">
+    <div class="setup-heading"><span class="setup-eyebrow">ACTIVACIÓN DE TU BANDEJA</span><h1>Activemos tus solicitudes<span>.</span></h1><p>Seguí estos tres pasos en tu proyecto de Supabase. La contraseña de tu cuenta se escribe únicamente en Supabase.</p></div>
+    <div id="setup-config-error" class="setup-feedback setup-feedback-error" role="alert" hidden></div>
+    <ol class="setup-steps">
+      <li class="setup-step"><span class="setup-step-number" aria-hidden="true">1</span><section aria-labelledby="setup-account-title"><div class="setup-step-heading"><span class="setup-eyebrow">TU CUENTA DE ADMINISTRACIÓN</span><h2 id="setup-account-title">Creá tu usuario.</h2></div><p>Abrí el panel de tu proyecto y, en <strong>Authentication → Users</strong>, elegí <strong>Add user → Create new user</strong>. Usá tu correo y una contraseña propia. Si aparece <strong>Auto Confirm User</strong>, dejalo activado.</p><p class="setup-help">Si ya creaste tu cuenta en este proyecto, podés seguir con el paso 2.</p><a id="setup-users-link" class="setup-button setup-button-secondary" target="_blank" rel="noopener noreferrer" aria-disabled="true">Abrir usuarios de mi proyecto<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6m0-6L10 14M9 4H4v16h16v-5"/></svg></a></section></li>
+      <li class="setup-step"><span class="setup-step-number" aria-hidden="true">2</span><section aria-labelledby="setup-install-title"><div class="setup-step-heading"><span class="setup-eyebrow">PREPARAR Y PEGAR</span><h2 id="setup-install-title">Instalá la recepción.</h2></div><p>Escribí el correo de la cuenta que creaste en el paso 1. Vamos a preparar el texto completo para instalar la bandeja y autorizar esa cuenta.</p><form id="setup-email-form" class="setup-email-form" autocomplete="off"><label for="setup-owner-email">Correo de tu cuenta de administración</label><div class="setup-email-row"><input type="email" id="setup-owner-email" name="owner-email" required maxlength="254" autocomplete="off" inputmode="email" spellcheck="false" autocapitalize="none" placeholder="tu-correo@ejemplo.com" aria-describedby="setup-email-help setup-email-error" disabled><button id="setup-generate-sql" class="setup-button setup-button-primary" type="submit" disabled>Preparar instalación</button></div><small id="setup-email-help">Este correo se incorpora al texto SQL para que tu cuenta pueda ver las solicitudes.</small><p id="setup-email-error" class="setup-inline-error" role="alert" hidden></p></form>
+        <div id="setup-sql-panel" class="setup-sql-panel" hidden><div class="setup-sql-instructions"><strong>Copiá todo, pegalo y ejecutalo.</strong><p>1. Tocá <strong>Copiar instalación</strong>.<br>2. Abrí el editor SQL de tu proyecto.<br>3. Pegá el texto completo y tocá <strong>Run</strong>.</p></div><div class="setup-sql-actions"><button id="setup-copy-sql" class="setup-button setup-button-primary" type="button">Copiar instalación</button><a id="setup-sql-link" class="setup-button setup-button-secondary" target="_blank" rel="noopener noreferrer" aria-disabled="true">Abrir editor SQL<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6m0-6L10 14M9 4H4v16h16v-5"/></svg></a></div><p id="setup-copy-status" class="setup-copy-status" role="status" aria-live="polite"></p><label class="setup-sql-label" for="setup-sql-output">Instalación completa · también podés seleccionarla y copiarla manualmente</label><textarea id="setup-sql-output" readonly rows="9" spellcheck="false" autocapitalize="none" autocomplete="off" aria-describedby="setup-copy-status"></textarea><p class="setup-help">El correo se usa solo en esta página y en el SQL que pegues en tu propio proyecto. No se agrega a los enlaces ni se guarda en este navegador.</p></div>
+      </section></li>
+      <li class="setup-step"><span class="setup-step-number" aria-hidden="true">3</span><section aria-labelledby="setup-check-title"><div class="setup-step-heading"><span class="setup-eyebrow">YA CASI ESTAMOS</span><h2 id="setup-check-title">Comprobá la instalación.</h2></div><p>Cuando el editor muestre que el SQL se ejecutó correctamente, volvé acá y comprobá la recepción. Esta prueba no envía una solicitud de préstamo.</p><button id="setup-check" class="setup-button setup-button-primary" type="button" disabled>Comprobar instalación</button><div id="setup-probe-status" class="setup-feedback" role="status" aria-live="polite" aria-atomic="true" data-state="idle" hidden></div></section></li>
+    </ol>
+    <p class="setup-footer"><span>préstamos<span>.</span></span>Tus datos de administración, en tu propio proyecto.</p>
+    <noscript><p class="setup-feedback setup-feedback-error">Abrí esta página con JavaScript activado en tu navegador para preparar y comprobar la instalación.</p></noscript>
+  </main>
+</body>
+</html>

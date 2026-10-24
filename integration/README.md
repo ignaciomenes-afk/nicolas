@@ -4,6 +4,18 @@ La página pública puede enviar solicitudes a un proyecto Supabase y Nicolás p
 
 Los registros existentes de Nicolás siguen en su bóveda cifrada local. La bandeja remota guarda datos personales de las solicitudes en una base privada: activar esta integración agrega almacenamiento en la nube y requiere conexión para enviar, consultar y decidir solicitudes. No sincroniza las copias completas de la bóveda entre equipos.
 
+## Instalación guiada desde el navegador
+
+El asistente del propietario está en **[Activar solicitudes](https://ignaciomenes-afk.github.io/nicolas/activar/)**. No se enlaza desde el formulario del cliente y no permite leer solicitudes ni ejecutar SQL por sí mismo. Incorpora únicamente la URL y la clave pública del proyecto y el código de instalación.
+
+1. Abrí **Usuarios de Supabase** desde el asistente y creá tu cuenta de administración con tu correo y una contraseña propia. La contraseña se escribe únicamente en Supabase.
+2. Volvé al asistente, indicá el correo de esa cuenta y copiá la instalación preparada. Abrí el **SQL Editor**, pegá el código y pulsá **Run**. El script instala las funciones y autoriza únicamente al usuario existente con ese correo, dentro de una transacción. Si la cuenta no existe o hay coincidencias ambiguas, se detiene sin instalar parcialmente.
+3. Usá **Comprobar instalación**. La comprobación no crea pedidos y solo verifica que la recepción está instalada. La publicación de las páginas conectadas y el acceso del propietario se verifican por separado; no presenta la instalación como un circuito ya activado.
+
+El correo se mantiene en memoria y en el SQL que decidís copiar; no se envía durante la comprobación, no se guarda en el navegador y no se añade a enlaces. El asistente no pide la contraseña, una clave de administrador ni datos de clientes.
+
+Para generar la copia web `docs/activar/index.html` y el archivo autónomo `entrega/ACTIVAR-SOLICITUDES.html`, usá `node scripts/build-requests-setup.cjs` después de guardar la URL y la clave pública correctas en `integration/requests-config.json`. El asistente permite comprobar la instalación aunque la aplicación mantenga `enabled: false` hasta completar la verificación.
+
 ## Preparar el proyecto
 
 1. Entrá a tu cuenta en [Supabase](https://supabase.com/dashboard), creá un proyecto o abrí el que ya tenés y esperá a que esté disponible. Conservá el acceso de administración. Revisá el plan, la región y las condiciones de tratamiento de datos antes de usar información real.
@@ -47,6 +59,8 @@ node scripts/configure-requests.cjs
 ```
 
 El comando sin opciones hace **la misma comprobación remota antes de guardar**. Solo si pasa escribe `integration/requests-config.json` con `enabled: true`. Ante un error conserva la configuración anterior; no crea el proyecto, instala SQL ni autoriza usuarios. No actives el JSON manualmente para saltar una comprobación fallida.
+
+Si la URL y la clave pública correctas ya están guardadas en `integration/requests-config.json`, podés usarlas explícitamente sin depender de variables antiguas: `node scripts/configure-requests.cjs --from-config --check` comprueba y `node scripts/configure-requests.cjs --from-config` activa después de comprobar. Ambos conservan las validaciones y rechazan claves privadas.
 
 Después generá ambos HTML:
 
