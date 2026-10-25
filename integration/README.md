@@ -1,12 +1,14 @@
 # Bandeja privada de solicitudes
 
-La página pública puede enviar solicitudes a un proyecto Supabase y Nicolás puede consultarlas con una cuenta autorizada. El proyecto y la cuenta deben pertenecer al prestamista. Esta entrega incluye el código y la migración; **no crea una cuenta, no despliega un backend y deja la conexión desactivada** hasta configurar y comprobar un proyecto real.
+La página pública envía solicitudes al proyecto Supabase configurado y Nicolás las consulta con una cuenta autorizada. La migración y la función de acceso inicial están instaladas en el proyecto del prestamista. El acceso requiere verificar el correo y autorizar la primera cuenta mediante un token administrativo con permiso de escritura; no se elige automáticamente al primer usuario registrado.
 
 Los registros existentes de Nicolás siguen en su bóveda cifrada local. La bandeja remota guarda datos personales de las solicitudes en una base privada: activar esta integración agrega almacenamiento en la nube y requiere conexión para enviar, consultar y decidir solicitudes. No sincroniza las copias completas de la bóveda entre equipos.
 
 ## Instalación guiada desde el navegador
 
 El asistente del propietario está en **[Activar solicitudes](https://ignaciomenes-afk.github.io/nicolas/activar/)**. No se enlaza desde el formulario del cliente y no permite leer solicitudes ni ejecutar SQL por sí mismo. Incorpora únicamente la URL y la clave pública del proyecto y el código de instalación.
+
+Con la conexión ya activada, ese asistente conduce directamente a [Nicolás](https://ignaciomenes-afk.github.io/nicolas/privado/). Los pasos SQL siguientes son para preparar otro proyecto; no hay que repetirlos para entrar al proyecto ya conectado. El acceso actual se explica en [OWNER-ACCESS.md](OWNER-ACCESS.md).
 
 1. Abrí **Usuarios de Supabase** desde el asistente y creá tu cuenta de administración con tu correo y una contraseña propia. La contraseña se escribe únicamente en Supabase.
 2. Volvé al asistente, indicá el correo de esa cuenta y copiá la instalación preparada. Abrí el **SQL Editor**, pegá el código y pulsá **Run**. El script instala las funciones y autoriza únicamente al usuario existente con ese correo, dentro de una transacción. Si la cuenta no existe o hay coincidencias ambiguas, se detiene sin instalar parcialmente.

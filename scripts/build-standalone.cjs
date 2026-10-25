@@ -15,7 +15,7 @@ let html = read("index.html")
   .replace(/\s*<script\s+src="\/?app\.js"\s+defer><\/script>/, "")
   .replace(/<body(?:\s[^>]*)?>/, '<body class="vault-locked">')
   .replace(/<title>[^<]*<\/title>/, '<title>Nicolás · Préstamos privados</title>')
-  .replace('</head>', `  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src ${requests.connection().connectSource}; frame-src 'self' blob: data:; base-uri 'none'; form-action 'none'">\n</head>`)
+  .replace('</head>', `  <meta name="referrer" content="no-referrer">\n<meta name="robots" content="noindex, nofollow">\n<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src ${requests.connection().connectSource}; frame-src 'self' blob: data:; base-uri 'none'; form-action 'none'">\n</head>`)
   .replace('</body>', () => `${script("local-store.js")}\n<script>\n${requests.browserSource().replace(/<\/script/gi, "<\\/script")}\n</script>\n${script("app.js")}\n${script("requests-ui.js")}\n${script("private-ui.js")}\n</body>`);
 if (/<(?:script|link)[^>]+(?:src|href)="\//.test(html)) throw new Error("El archivo aún requiere recursos externos.");
 if (!html.includes("data-nicolas-main")) throw new Error("No se incorporaron los estilos de la aplicación.");
@@ -24,4 +24,9 @@ if (embedded.length !== 5) throw new Error("Faltan componentes de la aplicación
 for (const [index, match] of embedded.entries()) new vm.Script(match[1], { filename: `Nicolas.inline-${index + 1}.js` });
 fs.mkdirSync(path.dirname(output), { recursive: true });
 fs.writeFileSync(output, html, "utf8");
+if (!process.argv[2]) {
+  const privateWeb = path.join(root, "docs", "privado", "index.html");
+  fs.mkdirSync(path.dirname(privateWeb), { recursive: true });
+  fs.writeFileSync(privateWeb, html, "utf8");
+}
 console.log(`Página sin instalación: ${output} (${Buffer.byteLength(html)} bytes)`);

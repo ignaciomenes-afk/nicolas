@@ -11,6 +11,7 @@ const read = filename => fs.readFileSync(path.join(root, filename), "utf8");
 const { config } = connection();
 if (!config.supabase_url || !config.publishable_key) throw new Error("Configurá primero la URL y la clave pública reales del proyecto.");
 const setup = { supabase_url: config.supabase_url, publishable_key: config.publishable_key,
+  application_enabled: config.enabled,
   migration_sql: read("supabase/migrations/202610230001_private_requests.sql") };
 const source = `window.NicolasSetupConfig = Object.freeze(${JSON.stringify(setup).replace(/</g, "\\u003c")});\n${read("integration/setup/app.js")}`;
 new vm.Script(source, { filename: "requests-setup.inline.js" });

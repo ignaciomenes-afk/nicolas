@@ -143,13 +143,13 @@ async function main() {
     await page.evaluate(() => { window.__denyClipboard = false; });
   });
   await check("Correo con delimitador SQL no puede cerrar el DO; una edición inválida borra el SQL preparado", async () => {
-    const previousTag = generated.match(/\bdo\s+(\$[a-z0-9_]*\$)/i)[1];
+    const previousTag = [...generated.matchAll(/\bdo\s+(\$[a-z0-9_]*\$)/gi)].at(-1)[1];
     const unusual = previousTag + email;
     await page.locator(selectors.email).fill(unusual);
     assert.equal(await copyBlocked(), true);
     await page.locator("#setup-generate-sql").click();
     const safe = await page.locator(selectors.sql).inputValue();
-    const chosenTag = safe.match(/\bdo\s+(\$[a-z0-9_]*\$)/i)[1];
+    const chosenTag = [...safe.matchAll(/\bdo\s+(\$[a-z0-9_]*\$)/gi)].at(-1)[1];
     assert.notEqual(chosenTag, previousTag); assert.ok(!unusual.includes(chosenTag));
     assert.ok(safe.includes("'" + unusual.replace(/'/g, "''") + "'"));
     assert.equal(safe.split(chosenTag).length - 1, 2, "Exactly one opening and closing DO delimiter");

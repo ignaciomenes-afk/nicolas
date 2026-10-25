@@ -13,6 +13,8 @@ const source = fs.readFileSync(path.resolve(__dirname, "../../shared/requests-cl
 const origin = "https://abcdefghijklmnopqrst.supabase.co";
 const publicKey = "sb_publishable_test_public_key_without_private_permissions";
 const ownerToken = "test-owner-access-token-for-memory-only-session";
+const ownerUserId = "00000000-0000-4000-8000-000000000001";
+const privateReturnUrl = "https://ignaciomenes-afk.github.io/nicolas/privado/";
 const requestId = "8e335e9f-27d7-4389-a949-56388994aeec";
 const payload = {
   request_id: requestId,
@@ -36,9 +38,10 @@ function deferred() {
   const promise = new Promise((res, rej) => { resolve = res; reject = rej; });
   return { promise, resolve, reject };
 }
-function harness(config = { enabled: true, supabase_url: origin, publishable_key: publicKey }, handler) {
+function harness(config = { enabled: true, supabase_url: origin, publishable_key: publicKey }, handler, initialUrl = privateReturnUrl) {
   const hub = new EventTarget();
-  const calls = [];
+  const calls = [], logs = [];
+  const address = new URL(initialUrl), historyChanges = [];
   const clock = { now: Date.UTC(2026, 0, 1, 12) };
   class ClockDate extends Date {
     constructor(...args) { super(...(args.length ? args : [clock.now])); }
@@ -46,8 +49,12 @@ function harness(config = { enabled: true, supabase_url: origin, publishable_key
   }
   const context = {
     NicolasCloudConfig: config,
+    location: address,
+    history: { replaceState(_state, _title, target) { address.href = new URL(target, address).href; historyChanges.push(address.href); } },
     URL, Headers, Request, Response, Event, EventTarget, AbortController, TextEncoder, TextDecoder, atob, btoa,
-    crypto: webcrypto, Date: ClockDate, console, setTimeout, clearTimeout,
+    crypto: webcrypto, Date: ClockDate,
+    console: Object.fromEntries(["log", "info", "warn", "error", "debug"].map(name => [name, (...args) => logs.push(args.map(String).join(" "))])),
+    setTimeout, clearTimeout,
     addEventListener: hub.addEventListener.bind(hub),
     removeEventListener: hub.removeEventListener.bind(hub),
     dispatchEvent: hub.dispatchEvent.bind(hub),
@@ -59,7 +66,10 @@ function harness(config = { enabled: true, supabase_url: origin, publishable_key
       calls.push(call);
       if (handler) return handler(call, calls.length);
       const pathname = new URL(call.url).pathname;
-      if (pathname === "/auth/v1/token") return token();
+      if (pathname === "/auth/v1/token" || pathname === "/auth/v1/verify") return token();
+      if (pathname === "/auth/v1/user") return json({ id: ownerUserId, email: verifiedEmail, email_confirmed_at: "2025-12-31T12:00:00Z" });
+      if (pathname === "/auth/v1/otp") return json({});
+      if (pathname === "/functions/v1/nicolas-owner-access") return json({ activated: true });
       if (pathname.endsWith("/nicolas_list_requests")) return json([]);
       if (pathname.endsWith("/nicolas_submit_request")) return json({ request_id: requestId, status: "pending" });
       if (pathname.endsWith("/nicolas_approve_request")) return json({ request_id: requestId, approved_at: "2026-01-01T12:00:00Z", issued_date: "2026-01-01", customer: payload.customer, quote: payload.quote });
@@ -72,7 +82,7 @@ function harness(config = { enabled: true, supabase_url: origin, publishable_key
   }
   context.window = context;
   vm.runInNewContext(source, context, { filename: "requests-cloud.js" });
-  return { api: context.NicolasCloud, calls, clock, window: context };
+  return { api: context.NicolasCloud, calls, logs, clock, window: context, historyChanges };
 }
 function rpcCalls(calls, name) { return calls.filter(call => new URL(call.url).pathname === "/rest/v1/rpc/" + name); }
 async function rejectsSafe(promise, forbidden = []) {
@@ -87,9 +97,12 @@ async function rejectsSafe(promise, forbidden = []) {
 test("exports the complete public transport and leaves disabled configuration offline", async () => {
   const h = harness({ enabled: false, supabase_url: "", publishable_key: "" });
   assert.equal(h.api.configured, false);
-  for (const name of ["submit", "signIn", "signOut", "listRequests", "approveRequest", "rejectRequest"]) assert.equal(typeof h.api[name], "function");
+  for (const name of ["submit", "signIn", "requestEmailCode", "signInWithCode", "resumeEmailSignIn", "activateOwner", "signOut", "listRequests", "approveRequest", "rejectRequest"]) assert.equal(typeof h.api[name], "function");
   await rejectsSafe(h.api.submit(payload));
   await rejectsSafe(h.api.signIn("owner@example.test", "test-password"));
+  await rejectsSafe(h.api.requestEmailCode("owner@example.test"));
+  await rejectsSafe(h.api.signInWithCode("owner@example.test", "123456"));
+  await rejectsSafe(h.api.activateOwner("sbp_synthetic_never_real_personal_access_token"));
   await rejectsSafe(h.api.listRequests());
   await rejectsSafe(h.api.approveRequest(requestId));
   await rejectsSafe(h.api.rejectRequest(requestId));
@@ -257,4 +270,230 @@ test("a private response arriving after logout is not returned to the UI", async
   await h.api.signOut();
   waiting.resolve(json([{ id: requestId, customer: payload.customer }]));
   await rejectsSafe(reading);
+});
+
+const verifiedEmail = "new-owner@example.invalid", otpCode = "12345678";
+const personalToken = "sbp_synthetic_never_real_personal_access_token";
+function pathname(call) { return new URL(call.url).pathname; }
+function activationHarness(edgeResponse, afterClaimAllowed = true) {
+  let claimed = false;
+  return harness(undefined, call => {
+    const endpoint = pathname(call);
+    if (endpoint === "/auth/v1/verify") return token();
+    if (endpoint.endsWith("/nicolas_list_requests")) return claimed && afterClaimAllowed ? json([]) : json({ code: "42501" }, 403);
+    if (endpoint === "/functions/v1/nicolas-owner-access") {
+      claimed = true;
+      return edgeResponse ? edgeResponse(call) : json({ activated: true });
+    }
+    throw new Error("Unexpected request from restricted account");
+  });
+}
+
+test("email codes require an explicit request and send only the exact Auth OTP payload", async () => {
+  const h = harness();
+  assert.equal(h.calls.length, 0);
+  await h.api.requestEmailCode("  " + verifiedEmail + "  ");
+  assert.equal(h.calls.length, 1);
+  const call = h.calls[0];
+  const target = new URL(call.url);
+  assert.equal(target.origin + target.pathname, origin + "/auth/v1/otp");
+  assert.equal(target.searchParams.get("redirect_to"), privateReturnUrl);
+  assert.deepEqual([...target.searchParams.keys()], ["redirect_to"]);
+  assert.equal(call.method, "POST"); assert.deepEqual(call.body, { email: verifiedEmail, create_user: true });
+  assert.equal(call.headers.get("apikey"), publicKey);
+  assert.equal(call.headers.get("authorization"), null, "Publishable key must not be used as an anonymous bearer");
+  assert.deepEqual(h.logs, []);
+});
+
+test("an existing owner verifies an email code and the allowlist before entering the inbox", async () => {
+  const h = harness();
+  const result = await h.api.signInWithCode(verifiedEmail, otpCode);
+  assert.equal(result.authenticated, true);
+  assert.equal(h.calls[0].url, origin + "/auth/v1/verify");
+  assert.deepEqual(h.calls[0].body, { email: verifiedEmail, token: otpCode, type: "email" });
+  assert.equal(h.calls[0].headers.get("authorization"), null);
+  assert.equal(rpcCalls(h.calls, "nicolas_list_requests").length, 1);
+  assert.equal(rpcCalls(h.calls, "nicolas_list_requests")[0].headers.get("authorization"), "Bearer " + ownerToken);
+  await h.api.approveRequest(requestId);
+  assert.equal(rpcCalls(h.calls, "nicolas_approve_request").length, 1);
+  assert.equal(h.calls.filter(call => pathname(call).includes("nicolas-owner-access")).length, 0);
+  assert.ok(h.calls.every(call => !call.url.includes(verifiedEmail) && !call.url.includes(otpCode)));
+  assert.deepEqual(h.logs, []);
+});
+
+test("invalid email codes and missing ownership tokens stop before any network operation", async () => {
+  const h = harness();
+  for (const invalid of ["12345", "12345678901", "12x45678", "", true]) await rejectsSafe(h.api.signInWithCode(verifiedEmail, invalid));
+  for (const email of ["", "no-email-address", true]) await rejectsSafe(h.api.requestEmailCode(email));
+  await rejectsSafe(h.api.activateOwner(personalToken));
+  assert.equal(h.calls.length, 0);
+});
+
+test("new verified accounts remain restricted until PAT activation and a fresh owner list check", async () => {
+  const h = activationHarness(call => {
+    assert.deepEqual(call.body, { access_token: personalToken });
+    assert.equal(call.headers.get("authorization"), "Bearer " + ownerToken);
+    assert.equal(call.headers.get("apikey"), publicKey);
+    assert.equal(call.url, origin + "/functions/v1/nicolas-owner-access");
+    return json({ activated: true });
+  });
+  const verified = await h.api.signInWithCode(verifiedEmail, otpCode);
+  assert.equal(verified.authenticated, false); assert.equal(verified.requiresActivation, true);
+  const before = h.calls.length;
+  await rejectsSafe(h.api.listRequests()); await rejectsSafe(h.api.approveRequest(requestId)); await rejectsSafe(h.api.rejectRequest(requestId));
+  assert.equal(h.calls.length, before, "Restricted verification must not authorize private operations");
+  const result = await h.api.activateOwner(personalToken);
+  assert.equal(result.authenticated, true);
+  assert.equal(rpcCalls(h.calls, "nicolas_list_requests").length, 2, "Edge activation must be followed by a server owner check");
+  assert.equal(pathname(h.calls.at(-1)), "/rest/v1/rpc/nicolas_list_requests");
+  assert.ok(!JSON.stringify(h.api.config).includes(personalToken));
+  assert.ok(!JSON.stringify(h.api).includes(ownerToken));
+  assert.ok(h.calls.every(call => !call.url.includes(verifiedEmail) && !call.url.includes(personalToken) && !call.url.includes(otpCode)));
+  assert.deepEqual(h.logs, []);
+});
+
+test("wrong PAT and owner conflicts do not create an authorized session or expose provider diagnostics", async () => {
+  for (const status of [403, 409]) {
+    const h = activationHarness(() => json({ error: "SyntheticPATPrivateDiagnostic", details: personalToken }, status));
+    const result = await h.api.signInWithCode(verifiedEmail, otpCode); assert.equal(result.requiresActivation, true);
+    await rejectsSafe(h.api.activateOwner(personalToken), ["SyntheticPATPrivateDiagnostic", personalToken]);
+    const before = h.calls.length;
+    await rejectsSafe(h.api.approveRequest(requestId));
+    assert.equal(h.calls.length, before);
+    assert.equal(rpcCalls(h.calls, "nicolas_list_requests").length, 1, "Failed activation must not be reported as a connected owner");
+  }
+});
+
+test("a failed activation can be retried with the restricted verified account", async () => {
+  let attempts = 0, claimed = false;
+  const h = harness(undefined, call => {
+    if (pathname(call) === "/auth/v1/verify") return token();
+    if (pathname(call).endsWith("/nicolas_list_requests")) return claimed ? json([]) : json({}, 403);
+    if (++attempts === 1) return json({ error: "Wrong personal token" }, 403);
+    claimed = true; return json({ activated: true });
+  });
+  await h.api.signInWithCode(verifiedEmail, otpCode);
+  await rejectsSafe(h.api.activateOwner("sbp_synthetic_wrong_personal_access_token"));
+  const result = await h.api.activateOwner(personalToken);
+  assert.equal(result.authenticated, true); assert.equal(attempts, 2);
+});
+
+test("an Edge success without subsequent owner access never reports a connected account", async () => {
+  const h = activationHarness(undefined, false);
+  await h.api.signInWithCode(verifiedEmail, otpCode);
+  await rejectsSafe(h.api.activateOwner(personalToken));
+  const before = h.calls.length; await rejectsSafe(h.api.approveRequest(requestId));
+  assert.equal(h.calls.length, before);
+  assert.equal(rpcCalls(h.calls, "nicolas_list_requests").length, 2);
+});
+
+test("a 200 activation response with no exact activated receipt cannot authorize the account", async () => {
+  for (const receipt of [{}, { activated: false }, { authenticated: true }]) {
+    const h = activationHarness(() => json(receipt));
+    await h.api.signInWithCode(verifiedEmail, otpCode);
+    await rejectsSafe(h.api.activateOwner(personalToken));
+    assert.equal(rpcCalls(h.calls, "nicolas_list_requests").length, 1);
+    const before = h.calls.length;
+    await rejectsSafe(h.api.approveRequest(requestId)); assert.equal(h.calls.length, before);
+  }
+});
+
+test("locking during OTP send or verification discards late results", async () => {
+  for (const operation of ["requestEmailCode", "signInWithCode"]) {
+    const waiting = deferred();
+    const h = harness(undefined, () => waiting.promise);
+    const pending = operation === "requestEmailCode" ? h.api.requestEmailCode(verifiedEmail) : h.api.signInWithCode(verifiedEmail, otpCode);
+    assert.equal(h.calls.length, 1);
+    h.window.dispatchEvent(new Event("nicolas:locked"));
+    waiting.resolve(operation === "requestEmailCode" ? json({}) : token());
+    await rejectsSafe(pending);
+    const before = h.calls.length; await rejectsSafe(h.api.activateOwner(personalToken));
+    assert.equal(h.calls.length, before);
+  }
+});
+
+test("locking during first-owner activation drops both restricted JWT and late success", async () => {
+  const waiting = deferred(), h = activationHarness(() => waiting.promise);
+  await h.api.signInWithCode(verifiedEmail, otpCode);
+  const pending = h.api.activateOwner(personalToken);
+  h.window.dispatchEvent(new Event("nicolas:locked")); waiting.resolve(json({ activated: true }));
+  await rejectsSafe(pending);
+  const before = h.calls.length; await rejectsSafe(h.api.listRequests()); await rejectsSafe(h.api.activateOwner(personalToken));
+  assert.equal(h.calls.length, before); assert.equal(rpcCalls(h.calls, "nicolas_list_requests").length, 1);
+});
+
+test("a pasted email link exchanges only its hash at this project's verify endpoint", async () => {
+  const linkHash = "a".repeat(64);
+  for (const parameter of ["token_hash", "token"]) {
+    const h = harness();
+    const link = origin + "/auth/v1/verify?" + parameter + "=" + linkHash + "&type=magiclink&redirect_to=" + encodeURIComponent(privateReturnUrl);
+    const result = await h.api.signInWithCode(verifiedEmail, link);
+    assert.equal(result.authenticated, true);
+    assert.equal(h.calls[0].url, origin + "/auth/v1/verify");
+    assert.deepEqual(h.calls[0].body, { token_hash: linkHash, type: "email" });
+    assert.ok(h.calls.every(call => !call.url.includes(linkHash) && !call.url.includes(verifiedEmail)));
+    assert.equal(h.historyChanges.length, 0, "Pasted verification links must never navigate or enter browser history");
+    assert.deepEqual(h.logs, []);
+  }
+});
+
+test("email links for another host, protocol or path never become a network request", async () => {
+  const hash = "a".repeat(64);
+  for (const link of [
+    "https://another-project.supabase.co/auth/v1/verify?token=" + hash,
+    origin + "/auth/v1/token?token=" + hash,
+    origin.replace("https:", "http:") + "/auth/v1/verify?token=" + hash,
+    origin.replace("https://", "https://user:synthetic-password@") + "/auth/v1/verify?token=" + hash,
+    "javascript:alert(1)",
+  ]) {
+    const h = harness();
+    await rejectsSafe(h.api.signInWithCode(verifiedEmail, link));
+    assert.equal(h.calls.length, 0); assert.equal(h.historyChanges.length, 0);
+  }
+});
+
+function callbackUrl(accessToken = ownerToken) {
+  return privateReturnUrl + "#access_token=" + encodeURIComponent(accessToken)
+    + "&refresh_token=synthetic-refresh-token-must-be-discarded&expires_in=3600&token_type=bearer&type=magiclink";
+}
+test("email callbacks scrub raw tokens immediately and wait for explicit post-unlock resume", async () => {
+  const h = harness(undefined, undefined, callbackUrl());
+  assert.equal(h.window.location.hash, "#requests");
+  assert.equal(h.calls.length, 0, "Loading an email callback must not fetch private data before vault unlock");
+  assert.ok(h.historyChanges.length > 0);
+  assert.ok(h.historyChanges.every(value => !value.includes(ownerToken) && !value.includes("refresh_token")));
+  const result = await h.api.resumeEmailSignIn();
+  assert.equal(result.authenticated, true);
+  assert.equal(h.calls[0].url, origin + "/auth/v1/user"); assert.equal(h.calls[0].method, "GET");
+  assert.equal(h.calls[0].headers.get("authorization"), "Bearer " + ownerToken);
+  assert.equal(rpcCalls(h.calls, "nicolas_list_requests").length, 1);
+  assert.equal(await h.api.resumeEmailSignIn(), null, "The callback must be consumed only once");
+  assert.deepEqual(h.logs, []);
+});
+
+test("callback identity without owner access remains restricted after server user verification", async () => {
+  const h = harness(undefined, call => pathname(call) === "/auth/v1/user"
+    ? json({ id: "00000000-0000-4000-8000-000000000002", email: verifiedEmail, email_confirmed_at: "2025-12-31T12:00:00Z" })
+    : json({}, 403), callbackUrl());
+  const result = await h.api.resumeEmailSignIn();
+  assert.equal(result.authenticated, false); assert.equal(result.requiresActivation, true);
+  const before = h.calls.length; await rejectsSafe(h.api.approveRequest(requestId));
+  assert.equal(h.calls.length, before);
+});
+
+test("manual lock before callback resume discards the pending credential without a network request", async () => {
+  const h = harness(undefined, undefined, callbackUrl());
+  h.window.dispatchEvent(new Event("nicolas:locked"));
+  assert.equal(await h.api.resumeEmailSignIn(), null);
+  await rejectsSafe(h.api.listRequests()); assert.equal(h.calls.length, 0);
+});
+
+test("lock during callback identity verification prevents late owner session resurrection", async () => {
+  const waiting = deferred();
+  const h = harness(undefined, () => waiting.promise, callbackUrl());
+  const pending = h.api.resumeEmailSignIn(); assert.equal(h.calls.length, 1);
+  h.window.dispatchEvent(new Event("nicolas:locked"));
+  waiting.resolve(json({ id: ownerUserId, email: verifiedEmail, email_confirmed_at: "2025-12-31T12:00:00Z" }));
+  await rejectsSafe(pending); assert.equal(rpcCalls(h.calls, "nicolas_list_requests").length, 0);
+  const before = h.calls.length; await rejectsSafe(h.api.listRequests()); assert.equal(h.calls.length, before);
 });

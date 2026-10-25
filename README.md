@@ -2,6 +2,8 @@
 
 [**Descargar la página privada actualizada (.zip)**](https://github.com/ignaciomenes-afk/nicolas/raw/refs/heads/codex/web-privada-descargable/entrega/Nicolas-prestamos.zip)
 
+[**Abrir Nicolás en la web**](https://ignaciomenes-afk.github.io/nicolas/privado/) · [**Página para clientes**](https://ignaciomenes-afk.github.io/nicolas/)
+
 ## Abrir y empezar
 
 1. Descargá y extraé todos los archivos del ZIP.
@@ -17,7 +19,11 @@ No necesita Python ni instalar programas. La cartera local funciona sin Internet
 
 La sección **Solicitudes** permite revisar los datos del cliente, capital, total, plazo, fechas y cuotas, y **aprobar o rechazar** el pedido. Al aprobar, se incorpora el cliente y el préstamo a la cartera cifrada en una sola operación, con el pagaré pendiente de firma. Una repetición o un corte de conexión no crea otro préstamo: se puede reintentar la incorporación de la misma aprobación.
 
-La conexión se entrega **desactivada hasta configurar un proyecto Supabase y autorizar al propietario**. Mientras esté desactivada, la página pública sigue preparando el pedido por WhatsApp y no anuncia una recepción en la bandeja. GitHub Pages no incluye una base de datos privada. La guía enlazada incluye la migración SQL y los pasos de activación; ninguna página necesita una clave de administrador.
+La recepción está **configurada con la base privada de Supabase**. El formulario guarda la solicitud antes de abrir WhatsApp y confirma la recepción; ante un fallo conserva los datos para reintentar. El cliente todavía debe tocar Enviar en WhatsApp para mandar ese mensaje. Los datos y las decisiones no se publican en GitHub Pages.
+
+Para abrir tu bandeja, desbloqueá Nicolás y entrá a **Solicitudes** con el correo de tu cuenta de Supabase. El correo trae un enlace: podés abrirlo para volver a la versión web o copiarlo y pegarlo en el acceso de la versión descargada. Si el correo muestra un código, también se admite. La primera vez, autorizá tu cuenta con el token personal de Supabase que administrás; se verifica su permiso de escritura, se usa solo para autorizar ese acceso y se borra del campo. Una persona que solo se registre con correo no puede ver solicitudes ni convertirse en propietaria. La opción con contraseña permanece para cuentas ya configuradas.
+
+**Antes de pasar del archivo a la versión web**, descargá una copia cifrada de tu cartera e importala en la web. Los datos locales pertenecen al navegador, perfil y origen; la página web no puede leer automáticamente el archivo ni su almacenamiento anterior. Los enlaces de descarga existentes se conservan.
 
 El acceso a solicitudes usa una cuenta de propietario independiente de la contraseña de la cartera. La contraseña local nunca se envía al servidor. El cliente conserva la página pública y su enlace; no recibe controles de aprobación ni acceso a pedidos ajenos. La conexión guarda los pedidos en el servidor privado para recibirlos aunque Nicolás esté cerrado. La cartera, los cobros y los adjuntos siguen siendo locales y requieren sus copias cifradas; esto no sincroniza toda la contabilidad entre equipos.
 

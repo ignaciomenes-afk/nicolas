@@ -175,6 +175,7 @@ async function navigateRequests(page) {
   await page.locator("#view-requests").waitFor({ state: "visible" });
 }
 async function login(page, valid = true) {
+  await page.locator("#requests-auth-password").click();
   await page.locator("#requests-email").fill(credentials.email);
   await page.locator("#requests-password").fill(valid ? credentials.password : "Clave equivocada sintética");
   await page.locator("#requests-login-submit").click();
@@ -374,6 +375,7 @@ async function privateChecks({ firstID, secondID, thirdID }) {
   });
   await check("Login tardío tras bloquear/desbloquear no revive sesión ni deja el formulario ocupado", async () => {
     holdLogin = true;
+    await page.locator("#requests-auth-password").click();
     await page.locator("#requests-email").fill(credentials.email);
     await page.locator("#requests-password").fill(credentials.password);
     await page.locator("#requests-login-submit").click();

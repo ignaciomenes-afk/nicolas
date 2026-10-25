@@ -8,13 +8,14 @@
   const dateLabel = (value) => { try { return value && typeof formatDate === "function" ? formatDate(String(value)) : value ? new Intl.DateTimeFormat("es-AR", { dateStyle: "medium" }).format(new Date(value)) : "—"; } catch { return "—"; } };
   const envelopeIcon = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>';
   const syncIcon = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M6 7a7 7 0 0 1 12-2l2 3M4 16l2 3a7 7 0 0 0 12-2"/></svg>';
-  let unlocked = false, authenticated = false, epoch = 0, rows = [], imported = new Map(), importErrors = new Map();
+  let unlocked = false, authenticated = false, activationRequired = false, codeSent = false, authMode = "email", epoch = 0, rows = [], imported = new Map(), importErrors = new Map();
   let poll = null, syncPromise = null, syncing = false, actionWorking = false, lastSync = null, currentRequestId = null, previousFocus = null;
   const section = document.createElement("section");
   section.id = "view-requests"; section.className = "view requests-view"; section.hidden = true; section.setAttribute("aria-label", "Solicitudes de préstamos recibidas");
   section.innerHTML = `<div class="section-intro requests-intro"><div><h2>Tu próxima operación empieza acá</h2><p>Revisá las solicitudes antes de incorporarlas a tu cartera.</p></div><span class="requests-connection" id="requests-connection"><i></i>Sin conectar</span></div>
     <div id="requests-unconfigured" class="requests-unconfigured panel"><span class="requests-large-icon">${envelopeIcon}</span><span class="requests-eyebrow">RECEPCIÓN POR INTERNET</span><h3>La bandeja todavía no está conectada.</h3><p>Cuando la conexión esté publicada, vas a recibir acá las solicitudes enviadas desde la página de clientes.</p><p class="requests-muted">Mientras tanto, podés seguir registrando préstamos y cobros en tu cartera privada.</p><button type="button" class="btn btn-secondary" disabled>Conexión pendiente</button></div>
-    <article class="panel requests-login" id="requests-login-panel" hidden><div class="requests-login-copy"><span class="requests-large-icon">${envelopeIcon}</span><span class="requests-eyebrow">ACCESO A SOLICITUDES</span><h3>Conectá tu bandeja.</h3><p>Ingresá con tu cuenta de administrador para revisar las solicitudes de la página de clientes.</p><p class="requests-auth-note">Usá la contraseña de esa cuenta. La contraseña de tu espacio privado se usa solo en este equipo.</p></div><form id="requests-login-form" class="requests-login-form"><label class="field" for="requests-email">Correo de tu cuenta<input id="requests-email" name="email" type="email" required autocomplete="username" maxlength="254" disabled></label><label class="field" for="requests-password">Contraseña de tu cuenta de solicitudes<input id="requests-password" name="password" type="password" required autocomplete="current-password" maxlength="512" disabled></label><p id="requests-login-error" class="requests-error" role="alert" tabindex="-1" hidden></p><button id="requests-login-submit" class="btn btn-primary" type="submit" disabled>Entrar a la bandeja</button><p class="requests-login-help">La sesión se cierra al bloquear tu espacio privado.</p></form></article>
+    <article class="panel requests-login" id="requests-login-panel" hidden><div class="requests-login-copy"><span class="requests-large-icon">${envelopeIcon}</span><span class="requests-eyebrow">ACCESO A SOLICITUDES</span><h3>Entrá con tu correo.</h3><p>Recibí un enlace de acceso en tu correo para abrir tu bandeja. La primera vez, vas a poder activar tu cuenta desde acá.</p><p class="requests-auth-note">La contraseña de tu espacio privado protege tus registros en este equipo. Para la bandeja en línea, usá el enlace de tu correo.</p></div><div class="requests-auth-controls"><div class="requests-auth-tabs" role="tablist" aria-label="Forma de entrar a solicitudes"><button id="requests-auth-email" type="button" role="tab" aria-selected="true" aria-controls="requests-email-access" data-requests-action="auth-email">Con tu correo</button><button id="requests-auth-password" type="button" role="tab" aria-selected="false" aria-controls="requests-password-access" tabindex="-1" data-requests-action="auth-password">Con contraseña</button></div><div id="requests-email-access" role="tabpanel" aria-labelledby="requests-auth-email"><form id="requests-code-form" class="requests-login-form"><label class="field" for="requests-code-email">Tu correo<input id="requests-code-email" name="email" type="email" required autocomplete="email" maxlength="254" disabled></label><div id="requests-code-entry" hidden><label class="field" for="requests-email-code">Enlace o código del correo<input id="requests-email-code" name="code" type="text" inputmode="text" autocomplete="off" maxlength="8192" disabled aria-describedby="requests-code-help"></label><p id="requests-code-help" class="requests-code-help">Pegá el enlace completo del correo o ingresá su código de 6 a 10 números.</p></div><p id="requests-code-status" class="requests-code-status" role="status" aria-live="polite"></p><p id="requests-code-error" class="requests-error" role="alert" tabindex="-1" hidden></p><div class="requests-code-actions"><button id="requests-send-code" class="btn btn-primary" type="button" data-requests-action="send-code" disabled>Enviar acceso a mi correo</button><button id="requests-verify-code" class="btn btn-primary" type="submit" disabled hidden>Entrar a mi bandeja</button></div><p class="requests-login-help">El acceso y la sesión se borran al bloquear tu espacio.</p></form></div><div id="requests-password-access" role="tabpanel" aria-labelledby="requests-auth-password" hidden><form id="requests-login-form" class="requests-login-form"><label class="field" for="requests-email">Correo de tu cuenta<input id="requests-email" name="email" type="email" required autocomplete="username" maxlength="254" disabled></label><label class="field" for="requests-password">Contraseña de tu cuenta de solicitudes<input id="requests-password" name="password" type="password" required autocomplete="current-password" maxlength="512" disabled></label><p id="requests-login-error" class="requests-error" role="alert" tabindex="-1" hidden></p><button id="requests-login-submit" class="btn btn-primary" type="submit" disabled>Entrar a la bandeja</button><p class="requests-login-help">Usá esta opción si ya tenés una contraseña para tu cuenta de solicitudes.</p></form></div></div></article>
+    <article id="requests-activation-panel" class="panel requests-activation" hidden><div class="requests-activation-copy"><span class="requests-large-icon">${envelopeIcon}</span><span class="requests-eyebrow">SOLO LA PRIMERA VEZ</span><h3>Activá tu cuenta.</h3><p>Correo verificado: <strong id="requests-activation-account"></strong></p><p>Para autorizar esta cuenta en tu proyecto, usá el token personal de acceso que obtuviste en Supabase.</p></div><form id="requests-activation-form" class="requests-login-form" autocomplete="off"><label class="field" for="requests-access-token">Token personal de Supabase<input id="requests-access-token" name="access-token" type="password" autocomplete="off" spellcheck="false" autocapitalize="none" maxlength="512" required disabled aria-describedby="requests-activation-help"></label><p id="requests-activation-help" class="requests-activation-help">Este campo es para el token de Supabase, no para la contraseña de tu espacio privado. El token se usa para esta autorización y no se guarda.</p><p id="requests-activation-error" class="requests-error" role="alert" tabindex="-1" hidden></p><button id="requests-activate-owner" class="btn btn-primary" type="submit" disabled>Activar mi cuenta</button><button class="requests-text-button" data-requests-action="change-account" type="button">Usar otro correo</button></form></article>
     <div id="requests-connected" hidden><div class="requests-toolbar"><div><strong>Solicitudes recibidas</strong><span id="requests-sync-state" role="status" aria-live="polite">Listas para actualizar.</span></div><div class="requests-tools"><button class="btn btn-secondary btn-sm" id="requests-sync" data-requests-action="sync" type="button">${syncIcon}Actualizar</button><button class="requests-text-button" id="requests-signout" data-requests-action="signout" type="button">Desconectar</button></div></div><p id="requests-error" class="requests-error" role="alert" tabindex="-1" hidden></p><div id="requests-summary" class="requests-summary" aria-label="Resumen de solicitudes"></div><article class="panel requests-list-panel"><div class="requests-list-header"><label for="requests-filter">Mostrar<select id="requests-filter"><option value="pending">Pendientes de revisión</option><option value="import">Aprobadas por incorporar</option><option value="approved">Aprobadas</option><option value="rejected">Rechazadas</option><option value="all">Todas las solicitudes</option></select></label><span id="requests-result-count"></span></div><div id="requests-list" class="requests-list" aria-live="polite"></div></article><p class="requests-footnote">La bandeja se actualiza cada 45 segundos mientras tu sesión está abierta. Revisá el cronograma y completá la entrega de dinero y la firma del pagaré por separado.</p></div>`;
   const main = document.getElementById("main");
   if (!main) return;
@@ -42,13 +43,18 @@
     if (dialog.open) dialog.close(); dialog.replaceChildren(); currentRequestId = null;
     if (previousFocus?.isConnected && !previousFocus.closest("[hidden]")) previousFocus.focus({ preventScroll: true }); previousFocus = null;
   }
-  function resetSession() {
-    epoch++; stopPolling(); authenticated = false; rows = []; imported = new Map(); importErrors = new Map(); syncPromise = null; syncing = false; actionWorking = false; lastSync = null;
-    closeDialog(true); get("requests-login-form").reset(); delete get("requests-login-form").dataset.working; get("requests-login-submit").textContent = "Entrar a la bandeja"; get("requests-password").value = ""; get("requests-email").value = ""; get("requests-filter").value = "pending";
+  function resetSession({ preserveIncomingLink = false } = {}) {
+    epoch++; stopPolling(); authenticated = false; activationRequired = false; codeSent = false; authMode = "email"; rows = []; imported = new Map(); importErrors = new Map(); syncPromise = null; syncing = false; actionWorking = false; lastSync = null;
+    closeDialog(true);
+    ["requests-code-form", "requests-activation-form"].forEach((id) => { get(id).reset(); delete get(id).dataset.working; });
+    get("requests-email-code").value = ""; get("requests-access-token").value = ""; get("requests-code-status").textContent = ""; get("requests-activation-account").textContent = "";
+    get("requests-send-code").textContent = "Enviar acceso a mi correo"; get("requests-verify-code").textContent = "Entrar a mi bandeja"; get("requests-activate-owner").textContent = "Activar mi cuenta";
+    clearError("requests-code-error"); clearError("requests-activation-error");
+    get("requests-login-form").reset(); delete get("requests-login-form").dataset.working; get("requests-login-submit").textContent = "Entrar a la bandeja"; get("requests-password").value = ""; get("requests-email").value = ""; get("requests-filter").value = "pending";
     ["requests-list", "requests-summary"].forEach((id) => get(id).replaceChildren()); clearError("requests-error"); clearError("requests-login-error");
     const badge = get("requests-nav-count"); if (badge) { badge.hidden = true; badge.textContent = ""; }
     // Adapter signOut clears its RAM token synchronously; late requests are invalidated there.
-    try { Promise.resolve(cloud()?.signOut()).catch(() => {}); } catch {}
+    try { Promise.resolve(cloud()?.signOut({ preserveIncomingLink })).catch(() => {}); } catch {}
     render();
   }
   function sessionFailure(error, ticket) {
@@ -61,10 +67,17 @@
   function render() {
     const enabled = configured();
     get("requests-unconfigured").hidden = enabled;
-    get("requests-login-panel").hidden = !enabled || authenticated;
+    get("requests-login-panel").hidden = !enabled || authenticated || activationRequired;
+    get("requests-activation-panel").hidden = !enabled || authenticated || !activationRequired;
     get("requests-connected").hidden = !enabled || !authenticated;
-    get("requests-login-form").querySelectorAll("input,button").forEach((node) => { node.disabled = !enabled || !unlocked || node.closest("form").dataset.working === "true"; });
-    const connection = get("requests-connection"); connection.classList.toggle("is-connected", authenticated); connection.lastChild.textContent = authenticated ? "Bandeja conectada" : enabled ? "Sesión cerrada" : "Conexión pendiente";
+    const authBusy = ["requests-login-form", "requests-code-form", "requests-activation-form"].some((id) => get(id).dataset.working === "true");
+    ["requests-login-form", "requests-code-form", "requests-activation-form"].forEach((id) => get(id).querySelectorAll("input,button").forEach((node) => { node.disabled = !enabled || !unlocked || authBusy; }));
+    get("requests-code-entry").hidden = !codeSent; get("requests-email-code").required = codeSent;
+    get("requests-email-code").disabled = !enabled || !unlocked || authBusy || !codeSent;
+    get("requests-verify-code").hidden = !codeSent; get("requests-verify-code").disabled = !enabled || !unlocked || authBusy || !codeSent;
+    get("requests-email-access").hidden = authMode !== "email"; get("requests-password-access").hidden = authMode !== "password";
+    ["email", "password"].forEach((mode) => { const button = get(`requests-auth-${mode}`); button.setAttribute("aria-selected", String(authMode === mode)); button.tabIndex = authMode === mode ? 0 : -1; button.disabled = !enabled || !unlocked || authBusy; });
+    const connection = get("requests-connection"); connection.classList.toggle("is-connected", authenticated); connection.lastChild.textContent = authenticated ? "Bandeja conectada" : activationRequired ? "Correo verificado" : enabled ? "Sesión cerrada" : "Conexión pendiente";
     get("requests-sync").disabled = syncing || actionWorking || !authenticated;
     get("requests-signout").disabled = false;
     if (!authenticated) return;
@@ -172,12 +185,71 @@
     catch (error) { if (!sessionFailure(error, ticket)) showError("requests-modal-error", errorMessage(error)); }
     finally { if (ticket === epoch) { actionWorking = false; modalBusy(false); render(); } }
   }
+  function authWorking() { return ["requests-login-form", "requests-code-form", "requests-activation-form"].some((id) => get(id).dataset.working === "true"); }
+  function setAuthMode(mode) {
+    if (authWorking() || activationRequired) return;
+    authMode = mode; get("requests-password").value = ""; get("requests-email-code").value = ""; clearError("requests-login-error"); clearError("requests-code-error"); render();
+  }
+  async function enterInbox(ticket) {
+    if (ticket !== epoch || !unlocked) return;
+    authenticated = true; activationRequired = false; codeSent = false;
+    ["requests-login-form", "requests-code-form", "requests-activation-form"].forEach((id) => get(id).reset());
+    get("requests-email-code").value = ""; get("requests-access-token").value = ""; get("requests-activation-account").textContent = ""; get("requests-code-status").textContent = "";
+    render(); startPolling(); await syncRequests();
+  }
+  async function sendEmailCode() {
+    const form = get("requests-code-form");
+    if (!unlocked || !configured() || authWorking() || !get("requests-code-email").reportValidity()) return;
+    const ticket = epoch, email = get("requests-code-email").value.trim();
+    get("requests-email-code").value = ""; clearError("requests-code-error"); form.dataset.working = "true"; get("requests-send-code").textContent = "Enviando…"; get("requests-code-status").textContent = "Enviando el acceso a tu correo…"; render();
+    try { await cloud().requestEmailCode(email); if (ticket !== epoch || !unlocked) return; codeSent = true; get("requests-code-status").textContent = "Revisá tu correo y tocá el enlace para volver a esta página. También podés pegarlo acá. Si el mensaje incluye un código, podés ingresarlo. Revisá correo no deseado si no lo ves."; }
+    catch (error) { if (ticket === epoch && unlocked) { get("requests-code-status").textContent = ""; showError("requests-code-error", errorMessage(error)); } }
+    finally { if (ticket === epoch) { delete form.dataset.working; get("requests-send-code").textContent = codeSent ? "Reenviar correo de acceso" : "Enviar acceso a mi correo"; render(); if (codeSent) get("requests-email-code").focus(); } }
+  }
+  async function resumeIncomingLink() {
+    if (!unlocked || !configured() || typeof cloud()?.resumeEmailSignIn !== "function") return;
+    const ticket = epoch, form = get("requests-code-form"); form.dataset.working = "true"; render();
+    try {
+      const result = await cloud().resumeEmailSignIn(); if (ticket !== epoch || !unlocked || result === null) return;
+      if (result?.requiresActivation === true && result.authenticated === false) { activationRequired = true; codeSent = false; get("requests-activation-account").textContent = result.email || "Tu cuenta verificada"; render(); get("requests-access-token").focus(); }
+      else if (result?.authenticated === true) await enterInbox(ticket);
+      else throw new Error("No se pudo confirmar el acceso del enlace. Pedí uno nuevo con tu correo.");
+    } catch (error) { if (ticket === epoch && unlocked) showError("requests-code-error", errorMessage(error)); }
+    finally { if (ticket === epoch) { delete form.dataset.working; render(); if (activationRequired) get("requests-access-token").focus(); } }
+  }
+  get("requests-code-email").addEventListener("input", () => { codeSent = false; get("requests-email-code").value = ""; get("requests-code-status").textContent = ""; clearError("requests-code-error"); get("requests-send-code").textContent = "Enviar acceso a mi correo"; render(); });
+  get("requests-code-form").addEventListener("submit", async (event) => {
+    event.preventDefault(); const form = event.currentTarget;
+    if (!codeSent) { await sendEmailCode(); return; }
+    if (!unlocked || !configured() || authWorking() || !form.reportValidity()) return;
+    const ticket = epoch, email = get("requests-code-email").value.trim(), code = get("requests-email-code").value.trim();
+    get("requests-email-code").value = ""; clearError("requests-code-error"); form.dataset.working = "true"; get("requests-verify-code").textContent = "Verificando…"; render();
+    try {
+      const result = await cloud().signInWithCode(email, code); if (ticket !== epoch || !unlocked) return;
+      if (result?.requiresActivation === true && result.authenticated === false) { activationRequired = true; codeSent = false; form.reset(); get("requests-activation-account").textContent = email; get("requests-code-status").textContent = ""; render(); get("requests-access-token").focus(); }
+      else if (result?.authenticated === true) await enterInbox(ticket);
+      else throw new Error("No se pudo confirmar tu acceso. Volvé a pedir un código.");
+    } catch (error) { if (ticket === epoch && unlocked) showError("requests-code-error", errorMessage(error)); }
+    finally { if (ticket === epoch) { delete form.dataset.working; get("requests-verify-code").textContent = "Entrar a mi bandeja"; render(); if (activationRequired) get("requests-access-token").focus(); } }
+  });
+  get("requests-activation-form").addEventListener("submit", async (event) => {
+    event.preventDefault(); const form = event.currentTarget;
+    if (!unlocked || !configured() || !activationRequired || authWorking() || !form.reportValidity()) return;
+    const ticket = epoch, accessToken = get("requests-access-token").value.trim();
+    get("requests-access-token").value = ""; clearError("requests-activation-error"); form.dataset.working = "true"; get("requests-activate-owner").textContent = "Activando…"; render();
+    try { const result = await cloud().activateOwner(accessToken); if (ticket !== epoch || !unlocked) return; if (result?.authenticated !== true) throw new Error("No se pudo confirmar el acceso a tu bandeja. Volvé a intentar."); await enterInbox(ticket); }
+    catch (error) {
+      if (ticket !== epoch || !unlocked) return;
+      if (error?.status === 401) { resetSession(); showError("requests-code-error", "La verificación venció. Pedí un nuevo enlace a tu correo para entrar."); }
+      else showError("requests-activation-error", errorMessage(error));
+    } finally { if (ticket === epoch) { delete form.dataset.working; get("requests-activate-owner").textContent = "Activar mi cuenta"; render(); } }
+  });
   get("requests-login-form").addEventListener("submit", async (event) => {
     event.preventDefault(); const form = event.currentTarget;
-    if (!unlocked || !configured() || form.dataset.working === "true" || !form.reportValidity()) return;
+    if (!unlocked || !configured() || authWorking() || !form.reportValidity()) return;
     const ticket = epoch, email = get("requests-email").value.trim(), password = get("requests-password").value;
     get("requests-password").value = ""; clearError("requests-login-error"); form.dataset.working = "true"; get("requests-login-submit").textContent = "Conectando…"; render();
-    try { await cloud().signIn(email, password); if (ticket !== epoch || !unlocked) return; authenticated = true; form.reset(); render(); startPolling(); await syncRequests(); }
+    try { const result = await cloud().signIn(email, password); if (ticket !== epoch || !unlocked) return; if (result?.authenticated !== true) throw new Error("No se pudo confirmar tu acceso a la bandeja."); await enterInbox(ticket); }
     catch (error) { if (ticket === epoch && unlocked) showError("requests-login-error", error?.status === 403 ? "Tu cuenta no tiene acceso a esta bandeja." : errorMessage(error)); }
     finally { if (ticket === epoch) { delete form.dataset.working; get("requests-login-submit").textContent = "Entrar a la bandeja"; render(); } }
   });
@@ -186,7 +258,11 @@
   document.addEventListener("click", (event) => {
     const button = event.target.closest("[data-requests-action]"); if (!button || button.disabled) return;
     const action = button.dataset.requestsAction;
-    if (action === "sync") syncRequests();
+    if (action === "auth-email") setAuthMode("email");
+    else if (action === "auth-password") setAuthMode("password");
+    else if (action === "send-code") sendEmailCode();
+    else if (action === "change-account") resetSession();
+    else if (action === "sync") syncRequests();
     else if (action === "signout") resetSession();
     else if (action === "review") reviewRequest(requestById(button.dataset.requestId), button);
     else if (action === "retry-import") approveOrImport(button.dataset.requestId, false);
@@ -197,13 +273,18 @@
     else if (action === "retry-current") approveOrImport(currentRequestId, false);
     else if (action === "reject") rejectRequest();
   });
+  section.addEventListener("keydown", (event) => {
+    if (!event.target.closest(".requests-auth-tabs") || !["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    event.preventDefault(); const mode = event.key === "Home" ? "email" : event.key === "End" ? "password" : authMode === "email" ? "password" : "email";
+    setAuthMode(mode); get(`requests-auth-${authMode}`).focus();
+  });
   dialog.addEventListener("cancel", (event) => { event.preventDefault(); closeDialog(); });
   window.addEventListener("nicolas:locked", () => { unlocked = false; resetSession(); });
-  window.addEventListener("nicolas:unlocked", () => { resetSession(); unlocked = true; render(); });
+  window.addEventListener("nicolas:unlocked", () => { resetSession({ preserveIncomingLink: true }); unlocked = true; render(); resumeIncomingLink(); });
   window.addEventListener("hashchange", () => { if (location.hash === "#requests") render(); });
   document.addEventListener("visibilitychange", () => { if (!document.hidden && unlocked && authenticated) syncRequests(); });
   render();
   const bootEpoch = epoch;
-  window.NicolasStore?.status().then((status) => { if (epoch !== bootEpoch) return; unlocked = Boolean(status.unlocked); render(); }).catch(() => {});
+  window.NicolasStore?.status().then((status) => { if (epoch !== bootEpoch) return; unlocked = Boolean(status.unlocked); render(); if (unlocked) resumeIncomingLink(); }).catch(() => {});
   if (location.hash === "#requests" && typeof navigate === "function") navigate("requests");
 })();

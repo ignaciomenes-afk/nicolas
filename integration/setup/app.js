@@ -22,6 +22,14 @@
       enableLink("setup-users-link", `https://supabase.com/dashboard/project/${projectRef}/auth/users`);
       enableLink("setup-sql-link", `https://supabase.com/dashboard/project/${projectRef}/sql/new`);
       emailInput.disabled = false; get("setup-generate-sql").disabled = false; get("setup-check").disabled = false; ready = true;
+      if (config.application_enabled === true) {
+        document.querySelector(".setup-heading").innerHTML = '<span class="setup-eyebrow">SOLICITUDES CONECTADAS</span><h1>Entrá a tu bandeja<span>.</span></h1><p>La recepción ya está configurada. No necesitás volver a instalar el código SQL.</p>';
+        document.querySelector(".setup-steps").hidden = true;
+        const section = document.createElement("section");
+        section.className = "setup-step";
+        section.innerHTML = '<section><h2>Tu acceso a Nicolás</h2><p>Usá el correo de tu cuenta de Supabase. Abrí el enlace que recibas para verificar tu correo. La primera vez, autorizá tu cuenta con el token personal de acceso que creaste en Supabase.</p><p class="setup-help">La cartera y los adjuntos se guardan en tu navegador. Si venías usando el archivo descargado, guardá una copia cifrada e importala para usar tus registros en la versión web.</p><div class="setup-sql-actions"><a class="setup-button setup-button-primary" href="https://ignaciomenes-afk.github.io/nicolas/privado/#requests">Abrir Nicolás</a><a class="setup-button setup-button-secondary" href="https://github.com/ignaciomenes-afk/nicolas/raw/refs/heads/codex/web-privada-descargable/entrega/Nicolas-prestamos.zip" rel="noopener noreferrer">Actualizar mi archivo de Nicolás</a></div></section>';
+        document.querySelector(".setup-steps").after(section);
+      }
     } catch {
       get("setup-config-error").textContent = "Esta página todavía no tiene todos los datos de instalación. Volvé al chat para recibir el enlace de activación completo.";
       get("setup-config-error").hidden = false;

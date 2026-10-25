@@ -262,7 +262,38 @@ begin
 end;
 $$;
 
+-- This is deliberately an invoker function. An Auth session or a service-role
+-- API key cannot claim ownership; the caller must also possess database write
+-- privileges through the Management API (normally the project postgres owner).
+create or replace function nicolas_private.claim_first_owner(p_user_id uuid) returns uuid
+language plpgsql security invoker set search_path = pg_catalog, nicolas_private as $$
+begin
+  if current_user <> 'postgres' and current_user <> (
+    select pg_get_userbyid(datdba) from pg_database where datname = current_database()
+  ) then
+    raise exception using errcode = 'PT403', message = 'Database owner privileges required.';
+  end if;
+  if p_user_id is null or not exists (
+    select 1 from auth.users where id = p_user_id and email_confirmed_at is not null
+  ) then
+    raise exception using errcode = 'PT403', message = 'A confirmed email account is required.';
+  end if;
+  lock table nicolas_private.owner_users in exclusive mode;
+  if exists (select 1 from nicolas_private.owner_users where user_id <> p_user_id) then
+    raise exception using errcode = 'PT409', message = 'An owner has already been configured.';
+  end if;
+  insert into nicolas_private.owner_users(user_id) values (p_user_id)
+    on conflict (user_id) do nothing;
+  return p_user_id;
+end;
+$$;
+
 revoke all on all functions in schema nicolas_private from public, anon, authenticated;
+do $$ begin
+  if exists (select 1 from pg_roles where rolname = 'service_role') then
+    revoke all on function nicolas_private.claim_first_owner(uuid) from service_role;
+  end if;
+end; $$;
 revoke all on function public.nicolas_submit_request(jsonb) from public, anon, authenticated;
 revoke all on function public.nicolas_list_requests() from public, anon, authenticated;
 revoke all on function public.nicolas_approve_request(uuid) from public, anon, authenticated;
@@ -273,6 +304,7 @@ grant execute on function public.nicolas_approve_request(uuid) to authenticated;
 grant execute on function public.nicolas_reject_request(uuid) to authenticated;
 
 comment on schema nicolas_private is 'Private request PII. Never expose this schema through the Data API.';
+comment on function nicolas_private.claim_first_owner(uuid) is 'First-owner claim: confirmed Auth user plus database-owner write access; no public RPC grant.';
 comment on function public.nicolas_submit_request(jsonb) is 'Anonymous write-only inbox submission; no PII or decision status is returned.';
 notify pgrst, 'reload schema';
 commit;
