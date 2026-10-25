@@ -4,6 +4,8 @@
 
 [**Abrir Nicolás en la web**](https://ignaciomenes-afk.github.io/nicolas/privado/) · [**Página para clientes**](https://ignaciomenes-afk.github.io/nicolas/)
 
+[**Video y guía de primer acceso**](https://ignaciomenes-afk.github.io/nicolas/guia/) · Voz en español, subtítulos y capítulos. La demostración usa datos de ejemplo.
+
 ## Abrir y empezar
 
 1. Descargá y extraé todos los archivos del ZIP.

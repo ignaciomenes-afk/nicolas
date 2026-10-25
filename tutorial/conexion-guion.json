@@ -1,0 +1,74 @@
+[
+  {
+    "step": 1,
+    "title": "Guardá tu cartera",
+    "tip": "Antes de cambiar de archivo a web, descargá tu copia cifrada.",
+    "narration": "La conexión ya está preparada. Vamos a completar tu primer acceso. Si ya tenés clientes en el archivo anterior, abrilo y tocá Copia de seguridad. Guardá ese respaldo y conservá su contraseña. Si empezás sin registros, podés continuar.",
+    "start": 0,
+    "duration": 20
+  },
+  {
+    "step": 2,
+    "title": "Abrí Nicolás",
+    "tip": "Usá el enlace privado, no el formulario para clientes.",
+    "narration": "Abrí la página privada de Nicolás. El enlace está debajo de este video. La página de Préstamos es para tus clientes; Nicolás es tu espacio para administrar los pedidos.",
+    "start": 20,
+    "duration": 15
+  },
+  {
+    "step": 3,
+    "title": "Tu contraseña local",
+    "tip": "Creá tu contraseña o importá la copia anterior.",
+    "narration": "Creá una contraseña de al menos ocho caracteres y repetila. Si ya tenés un espacio, desbloquealo. Esta contraseña protege tu cartera en este navegador. Si traés datos del archivo, elegí Importar mi copia de seguridad e ingresá la contraseña de esa copia.",
+    "start": 35,
+    "duration": 21
+  },
+  {
+    "step": 4,
+    "title": "Entrá a Solicitudes",
+    "tip": "Buscá Solicitudes en el menú de Nicolás.",
+    "narration": "Una vez dentro de Nicolás, tocá Solicitudes en el menú. En un celular, primero abrí el menú de las tres líneas. Dejá elegida la opción Con tu correo.",
+    "start": 56,
+    "duration": 13
+  },
+  {
+    "step": 5,
+    "title": "Pedí tu acceso",
+    "tip": "Escribí el correo con el que administrás Supabase.",
+    "narration": "Escribí el correo de tu cuenta de Supabase y tocá Enviar acceso a mi correo. Usá el correo con el que administrás tu proyecto. Revisá tu bandeja de entrada y también correo no deseado. En esta demostración usamos datos de ejemplo y no enviamos mensajes.",
+    "start": 69,
+    "duration": 20
+  },
+  {
+    "step": 6,
+    "title": "Abrí el enlace del correo",
+    "tip": "Al volver a la web, desbloqueá con la misma contraseña.",
+    "narration": "En el correo recibido, tocá el botón de acceso. Se abrirá la página privada. Desbloqueala con la misma contraseña local. Si usás el archivo descargado, copiá la dirección del botón del correo sin abrirlo, pegala en Enlace o código del correo y tocá Entrar a mi bandeja.",
+    "start": 89,
+    "duration": 22
+  },
+  {
+    "step": 7,
+    "title": "Autorizá tu cuenta",
+    "tip": "Solo la primera vez: token personal dentro de Nicolás.",
+    "narration": "La primera vez aparece Activá tu cuenta. Pegá ahí tu token personal de Supabase, el que empieza con ese, be, pe, y guion bajo. Tocá Activar mi cuenta. No es tu contraseña ni la clave pública. Ingresalo solo en Nicolás. En este video el campo contiene un ejemplo, no un token real.",
+    "start": 111,
+    "duration": 24
+  },
+  {
+    "step": 8,
+    "title": "Bandeja conectada",
+    "tip": "Actualizar → Revisar → Aprobar o rechazar.",
+    "narration": "Cuando veas Bandeja conectada, tocá Actualizar. Las solicitudes de tus clientes aparecen acá, aunque Nicolás estuviera cerrado cuando las enviaron. Abrí Revisar solicitud y controlá el monto, las fechas y las cuotas. Para aceptar, marcá que revisaste los datos y tocá Aprobar e incorporar.",
+    "start": 135,
+    "duration": 24
+  },
+  {
+    "step": 8,
+    "title": "Los datos se cargan solos",
+    "tip": "Cliente, préstamo y cuotas. Sin volver a escribirlos.",
+    "narration": "Al aprobar se cargan el cliente y su préstamo automáticamente, con las cuotas que vio en su solicitud. Si lo rechazás, no se crea un préstamo. La entrega del dinero y la firma del pagaré se completan aparte. Después de autorizar tu cuenta podés revocar el token de instalación. Guardá copias cifradas de tu cartera.",
+    "start": 159,
+    "duration": 25
+  }
+]
