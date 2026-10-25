@@ -1,0 +1,115 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:02.295
+La conexión ya está preparada.
+
+00:00:02.295 --> 00:00:05.049
+Vamos a completar tu primer acceso.
+
+00:00:05.049 --> 00:00:11.093
+Si ya tenés clientes en el archivo anterior, abrilo y tocá Copia de seguridad.
+
+00:00:11.093 --> 00:00:14.612
+Guardá ese respaldo y conservá su contraseña.
+
+00:00:14.612 --> 00:00:17.901
+Si empezás sin registros, podés continuar.
+
+00:00:20.000 --> 00:00:22.520
+Abrí la página privada de Nicolás.
+
+00:00:22.520 --> 00:00:25.261
+El enlace está debajo de este video.
+
+00:00:25.261 --> 00:00:32.449
+La página de Préstamos es para tus clientes; Nicolás es tu espacio para administrar los pedidos.
+
+00:00:35.000 --> 00:00:39.289
+Creá una contraseña de al menos ocho caracteres y repetila.
+
+00:00:39.289 --> 00:00:42.052
+Si ya tenés un espacio, desbloquealo.
+
+00:00:42.052 --> 00:00:45.978
+Esta contraseña protege tu cartera en este navegador.
+
+00:00:45.978 --> 00:00:53.466
+Si traés datos del archivo, elegí Importar mi copia de seguridad e ingresá la contraseña de esa copia.
+
+00:00:56.000 --> 00:01:00.066
+Una vez dentro de Nicolás, tocá Solicitudes en el menú.
+
+00:01:00.066 --> 00:01:04.206
+En un celular, primero abrí el menú de las tres líneas.
+
+00:01:04.206 --> 00:01:07.015
+Dejá elegida la opción Con tu correo.
+
+00:01:09.000 --> 00:01:14.406
+Escribí el correo de tu cuenta de Supabase y tocá Enviar acceso a mi correo.
+
+00:01:14.406 --> 00:01:17.962
+Usá el correo con el que administrás tu proyecto.
+
+00:01:17.962 --> 00:01:22.088
+Revisá tu bandeja de entrada y también correo no deseado.
+
+00:01:22.088 --> 00:01:26.995
+En esta demostración usamos datos de ejemplo y no enviamos mensajes.
+
+00:01:29.000 --> 00:01:32.385
+En el correo recibido, tocá el botón de acceso.
+
+00:01:32.385 --> 00:01:34.474
+Se abrirá la página privada.
+
+00:01:34.474 --> 00:01:37.642
+Desbloqueala con la misma contraseña local.
+
+00:01:37.642 --> 00:01:48.373
+Si usás el archivo descargado, copiá la dirección del botón del correo sin abrirlo, pegala en Enlace o código del correo y tocá Entrar a mi bandeja.
+
+00:01:51.000 --> 00:01:54.155
+La primera vez aparece Activá tu cuenta.
+
+00:01:54.155 --> 00:02:00.939
+Pegá ahí tu token personal de Supabase, el que empieza con ese, be, pe, y guion bajo.
+
+00:02:00.939 --> 00:02:02.833
+Tocá Activar mi cuenta.
+
+00:02:02.833 --> 00:02:06.067
+No es tu contraseña ni la clave pública.
+
+00:02:06.067 --> 00:02:08.197
+Ingresalo solo en Nicolás.
+
+00:02:08.197 --> 00:02:13.088
+En este video el campo contiene un ejemplo, no un token real.
+
+00:02:15.000 --> 00:02:18.476
+Cuando veas Bandeja conectada, tocá Actualizar.
+
+00:02:18.476 --> 00:02:25.871
+Las solicitudes de tus clientes aparecen acá, aunque Nicolás estuviera cerrado cuando las enviaron.
+
+00:02:25.871 --> 00:02:30.973
+Abrí Revisar solicitud y controlá el monto, las fechas y las cuotas.
+
+00:02:30.973 --> 00:02:36.372
+Para aceptar, marcá que revisaste los datos y tocá Aprobar e incorporar.
+
+00:02:39.000 --> 00:02:46.301
+Al aprobar se cargan el cliente y su préstamo automáticamente, con las cuotas que vio en su solicitud.
+
+00:02:46.301 --> 00:02:49.164
+Si lo rechazás, no se crea un préstamo.
+
+00:02:49.164 --> 00:02:53.817
+La entrega del dinero y la firma del pagaré se completan aparte.
+
+00:02:53.817 --> 00:02:58.827
+Después de autorizar tu cuenta podés revocar el token de instalación.
+
+00:02:58.827 --> 00:03:01.547
+Guardá copias cifradas de tu cartera.
